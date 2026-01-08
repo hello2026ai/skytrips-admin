@@ -71,8 +71,10 @@ export default function EditBookingPage() {
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
   const [existingTravelerSelected, setExistingTravelerSelected] = useState(false);
 
-  const validateContactForm = () => {
+  const validateForm = () => {
     const errors: { [key: string]: string } = {};
+    
+    // Contact Validation
     if (formData.contactType === 'new') {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!formData.email || !emailRegex.test(formData.email)) {
@@ -88,6 +90,26 @@ export default function EditBookingPage() {
         errors.address = "Address must be at least 5 characters long";
       }
     }
+
+    // Traveller Validation
+    if (formData.customerType === 'new') {
+        if (!formData.travellerFirstName || formData.travellerFirstName.trim().length < 2) {
+            errors.travellerFirstName = "First name is required";
+        }
+        if (!formData.travellerLastName || formData.travellerLastName.trim().length < 2) {
+            errors.travellerLastName = "Last name is required";
+        }
+        if (!formData.passportNumber || formData.passportNumber.trim().length < 5) {
+            errors.passportNumber = "Valid passport number is required";
+        }
+        if (!formData.passportExpiry) {
+            errors.passportExpiry = "Passport expiry date is required";
+        }
+        if (!formData.dob) {
+            errors.dob = "Date of birth is required";
+        }
+    }
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -112,6 +134,7 @@ export default function EditBookingPage() {
       email: prev.email || customer.email,
       phone: prev.phone || customer.phone,
       address: prev.address || customer.address || "",
+      contactType: 'existing', // Switch to existing contact mode when traveler is selected
     }));
     setExistingTravelerSelected(true);
   };
@@ -165,7 +188,7 @@ export default function EditBookingPage() {
     contactType: "existing",
     notes: "",
   });
-  const hideContactFields = formData.contactType === 'existing' || formData.customerType === 'existing' || existingTravelerSelected;
+  const hideContactFields = formData.contactType === 'existing';
 
   useEffect(() => {
     if (id) {
@@ -301,7 +324,7 @@ export default function EditBookingPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!validateContactForm()) {
+    if (!validateForm()) {
         const firstErrorField = document.querySelector('.error-field');
         if (firstErrorField) {
             firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -411,36 +434,34 @@ export default function EditBookingPage() {
               </div>
               <div className="p-6">
                 {/* Contact Type Toggle */}
-                <div className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-100 flex gap-6">
-                    <label className="flex items-center gap-2 cursor-pointer group">
-                        <div className="relative flex items-center">
-                            <input 
-                              type="radio" 
-                              name="contact-type" 
-                              value="existing"
-                              checked={formData.contactType === 'existing'}
-                              onChange={() => {
-                                setFormData(prev => ({ ...prev, contactType: 'existing' }));
-                                setFormErrors({});
-                              }}
-                              className="peer h-4 w-4 text-primary border-slate-300 focus:ring-primary"
-                            />
-                        </div>
-                        <span className="text-sm font-bold text-slate-700 group-hover:text-primary transition-colors">Existing Contact</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer group">
-                        <div className="relative flex items-center">
-                            <input 
-                              type="radio" 
-                              name="contact-type" 
-                              value="new"
-                              checked={formData.contactType === 'new'}
-                              onChange={() => setFormData(prev => ({ ...prev, contactType: 'new' }))}
-                              className="peer h-4 w-4 text-primary border-slate-300 focus:ring-primary"
-                            />
-                        </div>
-                        <span className="text-sm font-bold text-slate-700 group-hover:text-primary transition-colors">New Contact</span>
-                    </label>
+                <div className="flex p-1 bg-slate-100 rounded-xl mb-6">
+                  <button
+                    type="button"
+                    onClick={() => {
+                        setFormData(prev => ({ ...prev, contactType: 'existing' }));
+                        setFormErrors({});
+                    }}
+                    className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${
+                      formData.contactType === 'existing' 
+                        ? 'bg-white text-primary shadow-sm ring-1 ring-slate-200' 
+                        : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-[20px]">person_search</span>
+                    Existing Contact
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, contactType: 'new' }))}
+                    className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${
+                      formData.contactType === 'new' 
+                        ? 'bg-white text-primary shadow-sm ring-1 ring-slate-200' 
+                        : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-[20px]">person_add</span>
+                    New Contact
+                  </button>
                 </div>
 
                 {/* Search for Existing Contact */}
@@ -454,8 +475,12 @@ export default function EditBookingPage() {
                     </div>
                 )}
 
-                {!hideContactFields ? (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className={`transition-all duration-500 ease-in-out overflow-hidden ${
+                    !hideContactFields 
+                    ? 'max-h-[800px] opacity-100' 
+                    : 'max-h-0 opacity-0'
+                }`}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
                     <div className="md:col-span-2">
                       <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest mb-2">Email Address</label>
                       <div className={`relative rounded-md shadow-sm ${formErrors.email ? 'error-field' : ''}`}>
@@ -547,15 +572,21 @@ export default function EditBookingPage() {
                       )}
                     </div>
                   </div>
-                ) : (
+                </div>
+
+                <div className={`transition-all duration-500 ease-in-out overflow-hidden ${
+                    hideContactFields 
+                    ? 'max-h-[100px] opacity-100' 
+                    : 'max-h-0 opacity-0'
+                }`}>
                   <div className="rounded-lg border border-slate-200 bg-slate-50 p-4 flex items-start gap-3">
                     <span className="material-symbols-outlined text-slate-500">visibility_off</span>
                     <div>
                       <p className="text-sm font-bold text-slate-900">Contact fields hidden</p>
-                      <p className="text-xs text-slate-600">Using existing contact or traveller details. You can switch back to New Contact to edit.</p>
+                      <p className="text-xs text-slate-600">Using existing contact or traveller details. Switch to &quot;New Contact&quot; to edit manually.</p>
                     </div>
                   </div>
-                )}
+                </div>
               </div>
             </div>
 
@@ -568,104 +599,208 @@ export default function EditBookingPage() {
                 </h3>
               </div>
               <div className="p-6">
-                <div className="mb-6 p-4 bg-slate-50 rounded-lg border border-slate-100 flex gap-6">
-                    <label className="flex items-center gap-2 cursor-pointer">
-                        <input 
-                          type="radio" 
-                          name="customer-type" 
-                          value="existing"
-                          checked={formData.customerType === 'existing'}
-                          onChange={() => setFormData(prev => ({ ...prev, customerType: 'existing' }))}
-                          className="text-primary focus:ring-primary border-slate-300"
-                        />
-                        <span className="text-sm font-bold text-slate-700">Existing Traveller</span>
-                    </label>
-                    <label className="flex items-center gap-2 cursor-pointer">
-                        <input 
-                          type="radio" 
-                          name="customer-type" 
-                          value="new"
-                          checked={formData.customerType === 'new'}
-                          onChange={() => setFormData(prev => ({ ...prev, customerType: 'new' }))}
-                          className="text-primary focus:ring-primary border-slate-300"
-                        />
-                        <span className="text-sm font-bold text-slate-700">New Traveller</span>
-                    </label>
+                {/* Traveller Type Toggle */}
+                <div className="flex p-1 bg-slate-100 rounded-xl mb-6">
+                  <button
+                    type="button"
+                    onClick={() => {
+                        setFormData(prev => ({ ...prev, customerType: 'existing' }));
+                        setFormErrors({});
+                    }}
+                    className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${
+                      formData.customerType === 'existing' 
+                        ? 'bg-white text-primary shadow-sm ring-1 ring-slate-200' 
+                        : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-[20px]">person_search</span>
+                    Existing Traveller
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                        setFormData(prev => ({ ...prev, customerType: 'new' }));
+                        setExistingTravelerSelected(false);
+                    }}
+                    className={`flex-1 py-3 text-sm font-bold rounded-lg transition-all flex items-center justify-center gap-2 ${
+                      formData.customerType === 'new' 
+                        ? 'bg-white text-primary shadow-sm ring-1 ring-slate-200' 
+                        : 'text-slate-500 hover:text-slate-700'
+                    }`}
+                  >
+                    <span className="material-symbols-outlined text-[20px]">person_add</span>
+                    New Traveller
+                  </button>
                 </div>
 
+                {/* Existing Traveller Search / Read Only View */}
                 {formData.customerType === 'existing' && (
-                    <div className="mb-6">
-                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest mb-2">Search Traveller</label>
-                      <CustomerSearch 
-                        onSelect={handleTravelerSelect}
-                        className="w-full"
-                      />
+                    <div className="mb-6 animate-in fade-in slide-in-from-top-4 duration-300">
+                      {!existingTravelerSelected ? (
+                        <div>
+                            <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest mb-2">Search Traveller</label>
+                            <CustomerSearch 
+                                onSelect={handleTravelerSelect}
+                                className="w-full"
+                            />
+                            <p className="mt-2 text-xs text-slate-500">Search by name, email or phone number to auto-populate details.</p>
+                        </div>
+                      ) : (
+                        <div className="bg-blue-50 border border-blue-100 rounded-xl p-5 relative overflow-hidden group">
+                            <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <button 
+                                    type="button"
+                                    onClick={() => {
+                                        setFormData(prev => ({ ...prev, customerType: 'new' }));
+                                    }}
+                                    className="bg-white text-blue-600 hover:bg-blue-600 hover:text-white border border-blue-200 shadow-sm rounded-lg px-3 py-1.5 text-xs font-bold flex items-center gap-1 transition-all"
+                                >
+                                    <span className="material-symbols-outlined text-[14px]">edit</span>
+                                    Edit Details
+                                </button>
+                            </div>
+                            <div className="flex items-start gap-4">
+                                <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xl border-2 border-white shadow-sm">
+                                    {(formData.travellerFirstName?.[0] || '')}{(formData.travellerLastName?.[0] || '')}
+                                </div>
+                                <div>
+                                    <h4 className="text-base font-bold text-slate-900">{formData.travellerFirstName} {formData.travellerLastName}</h4>
+                                    <div className="mt-1 flex flex-wrap gap-x-4 gap-y-1 text-sm text-slate-600">
+                                        <span className="flex items-center gap-1">
+                                            <span className="material-symbols-outlined text-[16px] text-slate-400">badge</span>
+                                            {formData.passportNumber || 'N/A'}
+                                        </span>
+                                        <span className="flex items-center gap-1">
+                                            <span className="material-symbols-outlined text-[16px] text-slate-400">flag</span>
+                                            {formData.nationality || 'N/A'}
+                                        </span>
+                                        <span className="flex items-center gap-1">
+                                            <span className="material-symbols-outlined text-[16px] text-slate-400">cake</span>
+                                            {formData.dob || 'N/A'}
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                      )}
                     </div>
                 )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="md:col-span-2">
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest mb-2">Traveller Full Name</label>
-                    <input 
-                        className="block w-full h-10 rounded-lg border-slate-200 focus:border-primary focus:ring focus:ring-primary/10 sm:text-sm font-medium px-3 uppercase" 
-                        value={`${formData.travellerFirstName} ${formData.travellerLastName}`}
-                        readOnly={false}
-                        onChange={(e) => {
-                            const parts = e.target.value.split(' ');
-                            setFormData(prev => ({
-                                ...prev,
-                                travellerFirstName: parts[0] || '',
-                                travellerLastName: parts.slice(1).join(' ') || ''
-                            }));
-                        }}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest mb-2">Passport Number</label>
-                    <div className="relative rounded-md shadow-sm">
-                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
-                            <span className="material-symbols-outlined text-slate-400 text-[18px]">badge</span>
+                {/* Traveller Form Fields */}
+                <div className={`transition-all duration-500 ease-in-out overflow-hidden ${
+                    formData.customerType === 'new' 
+                    ? 'max-h-[800px] opacity-100' 
+                    : 'max-h-0 opacity-0'
+                }`}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                    <div className="md:col-span-2">
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest mb-2">Traveller Full Name</label>
+                        <div className={`flex gap-4 ${formErrors.travellerFirstName || formErrors.travellerLastName ? 'error-field' : ''}`}>
+                            <div className="flex-1">
+                                <input 
+                                    className={`block w-full h-10 rounded-lg border focus:ring sm:text-sm font-medium px-3 uppercase transition-colors ${
+                                        formErrors.travellerFirstName 
+                                        ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10' 
+                                        : 'border-slate-200 focus:border-primary focus:ring-primary/10'
+                                    }`}
+                                    placeholder="First Name"
+                                    value={formData.travellerFirstName}
+                                    onChange={(e) => {
+                                        setFormData(prev => ({ ...prev, travellerFirstName: e.target.value }));
+                                        if (formErrors.travellerFirstName) setFormErrors(prev => ({ ...prev, travellerFirstName: '' }));
+                                    }}
+                                />
+                                {formErrors.travellerFirstName && <p className="mt-1 text-xs text-red-600 flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">error</span>{formErrors.travellerFirstName}</p>}
+                            </div>
+                            <div className="flex-1">
+                                <input 
+                                    className={`block w-full h-10 rounded-lg border focus:ring sm:text-sm font-medium px-3 uppercase transition-colors ${
+                                        formErrors.travellerLastName 
+                                        ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10' 
+                                        : 'border-slate-200 focus:border-primary focus:ring-primary/10'
+                                    }`}
+                                    placeholder="Last Name"
+                                    value={formData.travellerLastName}
+                                    onChange={(e) => {
+                                        setFormData(prev => ({ ...prev, travellerLastName: e.target.value }));
+                                        if (formErrors.travellerLastName) setFormErrors(prev => ({ ...prev, travellerLastName: '' }));
+                                    }}
+                                />
+                                {formErrors.travellerLastName && <p className="mt-1 text-xs text-red-600 flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">error</span>{formErrors.travellerLastName}</p>}
+                            </div>
                         </div>
-                        <input 
-                            className="block w-full h-10 rounded-lg border-slate-200 pl-10 focus:border-primary focus:ring focus:ring-primary/10 sm:text-sm font-medium" 
-                            name="passportNumber" 
-                            value={formData.passportNumber}
-                            onChange={handleChange}
-                            placeholder="e.g. A1234567X"
-                        />
                     </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest mb-2">Passport Expiry Date</label>
-                    <input 
-                        className="block w-full h-10 rounded-lg border-slate-200 focus:border-primary focus:ring focus:ring-primary/10 sm:text-sm font-medium px-3" 
-                        name="passportExpiry" 
-                        type="date"
-                        value={formData.passportExpiry}
-                        onChange={handleChange}
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest mb-2">Nationality</label>
-                    <select 
-                        className="block w-full h-10 rounded-lg border-slate-200 focus:border-primary focus:ring focus:ring-primary/10 sm:text-sm font-medium px-3" 
-                        name="nationality"
-                        value={formData.nationality}
-                        onChange={handleChange}
-                    >
-                        {countryData.countries.map(c => <option key={c.value} value={c.label}>{c.label}</option>)}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest mb-2">Date of Birth</label>
-                    <input 
-                        className="block w-full h-10 rounded-lg border-slate-200 focus:border-primary focus:ring focus:ring-primary/10 sm:text-sm font-medium px-3" 
-                        name="dob" 
-                        type="date"
-                        value={formData.dob}
-                        onChange={handleChange}
-                    />
-                  </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest mb-2">Passport Number</label>
+                        <div className={`relative rounded-md shadow-sm ${formErrors.passportNumber ? 'error-field' : ''}`}>
+                            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                <span className="material-symbols-outlined text-slate-400 text-[18px]">badge</span>
+                            </div>
+                            <input 
+                                className={`block w-full h-10 rounded-lg border pl-10 focus:ring sm:text-sm font-medium transition-colors ${
+                                    formErrors.passportNumber 
+                                    ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10' 
+                                    : 'border-slate-200 focus:border-primary focus:ring-primary/10'
+                                }`}
+                                name="passportNumber" 
+                                value={formData.passportNumber}
+                                onChange={(e) => {
+                                    handleChange(e);
+                                    if (formErrors.passportNumber) setFormErrors(prev => ({ ...prev, passportNumber: '' }));
+                                }}
+                                placeholder="e.g. A1234567X"
+                            />
+                        </div>
+                        {formErrors.passportNumber && <p className="mt-1 text-xs text-red-600 flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">error</span>{formErrors.passportNumber}</p>}
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest mb-2">Passport Expiry Date</label>
+                        <input 
+                            className={`block w-full h-10 rounded-lg border focus:ring sm:text-sm font-medium px-3 transition-colors ${
+                                formErrors.passportExpiry 
+                                ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10' 
+                                : 'border-slate-200 focus:border-primary focus:ring-primary/10'
+                            }`}
+                            name="passportExpiry" 
+                            type="date"
+                            value={formData.passportExpiry}
+                            onChange={(e) => {
+                                handleChange(e);
+                                if (formErrors.passportExpiry) setFormErrors(prev => ({ ...prev, passportExpiry: '' }));
+                            }}
+                        />
+                        {formErrors.passportExpiry && <p className="mt-1 text-xs text-red-600 flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">error</span>{formErrors.passportExpiry}</p>}
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest mb-2">Nationality</label>
+                        <select 
+                            className="block w-full h-10 rounded-lg border-slate-200 focus:border-primary focus:ring focus:ring-primary/10 sm:text-sm font-medium px-3" 
+                            name="nationality"
+                            value={formData.nationality}
+                            onChange={handleChange}
+                        >
+                            {countryData.countries.map(c => <option key={c.value} value={c.label}>{c.label}</option>)}
+                        </select>
+                    </div>
+                    <div>
+                        <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest mb-2">Date of Birth</label>
+                        <input 
+                            className={`block w-full h-10 rounded-lg border focus:ring sm:text-sm font-medium px-3 transition-colors ${
+                                formErrors.dob 
+                                ? 'border-red-300 focus:border-red-500 focus:ring-red-500/10' 
+                                : 'border-slate-200 focus:border-primary focus:ring-primary/10'
+                            }`}
+                            name="dob" 
+                            type="date"
+                            value={formData.dob}
+                            onChange={(e) => {
+                                handleChange(e);
+                                if (formErrors.dob) setFormErrors(prev => ({ ...prev, dob: '' }));
+                            }}
+                        />
+                        {formErrors.dob && <p className="mt-1 text-xs text-red-600 flex items-center gap-1"><span className="material-symbols-outlined text-[14px]">error</span>{formErrors.dob}</p>}
+                    </div>
+                    </div>
                 </div>
               </div>
             </div>

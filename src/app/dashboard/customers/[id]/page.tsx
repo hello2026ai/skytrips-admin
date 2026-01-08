@@ -29,11 +29,198 @@ export default function CustomerDetailsPage() {
 
       if (error) throw error;
       setCustomer(data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Error fetching customer:", err);
-      setError(err.message || "Failed to load customer details");
+      const errorMessage = err instanceof Error ? err.message : "Failed to load customer details";
+      setError(errorMessage);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const [activeTab, setActiveTab] = useState("booking-history");
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<Record<string, string | number> | null>(null);
+
+  const handleInvoiceAction = (invoice: Record<string, string | number>) => {
+    setSelectedInvoice(invoice);
+    setShowInvoiceModal(true);
+  };
+
+  const renderTabContent = () => {
+    switch (activeTab) {
+      case "booking-history":
+        return (
+          <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="flex flex-col sm:flex-row gap-4 justify-between items-center mb-6">
+                <div className="relative w-full sm:w-64">
+                    <span className="material-symbols-outlined absolute left-3 top-2.5 text-slate-400">search</span>
+                    <input 
+                        className="w-full pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm"
+                        placeholder="Search reference..."
+                    />
+                </div>
+                <div className="flex gap-2 w-full sm:w-auto">
+                    <select className="bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/20">
+                        <option>All Status</option>
+                        <option>Confirmed</option>
+                        <option>Cancelled</option>
+                        <option>Pending</option>
+                    </select>
+                    <input type="date" className="bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/20" />
+                </div>
+            </div>
+
+            {/* Mock Booking Item */}
+            <div className="bg-white border border-slate-200 rounded-xl p-4 hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start mb-4">
+                    <div>
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className="font-bold text-slate-900">NYC → LON</span>
+                            <span className="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full font-bold">Confirmed</span>
+                        </div>
+                        <p className="text-xs text-slate-500">Ref: #BK-7829-XJ • Oct 24, 2023</p>
+                    </div>
+                    <span className="text-lg font-bold text-slate-900">$1,240.00</span>
+                </div>
+                <div className="flex justify-end gap-2 border-t border-slate-100 pt-3">
+                    <button className="text-xs font-bold text-slate-600 hover:text-primary px-3 py-1.5 rounded hover:bg-slate-50">View Details</button>
+                    <button className="text-xs font-bold text-primary border border-primary/20 px-3 py-1.5 rounded hover:bg-primary/5">Modify</button>
+                </div>
+            </div>
+             {/* Mock Booking Item 2 */}
+             <div className="bg-white border border-slate-200 rounded-xl p-4 hover:shadow-md transition-shadow opacity-75">
+                <div className="flex justify-between items-start mb-4">
+                    <div>
+                        <div className="flex items-center gap-2 mb-1">
+                            <span className="font-bold text-slate-900">PAR → DXB</span>
+                            <span className="bg-slate-100 text-slate-600 text-xs px-2 py-0.5 rounded-full font-bold">Cancelled</span>
+                        </div>
+                        <p className="text-xs text-slate-500">Ref: #BK-9921-AZ • Sep 12, 2023</p>
+                    </div>
+                    <span className="text-lg font-bold text-slate-500 line-through">$850.00</span>
+                </div>
+                <div className="flex justify-end gap-2 border-t border-slate-100 pt-3">
+                    <button className="text-xs font-bold text-slate-600 hover:text-primary px-3 py-1.5 rounded hover:bg-slate-50">View Details</button>
+                </div>
+            </div>
+          </div>
+        );
+      case "payment-due":
+        return (
+          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <div className="overflow-x-auto">
+                <table className="w-full text-left text-sm">
+                    <thead className="bg-slate-50 text-slate-500 font-bold uppercase text-xs">
+                        <tr>
+                            <th className="px-6 py-4">Reference</th>
+                            <th className="px-6 py-4">Due Date</th>
+                            <th className="px-6 py-4">Status</th>
+                            <th className="px-6 py-4 text-right">Amount</th>
+                            <th className="px-6 py-4 text-right">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                        <tr>
+                            <td className="px-6 py-4 font-medium text-primary">#BK-7829-XJ</td>
+                            <td className="px-6 py-4 text-red-600 font-medium">Oct 30, 2023</td>
+                            <td className="px-6 py-4"><span className="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-bold">Overdue</span></td>
+                            <td className="px-6 py-4 text-right font-bold">$450.00</td>
+                            <td className="px-6 py-4 text-right">
+                                <button 
+                                    className="h-8 w-8 rounded-full flex items-center justify-center text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20"
+                                    aria-label="More options"
+                                    onClick={() => handleInvoiceAction({
+                                        id: "#BK-7829-XJ",
+                                        dueDate: "Oct 30, 2023",
+                                        amount: "$450.00",
+                                        status: "Overdue",
+                                        items: "Flight Ticket (NYC-LON) - Upgrade",
+                                        customerName: `${customer?.firstName} ${customer?.lastName}`,
+                                        customerEmail: customer?.email || ""
+                                    })}
+                                >
+                                    <span className="material-symbols-outlined text-[20px]">more_vert</span>
+                                </button>
+                            </td>
+                        </tr>
+                        <tr className="bg-slate-50 font-bold text-slate-900">
+                            <td className="px-6 py-4" colSpan={3}>Total Due</td>
+                            <td className="px-6 py-4 text-right text-lg">$450.00</td>
+                            <td></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+          </div>
+        );
+      case "linked-travellers":
+        return (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+             <div className="bg-white border border-slate-200 rounded-xl p-4 flex items-center gap-4">
+                <div className="size-12 rounded-full bg-slate-100 flex items-center justify-center text-xl font-bold text-slate-500">JD</div>
+                <div className="flex-1">
+                    <h4 className="font-bold text-slate-900">Jane Doe</h4>
+                    <p className="text-xs text-slate-500">Spouse • Linked via #BK-7829-XJ</p>
+                </div>
+                <button className="text-slate-400 hover:text-primary"><span className="material-symbols-outlined">edit</span></button>
+             </div>
+             <button className="border-2 border-dashed border-slate-200 rounded-xl p-4 flex items-center justify-center gap-2 text-slate-500 hover:border-primary hover:text-primary transition-colors">
+                <span className="material-symbols-outlined">add_circle</span>
+                <span className="font-bold text-sm">Link New Traveller</span>
+             </button>
+          </div>
+        );
+      case "manage-booking":
+        return (
+          <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Re-issue Section */}
+            <div>
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-bold text-slate-900 flex items-center gap-2">
+                        <span className="material-symbols-outlined text-primary">sync_alt</span>
+                        Re-issue Requests
+                    </h3>
+                    <button className="text-xs font-bold text-primary border border-primary/20 px-3 py-1.5 rounded hover:bg-primary/5">+ New Request</button>
+                </div>
+                <div className="bg-white border border-slate-200 rounded-xl p-6 text-center text-slate-500 text-sm">
+                    No active re-issue requests found.
+                </div>
+            </div>
+
+            {/* Refund Section */}
+            <div>
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className="font-bold text-slate-900 flex items-center gap-2">
+                        <span className="material-symbols-outlined text-red-500">currency_exchange</span>
+                        Refund Requests
+                    </h3>
+                    <button className="text-xs font-bold text-primary border border-primary/20 px-3 py-1.5 rounded hover:bg-primary/5">+ New Refund</button>
+                </div>
+                <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
+                    <div className="p-4 border-b border-slate-100 flex justify-between items-center">
+                        <div>
+                            <p className="font-bold text-slate-900 text-sm">Refund #RF-2023-001</p>
+                            <p className="text-xs text-slate-500">Requested on Oct 15, 2023</p>
+                        </div>
+                        <span className="bg-blue-50 text-blue-600 text-xs font-bold px-2 py-1 rounded">Processing</span>
+                    </div>
+                    <div className="p-4 bg-slate-50/50">
+                        <div className="w-full bg-slate-200 rounded-full h-2 mb-2">
+                            <div className="bg-blue-500 h-2 rounded-full" style={{width: '60%'}}></div>
+                        </div>
+                        <div className="flex justify-between text-xs text-slate-500 font-medium">
+                            <span>Initiated</span>
+                            <span className="text-blue-600">Airline Review</span>
+                            <span>Completed</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+          </div>
+        );
+      default:
+        return null;
     }
   };
 
@@ -190,8 +377,30 @@ export default function CustomerDetailsPage() {
       </div>
       <div className="flex-1 overflow-y-auto custom-scrollbar p-6 bg-slate-50/50">
         <div className="max-w-5xl mx-auto space-y-6">
+          {/* Tabs */}
+          <div className="border-b border-slate-200">
+            <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+                {['booking-history', 'payment-due', 'linked-travellers', 'manage-booking'].map((tab) => (
+                    <button
+                        key={tab}
+                        onClick={() => setActiveTab(tab)}
+                        className={`
+                            whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors
+                            ${activeTab === tab 
+                                ? 'border-primary text-primary' 
+                                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'}
+                        `}
+                    >
+                        {tab.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ')}
+                    </button>
+                ))}
+            </nav>
+          </div>
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
+              {renderTabContent()}
+              
               <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                   <h3 className="text-slate-900 text-base font-bold flex items-center gap-2">
@@ -519,6 +728,85 @@ export default function CustomerDetailsPage() {
           </div>
         </div>
       </div>
+      
+      {/* Invoice/Reminder Modal */}
+      {showInvoiceModal && selectedInvoice && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl overflow-hidden animate-in zoom-in-95 duration-200">
+                {/* Header with Reminder Alert */}
+                <div className="bg-amber-50 border-b border-amber-100 p-4 flex items-start gap-3">
+                    <span className="material-symbols-outlined text-amber-600 mt-0.5">notifications_active</span>
+                    <div>
+                        <h3 className="text-amber-900 font-bold text-sm">Payment Reminder Required</h3>
+                        <p className="text-amber-700 text-xs mt-1">
+                            This invoice is overdue. Please review the details below before sending a reminder to the customer.
+                        </p>
+                    </div>
+                    <button 
+                        onClick={() => setShowInvoiceModal(false)}
+                        className="ml-auto text-amber-900/50 hover:text-amber-900"
+                    >
+                        <span className="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+
+                {/* Invoice Details */}
+                <div className="p-6">
+                    <div className="flex justify-between items-start mb-6">
+                        <div>
+                            <p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Invoice Reference</p>
+                            <h2 className="text-2xl font-bold text-slate-900 mt-1">{selectedInvoice.id}</h2>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-slate-500 text-xs uppercase font-bold tracking-wider">Amount Due</p>
+                            <h2 className="text-2xl font-bold text-red-600 mt-1">{selectedInvoice.amount}</h2>
+                        </div>
+                    </div>
+
+                    <div className="bg-slate-50 rounded-lg border border-slate-100 p-4 mb-6">
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                            <div>
+                                <p className="text-slate-500 font-medium mb-1">Billed To</p>
+                                <p className="text-slate-900 font-bold">{selectedInvoice.customerName}</p>
+                                <p className="text-slate-500">{selectedInvoice.customerEmail}</p>
+                            </div>
+                            <div className="text-right">
+                                <p className="text-slate-500 font-medium mb-1">Due Date</p>
+                                <p className="text-red-600 font-bold">{selectedInvoice.dueDate}</p>
+                                <p className="text-slate-500 mt-1">Status: <span className="font-bold text-slate-900">{selectedInvoice.status}</span></p>
+                            </div>
+                        </div>
+                        <div className="mt-4 pt-4 border-t border-slate-200">
+                             <p className="text-slate-500 font-medium mb-2">Line Items</p>
+                             <div className="flex justify-between text-sm">
+                                <span className="text-slate-900">{selectedInvoice.items}</span>
+                                <span className="font-bold text-slate-900">{selectedInvoice.amount}</span>
+                             </div>
+                        </div>
+                    </div>
+
+                    <div className="flex justify-end gap-3">
+                        <button 
+                            onClick={() => setShowInvoiceModal(false)}
+                            className="px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <button 
+                            onClick={() => {
+                                alert("Reminder sent successfully!");
+                                setShowInvoiceModal(false);
+                            }}
+                            className="px-4 py-2 text-sm font-bold text-white bg-primary rounded-lg hover:bg-primary/90 shadow-sm flex items-center gap-2"
+                        >
+                            <span className="material-symbols-outlined text-[18px]">send</span>
+                            Send Reminder
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+      )}
     </div>
   );
 }

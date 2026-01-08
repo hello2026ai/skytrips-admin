@@ -200,6 +200,27 @@ export default function DashboardLayout({
             </span>
             <p className="text-sm font-medium leading-normal">Bookings</p>
           </Link>
+
+          {/* Setting */}
+          <Link
+            href="/dashboard/settings"
+            className={`flex items-center gap-3 px-3 py-3 rounded-lg ml-6 transition-all ${
+              pathname === "/dashboard/settings"
+                ? "bg-primary text-primary-foreground shadow-md shadow-blue-200 dark:shadow-none"
+                : "text-sidebar-foreground hover:bg-muted hover:text-foreground group"
+            }`}
+          >
+            <span
+              className={`material-symbols-outlined ${
+                pathname === "/dashboard/settings"
+                  ? "active-icon"
+                  : "group-hover:text-primary transition-colors"
+              }`}
+            >
+              settings
+            </span>
+            <p className="text-sm font-medium leading-normal">Setting</p>
+          </Link>
         </nav>
 
         <div className="p-4 mt-auto">
@@ -259,7 +280,8 @@ export default function DashboardLayout({
                 <span className="absolute top-2 right-2 size-2 bg-destructive rounded-full border-2 border-background"></span>
               </button>
               <div
-                className="bg-center bg-no-repeat bg-cover rounded-full size-10 border-2 border-background shadow-sm cursor-pointer"
+                onClick={() => router.push("/dashboard/profile")}
+                className="bg-center bg-no-repeat bg-cover rounded-full size-10 border-2 border-background shadow-sm cursor-pointer hover:ring-2 hover:ring-primary/20 transition-all"
                 style={{
                   backgroundImage:
                     'url("https://lh3.googleusercontent.com/aida-public/AB6AXuDtdUFJhCY23zRHICCmdcqLphWmvNrGwS4fcKPbXSW5jX8KWpfe5nuooOqBEsvDtEahEUHfI_is0F8NU-gYv2iA-gmKGGPg7K0T0lawDA5xEtl3B8jhCzh681V3xVwHpkvOOXSXzj7GFDu5AP3ixiwPYzT4VUTd7fWIFEKSztODrf3nFh5bITRQG4zAn7kdaJ82gHHxViATaKOD7AIn6Ghks-sXo0-1fv1T9jE8Vfpq_nCg_Zc5lfs6jBTvMCIHcjvadlicEr9mXT4")',

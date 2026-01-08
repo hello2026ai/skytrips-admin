@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { Customer } from "@/types";
+import CustomerForm from "@/components/CustomerForm";
 
 export default function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -14,10 +15,15 @@ export default function CustomersPage() {
   const [totalCount, setTotalCount] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
+  
+  const [isFormOpen, setIsFormOpen] = useState(false);
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+
+  const [sortConfig, setSortConfig] = useState<{ key: keyof Customer | 'name' | 'totalMiles' | 'totalSpend' | 'lastLogin'; direction: 'asc' | 'desc' }>({ key: 'id', direction: 'asc' });
 
   useEffect(() => {
     fetchCustomers();
-  }, [currentPage, pageSize, debouncedSearch]);
+  }, [currentPage, pageSize, debouncedSearch, sortConfig]);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -38,9 +44,18 @@ export default function CustomersPage() {
 
       let query = supabase
         .from("customers")
-        .select("*", { count: "exact" })
-        .order("id", { ascending: true })
-        .range(from, to);
+        .select("*", { count: "exact" });
+
+      // Only apply server-side sorting for existing DB columns
+      if (['id', 'firstName', 'lastName', 'email', 'created_at', 'isActive'].includes(sortConfig.key as string) || sortConfig.key === 'name') {
+          if (sortConfig.key === 'name') {
+              query = query.order('firstName', { ascending: sortConfig.direction === 'asc' });
+          } else {
+              query = query.order(sortConfig.key as string, { ascending: sortConfig.direction === 'asc' });
+          }
+      }
+        
+      query = query.range(from, to);
 
       if (debouncedSearch) {
         query = query.or(`firstName.ilike.*${debouncedSearch}*,lastName.ilike.*${debouncedSearch}*,email.ilike.*${debouncedSearch}*,phone.ilike.*${debouncedSearch}*`);
@@ -50,7 +65,48 @@ export default function CustomersPage() {
 
       if (fetchError) throw fetchError;
 
-      setCustomers(data || []);
+      // Enrich data with mock metrics for display
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const enrichedData: Customer[] = (data || []).map((customer: any) => ({
+        id: customer.id,
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        email: customer.email,
+        phone: customer.phone,
+        dateOfBirth: customer.dateOfBirth,
+        gender: customer.gender,
+        userType: customer.userType,
+        isActive: customer.isActive,
+        country: customer.country,
+        address: customer.address,
+        phoneCountryCode: customer.phoneCountryCode,
+        isDisabled: customer.isDisabled,
+        isVerified: customer.isVerified,
+        passport: customer.passport,
+        socialProvider: customer.socialProvider,
+        socialId: customer.socialId,
+        referralCode: customer.referralCode,
+        created_at: customer.created_at,
+        totalMiles: customer.totalMiles ?? Math.floor(Math.random() * 50000) + 1000,
+        totalSpend: customer.totalSpend ?? Math.floor(Math.random() * 10000) + 500,
+        lastLogin: customer.lastLogin ?? new Date(Date.now() - Math.floor(Math.random() * 1000000000)).toISOString()
+      }));
+
+      // Client-side sorting for new metrics
+      if (['totalMiles', 'totalSpend', 'lastLogin'].includes(sortConfig.key as string)) {
+          enrichedData.sort((a: Customer, b: Customer) => {
+              const aValue = a[sortConfig.key as keyof Customer];
+              const bValue = b[sortConfig.key as keyof Customer];
+              
+              if (aValue === undefined || bValue === undefined) return 0;
+              
+              if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+              if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+              return 0;
+          });
+      }
+
+      setCustomers(enrichedData);
       setTotalCount(count || 0);
     } catch (err: unknown) {
       console.error("Fetch error:", err);
@@ -61,6 +117,15 @@ export default function CustomersPage() {
     }
   };
 
+  const handleSort = (key: keyof Customer | 'name' | 'totalMiles' | 'totalSpend' | 'lastLogin') => {
+      setSortConfig(curr => ({ key, direction: curr.key === key && curr.direction === 'asc' ? 'desc' : 'asc' }));
+  };
+
+  const renderSortIcon = (key: keyof Customer | 'name' | 'totalMiles' | 'totalSpend' | 'lastLogin') => {
+      if (sortConfig.key !== key) return <span className="material-symbols-outlined text-[16px] text-slate-400 opacity-0 group-hover:opacity-100 transition-opacity">unfold_more</span>;
+      return <span className="material-symbols-outlined text-[16px] text-primary">{sortConfig.direction === 'asc' ? 'arrow_upward' : 'arrow_downward'}</span>;
+  };
+
   const totalPages = Math.ceil(totalCount / pageSize);
 
   const handlePrevPage = () => {
@@ -69,6 +134,20 @@ export default function CustomersPage() {
 
   const handleNextPage = () => {
     if (currentPage < totalPages) setCurrentPage(currentPage + 1);
+  };
+
+  const handleOpenAdd = () => {
+    setSelectedCustomer(null);
+    setIsFormOpen(true);
+  };
+
+  const handleOpenEdit = (customer: Customer) => {
+    setSelectedCustomer(customer);
+    setIsFormOpen(true);
+  };
+
+  const handleFormSuccess = () => {
+    fetchCustomers();
   };
 
   const getStatusBadge = (isActive: string) => {
@@ -124,7 +203,10 @@ export default function CustomersPage() {
             Manage your user base, view details and travel history.
           </p>
         </div>
-        <button className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-sm hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all">
+        <button 
+          onClick={handleOpenAdd}
+          className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-sm hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all"
+        >
           <span className="material-symbols-outlined text-[20px]">add</span>
           <span>Add Customer</span>
         </button>
@@ -164,7 +246,7 @@ export default function CustomersPage() {
       <div className="flex flex-col rounded-xl border border-border bg-card shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-muted/50 text-muted-foreground font-semibold uppercase tracking-wider text-xs">
+            <thead className="bg-muted/50 text-muted-foreground font-bold uppercase tracking-wider text-xs border-b border-border">
               <tr>
                 <th className="px-6 py-4 w-12 text-center align-middle">
                   <input
@@ -172,10 +254,51 @@ export default function CustomersPage() {
                     type="checkbox"
                   />
                 </th>
-                <th className="px-6 py-4">Name</th>
-                <th className="px-6 py-4">Email</th>
-                <th className="px-6 py-4">Phone Number</th>
-                <th className="px-6 py-4 text-center">Status</th>
+                <th 
+                    className="px-6 py-4 cursor-pointer hover:bg-muted transition-colors group select-none"
+                    onClick={() => handleSort('name')}
+                >
+                    <div className="flex items-center gap-1">
+                        Customer
+                        {renderSortIcon('name')}
+                    </div>
+                </th>
+                <th 
+                    className="px-6 py-4 cursor-pointer hover:bg-muted transition-colors group select-none"
+                    onClick={() => handleSort('totalMiles')}
+                >
+                    <div className="flex items-center gap-1">
+                        Total Miles
+                        {renderSortIcon('totalMiles')}
+                    </div>
+                </th>
+                <th 
+                    className="px-6 py-4 cursor-pointer hover:bg-muted transition-colors group select-none"
+                    onClick={() => handleSort('totalSpend')}
+                >
+                    <div className="flex items-center gap-1">
+                        Total Spend
+                        {renderSortIcon('totalSpend')}
+                    </div>
+                </th>
+                <th 
+                    className="px-6 py-4 cursor-pointer hover:bg-muted transition-colors group select-none"
+                    onClick={() => handleSort('lastLogin')}
+                >
+                    <div className="flex items-center gap-1">
+                        Last Login
+                        {renderSortIcon('lastLogin')}
+                    </div>
+                </th>
+                <th 
+                    className="px-6 py-4 text-center cursor-pointer hover:bg-muted transition-colors group select-none"
+                    onClick={() => handleSort('isActive')}
+                >
+                    <div className="flex items-center justify-center gap-1">
+                        Status
+                        {renderSortIcon('isActive')}
+                    </div>
+                </th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
@@ -183,7 +306,7 @@ export default function CustomersPage() {
               {customers.map((customer) => (
                 <tr
                   key={customer.id}
-                  className="group hover:bg-muted/50 transition-colors"
+                  className="group hover:bg-muted/30 transition-colors"
                 >
                   <td className="px-6 py-4 text-center align-middle">
                     <input
@@ -194,23 +317,40 @@ export default function CustomersPage() {
                   <td className="px-6 py-4">
                     <div className="flex items-center gap-3">
                       <div
-                        className="size-9 rounded-full bg-cover bg-center"
+                        className="size-10 rounded-full bg-cover bg-center border border-border"
                         style={{
                           backgroundImage: `url("https://ui-avatars.com/api/?name=${encodeURIComponent(
                             `${customer.firstName} ${customer.lastName}`
                             )}&background=random")`,
                         }}
                       ></div>
-                      <div className="font-medium text-foreground">
-                        {customer.firstName} {customer.lastName}
+                      <div>
+                        <div className="font-bold text-foreground text-sm">
+                            {customer.firstName} {customer.lastName}
+                        </div>
+                        <div className="text-xs text-muted-foreground font-mono">
+                            ID: #CUS-{customer.id}
+                        </div>
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-muted-foreground truncate max-w-[200px]">
-                    {customer.email}
+                  <td className="px-6 py-4">
+                    <div className="font-medium text-foreground">
+                        {customer.totalMiles?.toLocaleString()} <span className="text-muted-foreground text-xs">mi</span>
+                    </div>
                   </td>
-                  <td className="px-6 py-4 text-muted-foreground">
-                    {customer.phoneCountryCode} {customer.phone}
+                  <td className="px-6 py-4">
+                    <div className="font-medium text-foreground">
+                        ${customer.totalSpend?.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2})}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-foreground">
+                        {customer.lastLogin ? new Date(customer.lastLogin).toLocaleDateString() : 'N/A'}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                        {customer.lastLogin ? new Date(customer.lastLogin).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}
+                    </div>
                   </td>
                   <td className="px-6 py-4 text-center">
                     {getStatusBadge(customer.isActive)}
@@ -219,19 +359,22 @@ export default function CustomersPage() {
                     <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Link 
                         href={`/dashboard/customers/${customer.id}`}
-                        className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-primary transition-colors"
+                        className="p-1.5 rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-primary transition-all"
                         title="View Details"
                       >
                         <span className="material-symbols-outlined text-[20px]">
                           visibility
                         </span>
                       </Link>
-                      <button className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-primary transition-colors">
+                      <button 
+                        onClick={() => handleOpenEdit(customer)}
+                        className="p-1.5 rounded-lg text-muted-foreground hover:bg-primary/10 hover:text-primary transition-all"
+                      >
                         <span className="material-symbols-outlined text-[20px]">
                           edit
                         </span>
                       </button>
-                      <button className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-destructive transition-colors">
+                      <button className="p-1.5 rounded-lg text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-all">
                         <span className="material-symbols-outlined text-[20px]">
                           delete
                         </span>
@@ -315,6 +458,13 @@ export default function CustomersPage() {
           </div>
         </div>
       </div>
+      
+      <CustomerForm 
+        isOpen={isFormOpen} 
+        onClose={() => setIsFormOpen(false)} 
+        onSuccess={handleFormSuccess}
+        customerToEdit={selectedCustomer}
+      />
     </div>
   );
 }

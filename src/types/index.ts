@@ -33,6 +33,7 @@ export interface Booking {
   transactionId?: string;
   dateOfPayment?: string;
   payment: string;
+  travelDate?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -56,5 +57,8 @@ export interface Customer {
   socialProvider: string;
   socialId: string;
   referralCode: string;
+  totalMiles?: number;
+  totalSpend?: number;
+  lastLogin?: string;
   created_at?: string;
 }
