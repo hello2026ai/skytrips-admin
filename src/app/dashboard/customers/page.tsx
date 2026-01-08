@@ -52,9 +52,10 @@ export default function CustomersPage() {
 
       setCustomers(data || []);
       setTotalCount(count || 0);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Fetch error:", err);
-      setError(err.message || "Failed to fetch customers");
+      const errorMessage = err instanceof Error ? err.message : "Failed to fetch customers";
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -73,13 +74,13 @@ export default function CustomersPage() {
   const getStatusBadge = (isActive: string) => {
     if (isActive === "true" || isActive === "Active") {
       return (
-        <span className="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">
+        <span className="inline-flex items-center rounded-full bg-success/20 px-2.5 py-0.5 text-xs font-medium text-success">
           Active
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">
+      <span className="inline-flex items-center rounded-full bg-muted px-2.5 py-0.5 text-xs font-medium text-muted-foreground">
         Inactive
       </span>
     );
@@ -116,14 +117,14 @@ export default function CustomersPage() {
       {/* Page Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">
             Customers
           </h1>
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm text-muted-foreground">
             Manage your user base, view details and travel history.
           </p>
         </div>
-        <button className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-white shadow-sm hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all">
+        <button className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-sm hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all">
           <span className="material-symbols-outlined text-[20px]">add</span>
           <span>Add Customer</span>
         </button>
@@ -132,11 +133,11 @@ export default function CustomersPage() {
       {/* Filters and Search Toolbar */}
       <div className="mb-6 flex flex-col sm:flex-row gap-4">
         <div className="relative flex-1 min-w-[200px]">
-          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
+          <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
             search
           </span>
           <input
-            className="w-full rounded-lg border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-900 placeholder:text-slate-400 focus:border-primary focus:ring-1 focus:ring-primary"
+            className="w-full rounded-lg border border-border bg-card py-2.5 pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:ring-1 focus:ring-primary"
             placeholder="Search by name, email, or phone..."
             type="text"
             value={searchTerm}
@@ -144,13 +145,13 @@ export default function CustomersPage() {
           />
         </div>
         <div className="flex gap-4">
-          <select className="w-full sm:w-48 rounded-lg border border-slate-200 bg-white py-2.5 pl-3 pr-10 text-sm text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary">
+          <select className="w-full sm:w-48 rounded-lg border border-border bg-card py-2.5 pl-3 pr-10 text-sm text-foreground focus:border-primary focus:ring-1 focus:ring-primary">
             <option value="">All Statuses</option>
             <option value="active">Active</option>
             <option value="inactive">Inactive</option>
             <option value="pending">Pending</option>
           </select>
-          <button className="flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">
+          <button className="flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted transition-colors">
             <span className="material-symbols-outlined text-[20px]">
               filter_list
             </span>
@@ -160,14 +161,14 @@ export default function CustomersPage() {
       </div>
 
       {/* Data Table Card */}
-      <div className="flex flex-col rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+      <div className="flex flex-col rounded-xl border border-border bg-card shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-slate-50 text-slate-500 font-semibold uppercase tracking-wider text-xs">
+            <thead className="bg-muted/50 text-muted-foreground font-semibold uppercase tracking-wider text-xs">
               <tr>
                 <th className="px-6 py-4 w-12 text-center align-middle">
                   <input
-                    className="rounded border-gray-300 text-primary focus:ring-primary bg-white"
+                    className="rounded border-border text-primary focus:ring-primary bg-card"
                     type="checkbox"
                   />
                 </th>
@@ -178,15 +179,15 @@ export default function CustomersPage() {
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-border">
               {customers.map((customer) => (
                 <tr
                   key={customer.id}
-                  className="group hover:bg-slate-50 transition-colors"
+                  className="group hover:bg-muted/50 transition-colors"
                 >
                   <td className="px-6 py-4 text-center align-middle">
                     <input
-                      className="rounded border-gray-300 text-primary focus:ring-primary bg-white"
+                      className="rounded border-border text-primary focus:ring-primary bg-card"
                       type="checkbox"
                     />
                   </td>
@@ -200,15 +201,15 @@ export default function CustomersPage() {
                             )}&background=random")`,
                         }}
                       ></div>
-                      <div className="font-medium text-slate-900">
+                      <div className="font-medium text-foreground">
                         {customer.firstName} {customer.lastName}
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 text-slate-500 truncate max-w-[200px]">
+                  <td className="px-6 py-4 text-muted-foreground truncate max-w-[200px]">
                     {customer.email}
                   </td>
-                  <td className="px-6 py-4 text-slate-500">
+                  <td className="px-6 py-4 text-muted-foreground">
                     {customer.phoneCountryCode} {customer.phone}
                   </td>
                   <td className="px-6 py-4 text-center">
@@ -218,19 +219,19 @@ export default function CustomersPage() {
                     <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                       <Link 
                         href={`/dashboard/customers/${customer.id}`}
-                        className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-primary"
+                        className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-primary transition-colors"
                         title="View Details"
                       >
                         <span className="material-symbols-outlined text-[20px]">
                           visibility
                         </span>
                       </Link>
-                      <button className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-primary">
+                      <button className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-primary transition-colors">
                         <span className="material-symbols-outlined text-[20px]">
                           edit
                         </span>
                       </button>
-                      <button className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-red-500">
+                      <button className="rounded p-1 text-muted-foreground hover:bg-muted hover:text-destructive transition-colors">
                         <span className="material-symbols-outlined text-[20px]">
                           delete
                         </span>
@@ -244,33 +245,33 @@ export default function CustomersPage() {
         </div>
 
         {/* Pagination Footer */}
-        <div className="flex items-center justify-between border-t border-slate-100 bg-white px-6 py-4">
+        <div className="flex items-center justify-between border-t border-border bg-card px-6 py-4">
           <div className="flex-1 flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <p className="text-sm text-slate-500 font-display">
+              <p className="text-sm text-muted-foreground font-display">
                 Showing{" "}
-                <span className="font-medium text-slate-900">
+                <span className="font-medium text-foreground">
                   {totalCount === 0 ? 0 : (currentPage - 1) * pageSize + 1}
                 </span>{" "}
                 to{" "}
-                <span className="font-medium text-slate-900">
+                <span className="font-medium text-foreground">
                   {Math.min(currentPage * pageSize, totalCount)}
                 </span>{" "}
                 of{" "}
-                <span className="font-medium text-slate-900">
+                <span className="font-medium text-foreground">
                   {totalCount}
                 </span>{" "}
                 results
               </p>
-              <div className="hidden sm:flex items-center gap-2 ml-4 border-l border-slate-100 pl-4">
-                <span className="text-xs text-slate-500">Rows per page:</span>
+              <div className="hidden sm:flex items-center gap-2 ml-4 border-l border-border pl-4">
+                <span className="text-xs text-muted-foreground">Rows per page:</span>
                 <select 
                   value={pageSize}
                   onChange={(e) => {
                     setPageSize(Number(e.target.value));
                     setCurrentPage(1);
                   }}
-                  className="bg-transparent text-xs font-bold text-slate-900 focus:outline-none cursor-pointer"
+                  className="bg-transparent text-xs font-bold text-foreground focus:outline-none cursor-pointer"
                 >
                   <option value={10}>10</option>
                   <option value={20}>20</option>
@@ -287,7 +288,7 @@ export default function CustomersPage() {
                 <button
                   onClick={handlePrevPage}
                   disabled={currentPage === 1 || loading}
-                  className="relative inline-flex items-center rounded-l-md px-2 py-2 text-slate-400 ring-1 ring-inset ring-slate-200 hover:bg-slate-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="relative inline-flex items-center rounded-l-md px-2 py-2 text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   <span className="sr-only">Previous</span>
                   <span className="material-symbols-outlined text-[20px]">
@@ -295,14 +296,14 @@ export default function CustomersPage() {
                   </span>
                 </button>
                 
-                <div className="flex items-center px-4 py-2 text-sm font-semibold text-slate-900 ring-1 ring-inset ring-slate-200">
+                <div className="flex items-center px-4 py-2 text-sm font-semibold text-foreground ring-1 ring-inset ring-border">
                   Page <span className="mx-1 font-bold text-primary">{currentPage}</span> of {totalPages || 1}
                 </div>
 
                 <button
                   onClick={handleNextPage}
                   disabled={currentPage === totalPages || totalPages === 0 || loading}
-                  className="relative inline-flex items-center rounded-r-md px-2 py-2 text-slate-400 ring-1 ring-inset ring-slate-200 hover:bg-slate-50 focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="relative inline-flex items-center rounded-r-md px-2 py-2 text-muted-foreground ring-1 ring-inset ring-border hover:bg-muted focus:z-20 focus:outline-offset-0 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   <span className="sr-only">Next</span>
                   <span className="material-symbols-outlined text-[20px]">

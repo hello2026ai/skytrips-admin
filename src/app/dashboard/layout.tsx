@@ -4,6 +4,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { supabase, getCurrentUser } from "@/lib/supabase";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export default function DashboardLayout({
   children,
@@ -93,9 +94,9 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="bg-white font-display text-slate-900 h-screen overflow-hidden flex w-full">
+    <div className="bg-background font-display text-foreground h-screen overflow-hidden flex w-full transition-colors duration-300">
       {/* Side Navigation */}
-      <aside className="w-64 bg-white border-r border-slate-100 flex-col hidden md:flex h-full flex-shrink-0 z-20">
+      <aside className="w-64 bg-sidebar border-r border-sidebar-border flex-col hidden md:flex h-full flex-shrink-0 z-20 transition-colors duration-300">
         <div className="p-6 pb-2">
           <div
             className="flex items-center gap-3 cursor-pointer"
@@ -120,8 +121,8 @@ export default function DashboardLayout({
             href="/dashboard"
             className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all ${
               pathname === "/dashboard"
-                ? "bg-primary text-white shadow-md shadow-blue-200"
-                : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 group"
+                ? "bg-primary text-primary-foreground shadow-md shadow-blue-200 dark:shadow-none"
+                : "text-sidebar-foreground hover:bg-muted hover:text-foreground group"
             }`}
           >
             <span
@@ -139,7 +140,7 @@ export default function DashboardLayout({
           {/* Flights */}
           <Link
             href="#"
-            className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-slate-50 text-slate-500 hover:text-slate-900 transition-colors group"
+            className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-muted text-sidebar-foreground hover:text-foreground transition-colors group"
           >
             <span className="material-symbols-outlined group-hover:text-primary transition-colors">
               flight
@@ -150,7 +151,7 @@ export default function DashboardLayout({
           {/* Hotels */}
           <Link
             href="#"
-            className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-slate-50 text-slate-500 hover:text-slate-900 transition-colors group"
+            className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-muted text-sidebar-foreground hover:text-foreground transition-colors group"
           >
             <span className="material-symbols-outlined group-hover:text-primary transition-colors">
               hotel
@@ -163,8 +164,8 @@ export default function DashboardLayout({
             href="/dashboard/customers"
             className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all ${
               pathname === "/dashboard/customers"
-                ? "bg-primary text-white shadow-md shadow-blue-200"
-                : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 group"
+                ? "bg-primary text-primary-foreground shadow-md shadow-blue-200 dark:shadow-none"
+                : "text-sidebar-foreground hover:bg-muted hover:text-foreground group"
             }`}
           >
             <span
@@ -184,8 +185,8 @@ export default function DashboardLayout({
             href="/dashboard/booking"
             className={`flex items-center gap-3 px-3 py-3 rounded-lg transition-all ${
               pathname === "/dashboard/booking"
-                ? "bg-primary text-white shadow-md shadow-blue-200"
-                : "text-slate-500 hover:bg-slate-50 hover:text-slate-900 group"
+                ? "bg-primary text-primary-foreground shadow-md shadow-blue-200 dark:shadow-none"
+                : "text-sidebar-foreground hover:bg-muted hover:text-foreground group"
             }`}
           >
             <span
@@ -199,34 +200,12 @@ export default function DashboardLayout({
             </span>
             <p className="text-sm font-medium leading-normal">Bookings</p>
           </Link>
-
-          {/* Analytics */}
-          <Link
-            href="#"
-            className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-slate-50 text-slate-500 hover:text-slate-900 transition-colors group"
-          >
-            <span className="material-symbols-outlined group-hover:text-primary transition-colors">
-              bar_chart
-            </span>
-            <p className="text-sm font-medium leading-normal">Analytics</p>
-          </Link>
-
-          {/* Support */}
-          <Link
-            href="#"
-            className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-slate-50 text-slate-500 hover:text-slate-900 transition-colors group"
-          >
-            <span className="material-symbols-outlined group-hover:text-primary transition-colors">
-              support_agent
-            </span>
-            <p className="text-sm font-medium leading-normal">Support</p>
-          </Link>
         </nav>
 
         <div className="p-4 mt-auto">
           <div
             onClick={handleLogout}
-            className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-red-50 text-slate-500 hover:text-red-600 cursor-pointer transition-colors"
+            className="flex items-center gap-3 px-3 py-3 rounded-lg hover:bg-destructive/10 text-sidebar-foreground hover:text-destructive cursor-pointer transition-colors"
           >
             <span className="material-symbols-outlined">logout</span>
             <p className="text-sm font-medium leading-normal">Sign Out</p>
@@ -235,19 +214,19 @@ export default function DashboardLayout({
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex flex-col flex-1 h-full min-w-0 bg-white overflow-hidden relative">
+      <div className="flex flex-col flex-1 h-full min-w-0 bg-background overflow-hidden relative transition-colors duration-300">
         {/* Header */}
-        <header className="flex items-center justify-between whitespace-nowrap bg-white border-b border-slate-100 px-6 py-4 flex-shrink-0 z-10 shadow-sm">
+        <header className="flex items-center justify-between whitespace-nowrap bg-background border-b border-border px-6 py-4 flex-shrink-0 z-10 shadow-sm transition-colors duration-300">
           <div className="flex items-center gap-4">
             {/* Mobile Menu Button */}
-            <button className="md:hidden p-2 text-slate-500">
+            <button className="md:hidden p-2 text-muted-foreground">
               <span className="material-symbols-outlined">menu</span>
             </button>
             <div className="flex flex-col">
-              <h2 className="text-slate-900 text-lg font-bold leading-tight">
+              <h2 className="text-foreground text-lg font-bold leading-tight">
                 Dashboard Overview
               </h2>
-              <p className="text-xs text-slate-500 font-medium">
+              <p className="text-xs text-muted-foreground font-medium">
                 Welcome back, Admin
               </p>
             </div>
@@ -256,8 +235,8 @@ export default function DashboardLayout({
           <div className="flex items-center gap-6">
             {/* Search */}
             <label className="hidden md:flex flex-col min-w-64 h-10">
-              <div className="flex w-full flex-1 items-stretch rounded-lg h-full bg-slate-50 focus-within:ring-2 focus-within:ring-primary/20 transition-all">
-                <div className="text-slate-500 flex items-center justify-center pl-4 pr-2">
+              <div className="flex w-full flex-1 items-stretch rounded-lg h-full bg-muted focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+                <div className="text-muted-foreground flex items-center justify-center pl-4 pr-2">
                   <span
                     className="material-symbols-outlined"
                     style={{ fontSize: "20px" }}
@@ -266,7 +245,7 @@ export default function DashboardLayout({
                   </span>
                 </div>
                 <input
-                  className="w-full bg-transparent border-none text-slate-900 placeholder:text-slate-500 focus:outline-none focus:ring-0 text-sm font-normal"
+                  className="w-full bg-transparent border-none text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-0 text-sm font-normal"
                   placeholder="Search bookings, users..."
                 />
               </div>
@@ -274,12 +253,13 @@ export default function DashboardLayout({
 
             {/* Actions */}
             <div className="flex items-center gap-3">
-              <button className="flex items-center justify-center size-10 rounded-full hover:bg-slate-50 text-slate-900 transition-colors relative">
+              <ThemeToggle />
+              <button className="flex items-center justify-center size-10 rounded-full hover:bg-muted text-foreground transition-colors relative">
                 <span className="material-symbols-outlined">notifications</span>
-                <span className="absolute top-2 right-2 size-2 bg-red-500 rounded-full border-2 border-white"></span>
+                <span className="absolute top-2 right-2 size-2 bg-destructive rounded-full border-2 border-background"></span>
               </button>
               <div
-                className="bg-center bg-no-repeat bg-cover rounded-full size-10 border-2 border-white shadow-sm cursor-pointer"
+                className="bg-center bg-no-repeat bg-cover rounded-full size-10 border-2 border-background shadow-sm cursor-pointer"
                 style={{
                   backgroundImage:
                     'url("https://lh3.googleusercontent.com/aida-public/AB6AXuDtdUFJhCY23zRHICCmdcqLphWmvNrGwS4fcKPbXSW5jX8KWpfe5nuooOqBEsvDtEahEUHfI_is0F8NU-gYv2iA-gmKGGPg7K0T0lawDA5xEtl3B8jhCzh681V3xVwHpkvOOXSXzj7GFDu5AP3ixiwPYzT4VUTd7fWIFEKSztODrf3nFh5bITRQG4zAn7kdaJ82gHHxViATaKOD7AIn6Ghks-sXo0-1fv1T9jE8Vfpq_nCg_Zc5lfs6jBTvMCIHcjvadlicEr9mXT4")',
@@ -290,7 +270,7 @@ export default function DashboardLayout({
         </header>
 
         {/* Scrollable Content */}
-        <main className="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth bg-white">
+        <main className="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth bg-background transition-colors duration-300">
           {children}
         </main>
       </div>
