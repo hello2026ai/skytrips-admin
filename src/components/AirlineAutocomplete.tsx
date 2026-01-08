@@ -3,14 +3,30 @@
 import { useState, useEffect, useRef } from "react";
 import airlineData from "../../libs/shared-utils/constants/airline.json";
 
-const AirlineAutocomplete = ({ label, name, value, onChange, disabled, icon }) => {
+interface Airline {
+  name: string;
+  iata?: string;
+  icao?: string;
+  country?: string;
+}
+
+interface AirlineAutocompleteProps {
+  label: string;
+  name: string;
+  value: string;
+  onChange: (e: any) => void;
+  disabled?: boolean;
+  icon: string;
+}
+
+const AirlineAutocomplete = ({ label, name, value, onChange, disabled, icon }: AirlineAutocompleteProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [filteredOptions, setFilteredOptions] = useState([]);
-  const wrapperRef = useRef(null);
+  const [filteredOptions, setFilteredOptions] = useState<Airline[]>([]);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
@@ -20,7 +36,7 @@ const AirlineAutocomplete = ({ label, name, value, onChange, disabled, icon }) =
 
   useEffect(() => {
     if (isOpen) {
-      const airlines = airlineData.airlinecodes;
+      const airlines = (airlineData as any).airlinecodes as Airline[];
       if (!value) {
         setFilteredOptions(airlines.slice(0, 50));
       } else {

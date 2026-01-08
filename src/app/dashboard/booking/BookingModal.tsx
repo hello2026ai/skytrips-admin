@@ -4,6 +4,78 @@ import { useState, useEffect } from "react";
 import AirportAutocomplete from "@/components/AirportAutocomplete";
 import AirlineAutocomplete from "@/components/AirlineAutocomplete";
 import countryData from "../../../../libs/shared-utils/constants/country.json";
+import { Booking } from "@/types";
+
+interface BookingModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (booking: Partial<Booking>) => Promise<void>;
+  onEdit?: () => void;
+  booking: Booking | null;
+  isLoading: boolean;
+  isReadOnly?: boolean;
+}
+
+interface Addons {
+  meals: boolean;
+  wheelchair: boolean;
+  pickup: boolean;
+  dropoff: boolean;
+  luggage: boolean;
+}
+
+interface Prices {
+  meals: string;
+  wheelchair: string;
+  pickup: string;
+  dropoff: string;
+  luggage: string;
+  [key: string]: string;
+}
+
+interface FormData {
+  email: string;
+  phone: string;
+  travellerFirstName: string;
+  travellerLastName: string;
+  passportNumber: string;
+  passportExpiry: string;
+  nationality: string;
+  dob: string;
+  tripType: string;
+  travelDate: string;
+  origin: string;
+  destination: string;
+  transit: string;
+  airlines: string;
+  flightNumber: string;
+  flightClass: string;
+  frequentFlyer: string;
+  pnr: string;
+  ticketNumber: string;
+  issueMonth: string;
+  IssueDay: string;
+  issueYear: string;
+  agency: string;
+  handledBy: string;
+  status: string;
+  currency: string;
+  paymentStatus: string;
+  paymentMethod: string;
+  transactionId: string;
+  paymentDate: string;
+  buyingPrice: string;
+  costPrice: string;
+  sellingPrice: string;
+  payment: string;
+  stopoverLocation?: string;
+  stopoverArrival?: string;
+  stopoverDeparture?: string;
+  addons: Addons;
+  prices: Prices;
+  customerType: string;
+  contactType: string;
+}
 
 export default function BookingModal({
   isOpen,
@@ -13,10 +85,10 @@ export default function BookingModal({
   booking,
   isLoading,
   isReadOnly = false,
-}) {
+}: BookingModalProps) {
   const [isMealModalOpen, setIsMealModalOpen] = useState(false);
   const [showStopover, setShowStopover] = useState(false);
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<FormData>({
     email: "sarita.p@example.com",
     phone: "+61 412 345 678",
     travellerFirstName: "",
@@ -81,9 +153,15 @@ export default function BookingModal({
         issueYear: booking.issueYear || "",
         buyingPrice: booking.buyingPrice || "0.00",
         payment: booking.payment || "Pending",
-        customerType: booking.customerType || "existing",
-        contactType: booking.contactType || "existing",
+        customerType: (booking as any).customerType || "existing",
+        contactType: (booking as any).contactType || "existing",
+        addons: (booking as any).addons || prev.addons,
+        prices: (booking as any).prices || prev.prices,
+        stopoverLocation: booking.stopoverLocation || "",
       }));
+      if (booking.stopoverLocation) {
+        setShowStopover(true);
+      }
     } else {
       // Reset for new booking
       setFormData({
@@ -138,17 +216,18 @@ export default function BookingModal({
         customerType: "existing",
         contactType: "existing",
       });
+      setShowStopover(false);
     }
   }, [booking, isOpen]);
 
   if (!isOpen) return null;
 
-  const handleChange = (e) => {
+  const handleChange = (e: any) => {
     if (isReadOnly) return;
     const { name, value, type, checked } = e.target;
     
     if (type === "checkbox" && name.startsWith("addon-")) {
-      const addonName = name.replace("addon-", "");
+      const addonName = name.replace("addon-", "") as keyof Addons;
       setFormData((prev) => ({
         ...prev,
         addons: { ...prev.addons, [addonName]: checked },
@@ -174,11 +253,11 @@ export default function BookingModal({
     return (sellingPrice + addonsTotal).toFixed(2);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (isReadOnly) return;
     // Map back to the Booking interface structure before saving
-    const bookingToSave = {
+    const bookingToSave: Partial<Booking> = {
       travellerFirstName: formData.travellerFirstName,
       travellerLastName: formData.travellerLastName,
       PNR: formData.pnr,
@@ -188,13 +267,36 @@ export default function BookingModal({
       transit: formData.transit,
       destination: formData.destination,
       tripType: formData.tripType,
-      issueMonth: formData.issueMonth || new Date().getMonth() + 1 + "",
+      issueMonth: formData.issueMonth || (new Date().getMonth() + 1) + "",
       IssueDay: formData.IssueDay || new Date().getDate() + "",
       issueYear: formData.issueYear || new Date().getFullYear() + "",
       buyingPrice: formData.buyingPrice,
+      sellingPrice: formData.sellingPrice,
       payment: formData.paymentStatus, // Or use formData.payment
-      customerType: formData.customerType,
-      contactType: formData.contactType,
+      status: formData.status,
+      email: formData.email,
+      phone: formData.phone,
+      passportNumber: formData.passportNumber,
+      passportExpiry: formData.passportExpiry,
+      nationality: formData.nationality,
+      dob: formData.dob,
+      flightNumber: formData.flightNumber,
+      flightClass: formData.flightClass,
+      frequentFlyer: formData.frequentFlyer,
+      agency: formData.agency,
+      handledBy: formData.handledBy,
+      paymentStatus: formData.paymentStatus,
+      paymentMethod: formData.paymentMethod,
+      transactionId: formData.transactionId,
+      dateOfPayment: formData.paymentDate,
+      stopoverLocation: formData.stopoverLocation,
+      // Add custom fields that might not be in Booking interface yet but are in state
+      ...({ 
+        customerType: formData.customerType,
+        contactType: formData.contactType,
+        addons: formData.addons,
+        prices: formData.prices
+      } as any)
     };
     onSave(bookingToSave);
   };
@@ -554,7 +656,7 @@ export default function BookingModal({
                                     name="stopoverLocation" 
                                     placeholder="City, Airport Code" 
                                     type="text"
-                                    value={formData.stopoverLocation}
+                                    value={formData.stopoverLocation || ""}
                                     onChange={handleChange}
                                     disabled={isReadOnly}
                                   />
@@ -566,7 +668,7 @@ export default function BookingModal({
                                   className="block w-full h-12 rounded-lg border-slate-200 shadow-sm focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium px-4" 
                                   name="stopoverArrival" 
                                   type="date"
-                                  value={formData.stopoverArrival}
+                                  value={formData.stopoverArrival || ""}
                                   onChange={handleChange}
                                   disabled={isReadOnly}
                                 />
@@ -577,7 +679,7 @@ export default function BookingModal({
                                   className="block w-full h-12 rounded-lg border-slate-200 shadow-sm focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium px-4" 
                                   name="stopoverDeparture" 
                                   type="date"
-                                  value={formData.stopoverDeparture}
+                                  value={formData.stopoverDeparture || ""}
                                   onChange={handleChange}
                                   disabled={isReadOnly}
                                 />

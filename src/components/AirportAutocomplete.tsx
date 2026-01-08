@@ -3,14 +3,34 @@
 import { useState, useEffect, useRef } from "react";
 import { airports } from "../../libs/shared-utils/constants/airport";
 
-const AirportAutocomplete = ({ label, name, value, onChange, disabled, icon }) => {
+interface Airport {
+  name: string;
+  city: string;
+  country: string;
+  IATA: string;
+  ICAO: string;
+  lat: string;
+  lon: string;
+  timezone: string;
+}
+
+interface AirportAutocompleteProps {
+  label: string;
+  name: string;
+  value: string;
+  onChange: (e: any) => void;
+  disabled?: boolean;
+  icon: string;
+}
+
+const AirportAutocomplete = ({ label, name, value, onChange, disabled, icon }: AirportAutocompleteProps) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [filteredOptions, setFilteredOptions] = useState([]);
-  const wrapperRef = useRef(null);
+  const [filteredOptions, setFilteredOptions] = useState<Airport[]>([]);
+  const wrapperRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target as Node)) {
         setIsOpen(false);
       }
     };
@@ -21,10 +41,10 @@ const AirportAutocomplete = ({ label, name, value, onChange, disabled, icon }) =
   useEffect(() => {
     if (isOpen) {
       if (!value) {
-        setFilteredOptions(airports.slice(0, 50));
+        setFilteredOptions((airports as Airport[]).slice(0, 50));
       } else {
         const lower = value.toLowerCase();
-        const filtered = airports.filter(
+        const filtered = (airports as Airport[]).filter(
           (a) =>
             (a.name && a.name.toLowerCase().includes(lower)) ||
             (a.IATA && a.IATA.toLowerCase().includes(lower)) ||
