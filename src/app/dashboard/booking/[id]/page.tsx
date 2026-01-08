@@ -137,7 +137,10 @@ export default function BookingDetailsPage() {
               <span className="material-symbols-outlined text-[20px] mr-2 text-slate-500">edit</span>
               Edit Details
             </button>
-            <button className="inline-flex items-center px-4 py-2.5 bg-white border border-slate-200 text-slate-700 text-sm font-bold rounded-lg shadow-sm hover:bg-slate-50 transition-all active:scale-95">
+            <button 
+              onClick={() => router.push(`/dashboard/booking/${bookingId}/invoice`)}
+              className="inline-flex items-center px-4 py-2.5 bg-white border border-slate-200 text-slate-700 text-sm font-bold rounded-lg shadow-sm hover:bg-slate-50 transition-all active:scale-95"
+            >
               <span className="material-symbols-outlined text-[20px] mr-2 text-slate-500">receipt_long</span>
               View Invoice
             </button>
