@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
-import { Customer } from "@/types";
+import { Customer, Booking } from "@/types";
 
 export default function CustomerDetailsPage() {
   const params = useParams();
@@ -15,9 +15,24 @@ export default function CustomerDetailsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // UI State
+  const [activeTab, setActiveTab] = useState("booking-history");
+  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<Record<string, string | number> | null>(null);
+
+  // Booking History State
+  const [bookings, setBookings] = useState<Booking[]>([]);
+  const [bookingsLoading, setBookingsLoading] = useState(false);
+
   useEffect(() => {
     fetchCustomerDetails();
   }, [customerId]);
+
+  useEffect(() => {
+    if ((activeTab === "booking-history" || activeTab === "linked-travellers") && customerId) {
+        fetchBookingHistory();
+    }
+  }, [activeTab, customerId]);
 
   const fetchCustomerDetails = async () => {
     try {
@@ -38,9 +53,25 @@ export default function CustomerDetailsPage() {
     }
   };
 
-  const [activeTab, setActiveTab] = useState("booking-history");
-  const [showInvoiceModal, setShowInvoiceModal] = useState(false);
-  const [selectedInvoice, setSelectedInvoice] = useState<Record<string, string | number> | null>(null);
+  const fetchBookingHistory = async () => {
+    setBookingsLoading(true);
+    try {
+        console.log("Fetching booking history for customer:", customerId);
+        const { data, error } = await supabase
+            .from("bookings")
+            .select("*")
+            .eq("customerid", customerId)
+            .order("created_at", { ascending: false });
+
+        if (error) throw error;
+        console.log("Booking history fetched:", data);
+        setBookings(data || []);
+    } catch (err) {
+        console.error("Error fetching booking history:", err);
+    } finally {
+        setBookingsLoading(false);
+    }
+  };
 
   const handleInvoiceAction = (invoice: Record<string, string | number>) => {
     setSelectedInvoice(invoice);
@@ -71,39 +102,70 @@ export default function CustomerDetailsPage() {
                 </div>
             </div>
 
-            {/* Mock Booking Item */}
-            <div className="bg-white border border-slate-200 rounded-xl p-4 hover:shadow-md transition-shadow">
-                <div className="flex justify-between items-start mb-4">
-                    <div>
-                        <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-slate-900">NYC → LON</span>
-                            <span className="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full font-bold">Confirmed</span>
-                        </div>
-                        <p className="text-xs text-slate-500">Ref: #BK-7829-XJ • Oct 24, 2023</p>
+            {bookingsLoading ? (
+                 <div className="flex flex-col items-center justify-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-3"></div>
+                    <p className="text-slate-500 text-sm">Loading booking history...</p>
+                 </div>
+            ) : bookings.length === 0 ? (
+                 <div className="bg-white border border-slate-200 rounded-xl p-8 text-center">
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 mb-3">
+                        <span className="material-symbols-outlined text-slate-400">history_off</span>
                     </div>
-                    <span className="text-lg font-bold text-slate-900">$1,240.00</span>
-                </div>
-                <div className="flex justify-end gap-2 border-t border-slate-100 pt-3">
-                    <button className="text-xs font-bold text-slate-600 hover:text-primary px-3 py-1.5 rounded hover:bg-slate-50">View Details</button>
-                    <button className="text-xs font-bold text-primary border border-primary/20 px-3 py-1.5 rounded hover:bg-primary/5">Modify</button>
-                </div>
-            </div>
-             {/* Mock Booking Item 2 */}
-             <div className="bg-white border border-slate-200 rounded-xl p-4 hover:shadow-md transition-shadow opacity-75">
-                <div className="flex justify-between items-start mb-4">
-                    <div>
-                        <div className="flex items-center gap-2 mb-1">
-                            <span className="font-bold text-slate-900">PAR → DXB</span>
-                            <span className="bg-slate-100 text-slate-600 text-xs px-2 py-0.5 rounded-full font-bold">Cancelled</span>
+                    <h3 className="text-slate-900 font-bold">No bookings found</h3>
+                    <p className="text-slate-500 text-sm mt-1">This customer hasn't made any bookings yet.</p>
+                 </div>
+            ) : (
+                bookings.map((booking, index) => {
+                    const b = booking as any;
+                    const status = booking.status || b.status || b.bookingstatus || "Pending";
+                    const origin = booking.origin || b.origin || "N/A";
+                    const destination = booking.destination || b.destination || "N/A";
+                    const pnr = booking.PNR || booking.ticketNumber || b.pnr || b.PNR || "N/A";
+                    const travelDate = booking.travelDate || b.traveldate || b.created_at;
+                    const price = booking.sellingPrice || b.sellingprice || booking.buyingPrice || b.buyingPrice || "$0.00";
+                    
+                    return (
+                        <div key={booking.id || index} className={`bg-white border border-slate-200 rounded-xl p-4 hover:shadow-md transition-shadow ${status === 'Cancelled' ? 'opacity-75' : ''}`}>
+                            <div className="flex justify-between items-start mb-4">
+                                <div>
+                                    <div className="flex items-center gap-2 mb-1">
+                                        <span className="font-bold text-slate-900">
+                                            {origin} → {destination}
+                                        </span>
+                                        <span className={`text-xs px-2 py-0.5 rounded-full font-bold ${
+                                            status === 'Confirmed' ? 'bg-green-100 text-green-700' :
+                                            status === 'Cancelled' ? 'bg-slate-100 text-slate-600' :
+                                            'bg-amber-100 text-amber-700'
+                                        }`}>
+                                            {status}
+                                        </span>
+                                    </div>
+                                    <p className="text-xs text-slate-500">
+                                        Ref: #{pnr} • {travelDate ? new Date(travelDate).toLocaleDateString() : "Date TBA"}
+                                    </p>
+                                </div>
+                                <span className={`text-lg font-bold ${
+                                    status === 'Cancelled' ? 'text-slate-500 line-through' : 'text-slate-900'
+                                }`}>
+                                    {price}
+                                </span>
+                            </div>
+                            <div className="flex justify-end gap-2 border-t border-slate-100 pt-3">
+                                <button className="text-xs font-bold text-slate-600 hover:text-primary px-3 py-1.5 rounded hover:bg-slate-50">View Details</button>
+                                {(status !== 'Cancelled' && booking.id) && (
+                                    <button 
+                                        onClick={() => router.push(`/dashboard/booking/edit/${booking.id}`)}
+                                        className="text-xs font-bold text-primary border border-primary/20 px-3 py-1.5 rounded hover:bg-primary/5"
+                                    >
+                                        Modify
+                                    </button>
+                                )}
+                            </div>
                         </div>
-                        <p className="text-xs text-slate-500">Ref: #BK-9921-AZ • Sep 12, 2023</p>
-                    </div>
-                    <span className="text-lg font-bold text-slate-500 line-through">$850.00</span>
-                </div>
-                <div className="flex justify-end gap-2 border-t border-slate-100 pt-3">
-                    <button className="text-xs font-bold text-slate-600 hover:text-primary px-3 py-1.5 rounded hover:bg-slate-50">View Details</button>
-                </div>
-            </div>
+                    );
+                })
+            )}
           </div>
         );
       case "payment-due":
@@ -155,19 +217,73 @@ export default function CustomerDetailsPage() {
           </div>
         );
       case "linked-travellers":
+        // Filter and deduplicate travellers
+        const uniqueTravellers = bookings.reduce((acc: any[], booking) => {
+            const b = booking as any;
+            const fName = b.travellerFirstName || b.travellerfirstname || "";
+            const lName = b.travellerLastName || b.travellerlastname || "";
+            const fullName = `${fName} ${lName}`.trim();
+            
+            // Skip if empty name
+            if (!fullName) return acc;
+            
+            // Skip if matches current customer
+            if (customer) {
+                const customerName = `${customer.firstName} ${customer.lastName}`.trim();
+                if (fullName.toLowerCase() === customerName.toLowerCase()) return acc;
+            }
+
+            // Check if already in accumulator
+            if (!acc.some(t => `${t.firstName} ${t.lastName}`.trim() === fullName)) {
+                acc.push({
+                    firstName: fName,
+                    lastName: lName,
+                    linkedVia: b.PNR || b.ticketNumber || b.pnr || "N/A",
+                    bookingId: b.id
+                });
+            }
+            return acc;
+        }, []);
+
         return (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-             <div className="bg-white border border-slate-200 rounded-xl p-4 flex items-center gap-4">
-                <div className="size-12 rounded-full bg-slate-100 flex items-center justify-center text-xl font-bold text-slate-500">JD</div>
-                <div className="flex-1">
-                    <h4 className="font-bold text-slate-900">Jane Doe</h4>
-                    <p className="text-xs text-slate-500">Spouse • Linked via #BK-7829-XJ</p>
-                </div>
-                <button className="text-slate-400 hover:text-primary"><span className="material-symbols-outlined">edit</span></button>
-             </div>
-             <button className="border-2 border-dashed border-slate-200 rounded-xl p-4 flex items-center justify-center gap-2 text-slate-500 hover:border-primary hover:text-primary transition-colors">
+             {bookingsLoading ? (
+                 <div className="col-span-full flex flex-col items-center justify-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-3"></div>
+                    <p className="text-slate-500 text-sm">Loading linked travellers...</p>
+                 </div>
+             ) : uniqueTravellers.length === 0 ? (
+                 <div className="col-span-full bg-white border border-slate-200 rounded-xl p-8 text-center">
+                    <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 mb-3">
+                        <span className="material-symbols-outlined text-slate-400">group_off</span>
+                    </div>
+                    <h3 className="text-slate-900 font-bold">No linked travellers found</h3>
+                    <p className="text-slate-500 text-sm mt-1">No other travellers found in this customer's bookings.</p>
+                 </div>
+             ) : (
+                 uniqueTravellers.map((traveller, index) => (
+                    <div key={index} className="bg-white border border-slate-200 rounded-xl p-4 flex items-center gap-4 hover:shadow-md transition-shadow">
+                        <div className="size-12 rounded-full bg-slate-100 flex items-center justify-center text-xl font-bold text-slate-500 uppercase">
+                            {traveller.firstName.charAt(0)}{traveller.lastName.charAt(0)}
+                        </div>
+                        <div className="flex-1">
+                            <h4 className="font-bold text-slate-900 capitalize">{traveller.firstName} {traveller.lastName}</h4>
+                            <p className="text-xs text-slate-500">Linked via Booking #{traveller.linkedVia}</p>
+                        </div>
+                        <button 
+                            onClick={() => router.push(`/dashboard/booking/edit/${traveller.bookingId}`)}
+                            className="text-slate-400 hover:text-primary p-2 hover:bg-slate-50 rounded-full transition-colors"
+                            title="View Booking"
+                        >
+                            <span className="material-symbols-outlined">visibility</span>
+                        </button>
+                    </div>
+                 ))
+             )}
+             
+             <button className="col-span-full border-2 border-dashed border-slate-200 rounded-xl p-4 flex items-center justify-center gap-2 text-slate-500 hover:border-primary hover:text-primary transition-colors hover:bg-slate-50">
                 <span className="material-symbols-outlined">add_circle</span>
-                <span className="font-bold text-sm">Link New Traveller</span>
+                <span className="font-bold text-sm">Link New Traveller (Create Booking)</span>
              </button>
           </div>
         );

@@ -40,6 +40,14 @@ export default function TestAPIPage() {
         .select("*", { count: "exact" })
         .limit(5);
 
+      // Check for email column specifically if data exists
+      let emailCheck = null;
+      if (bookingsData && bookingsData.length > 0) {
+         emailCheck = Object.keys(bookingsData[0]).includes('email') 
+           ? "Column 'email' FOUND" 
+           : "Column 'email' NOT FOUND. Available columns: " + Object.keys(bookingsData[0]).join(", ");
+      }
+
       tests.bookingsQuery = {
         success: !bookingsError,
         error: bookingsError?.message || null,
@@ -47,6 +55,7 @@ export default function TestAPIPage() {
         errorHint: bookingsError?.hint || null,
         errorCode: bookingsError?.code || null,
         count: count,
+        emailColumnCheck: emailCheck,
         sampleData: bookingsData ? bookingsData.slice(0, 2) : null,
       };
 

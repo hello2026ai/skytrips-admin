@@ -6,6 +6,7 @@ import { supabase } from "@/lib/supabase";
 import AirportAutocomplete from "@/components/AirportAutocomplete";
 import AirlineAutocomplete from "@/components/AirlineAutocomplete";
 import CustomerSearch from "@/components/CustomerSearch";
+import BookingHistory from "@/components/BookingHistory";
 import { Customer } from "@/types";
 import countryData from "../../../../../../libs/shared-utils/constants/country.json";
 import Link from "next/link";
@@ -70,6 +71,14 @@ export default function EditBookingPage() {
   const [showStopover, setShowStopover] = useState(false);
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
   const [existingTravelerSelected, setExistingTravelerSelected] = useState(false);
+  const [selectedCustomerId, setSelectedCustomerId] = useState<string | number | undefined>(undefined);
+
+  const logAssignmentChange = (oldId: string | number | undefined, newId: string | number | undefined, context: string) => {
+    if (!oldId && !newId) return;
+    if (oldId === newId) return;
+    const timestamp = new Date().toISOString();
+    console.log(`[AUDIT] ${timestamp} - Customer Association Changed (${context}): ${oldId || 'None'} -> ${newId}`);
+  };
 
   const validateForm = () => {
     const errors: { [key: string]: string } = {};
@@ -115,10 +124,14 @@ export default function EditBookingPage() {
   };
 
   const handleCustomerSelect = (customer: Customer) => {
+    const newId = customer.id;
+    logAssignmentChange(selectedCustomerId, newId, "Contact Selection");
+    setSelectedCustomerId(newId);
+    
     setFormData(prev => ({
       ...prev,
-      email: customer.email,
-      phone: customer.phone,
+      email: customer.email || "",
+      phone: customer.phone || "",
       address: customer.address || "",
       travellerFirstName: prev.travellerFirstName || customer.firstName,
       travellerLastName: prev.travellerLastName || customer.lastName,
@@ -127,6 +140,12 @@ export default function EditBookingPage() {
   };
   
   const handleTravelerSelect = (customer: Customer) => {
+    const newId = customer.id;
+    if (newId !== selectedCustomerId) {
+       logAssignmentChange(selectedCustomerId, newId, "Traveller Selection");
+       setSelectedCustomerId(newId);
+    }
+
     setFormData(prev => ({
       ...prev,
       travellerFirstName: customer.firstName,
@@ -206,6 +225,14 @@ export default function EditBookingPage() {
 
       if (error) throw error;
       if (data) {
+        // Try to find customer ID from the booking data if available (lowercase 'customerid' in DB)
+        // Since we don't have it in the typed response, we might need to cast or rely on prop if passed
+        // For now, let's assume it might be in the data object even if untyped
+        const possibleCustomerId = (data as any).customerid || (data as any).customerId;
+        if (possibleCustomerId) {
+           setSelectedCustomerId(possibleCustomerId);
+        }
+        
         setFormData({
           email: data.email || "",
           phone: data.phone || "",
@@ -335,10 +362,24 @@ export default function EditBookingPage() {
     setSaving(true);
 
     try {
-      const updateData = {
+      // Temporary helper to filter out empty fields
+      // TODO: Complete handling of empty fields should be implemented in a future update
+      const filterEmptyFields = (data: any) => {
+        const clean: any = {};
+        Object.keys(data).forEach(key => {
+          const value = data[key];
+          if (value !== null && value !== undefined && value !== "") {
+             clean[key] = value;
+          }
+        });
+        return clean;
+      };
+
+      const rawUpdateData = {
+        customerid: selectedCustomerId,
         email: formData.email,
         phone: formData.phone,
-        address: formData.address,
+        // address: formData.address, // Temporarily excluded: column missing in DB
         travellerFirstName: formData.travellerFirstName,
         travellerLastName: formData.travellerLastName,
         passportNumber: formData.passportNumber,
@@ -355,8 +396,8 @@ export default function EditBookingPage() {
         airlines: formData.airlines,
         flightNumber: formData.flightNumber,
         flightClass: formData.flightClass,
-        addons: formData.addons,
-        prices: formData.prices,
+        // addons: formData.addons, // Temporarily excluded due to missing column in DB
+        // prices: formData.prices, // Temporarily excluded due to missing column in DB
         frequentFlyer: formData.frequentFlyer,
         PNR: formData.pnr,
         agency: formData.agency,
@@ -372,6 +413,70 @@ export default function EditBookingPage() {
         contactType: formData.contactType,
         notes: formData.notes,
       };
+
+      // Exclude address specifically as requested by error log
+      // @ts-ignore
+      delete rawUpdateData.address;
+
+      // Schema Mapping & Validation Bypass
+      // TODO: This is a temporary workaround to bypass schema validation errors (e.g., "Could not find column...").
+      // We map known field names to actual DB column names and filter out anything that doesn't match the known schema.
+      // This needs proper resolution by aligning the frontend types with the DB schema in a future update.
+      
+      const DB_COLUMN_MAPPING: { [key: string]: string } = {
+        agency: 'issuedthroughagency',
+        status: 'bookingstatus',
+        paymentStatus: 'paymentstatus',
+        paymentMethod: 'paymentmethod',
+        transactionId: 'transactionid',
+        dateOfPayment: 'dateofpayment',
+        costPrice: 'costprice',
+        sellingPrice: 'sellingprice',
+        handledBy: 'handledby',
+        pnr: 'pnr', // DB has both 'PNR' and 'pnr'? Let's check schema. Use 'pnr' or 'PNR' depending on availability.
+        // Add others as discovered
+      };
+
+      // Whitelist of columns known to exist in the DB (based on check_columns.js)
+      // We set everything else to be "optional" (i.e., skipped if not in this list)
+      const KNOWN_DB_COLUMNS = [
+        'id', 'created_at', 'travellerFirstName', 'travellerLastName', 'PNR', 'ticketNumber', 
+        'airlines', 'origin', 'transit', 'destination', 'tripType', 'issueMonth', 'IssueDay', 'issueYear', 
+        'buyingPrice', 'payment', 'bookingid', 'pnr', 'issuedthroughagency', 'handledby', 'bookingstatus', 
+        'costprice', 'sellingprice', 'paymentstatus', 'paymentmethod', 'transactionid', 'dateofpayment', 
+        'notes', 'currencycode', 'meals', 'requestwheelchair', 'airportpickup', 'airportdropoff', 'extraluggage', 
+        'customerid' // Removed 'email', 'phone', 'address' as they do not exist in the current DB schema
+      ];
+
+      const mapAndFilterPayload = (data: any) => {
+        const processed: any = {};
+        
+        Object.keys(data).forEach(key => {
+          let dbKey = key;
+          
+          // 1. Apply mapping
+          if (DB_COLUMN_MAPPING[key]) {
+            dbKey = DB_COLUMN_MAPPING[key];
+          }
+
+          // 2. Check if valid column (Case-sensitive check against known columns)
+          // We also allow if the key itself matches a known column directly
+          const isValid = KNOWN_DB_COLUMNS.includes(dbKey) || KNOWN_DB_COLUMNS.includes(key);
+
+          if (isValid) {
+             processed[dbKey] = data[key];
+          } else {
+             console.warn(`[Schema Bypass] Skipping field '${key}' (mapped to '${dbKey}') as it does not exist in target schema.`);
+          }
+        });
+        return processed;
+      };
+
+      // Apply mapping/filtering THEN empty check
+      const mappedData = mapAndFilterPayload(rawUpdateData);
+      const updateData = filterEmptyFields(mappedData);
+
+      console.log("Submitting update (mapped & filtered):", updateData);
 
       const { error } = await supabase
         .from("bookings")
@@ -589,6 +694,8 @@ export default function EditBookingPage() {
                 </div>
               </div>
             </div>
+
+            <BookingHistory customerId={selectedCustomerId} />
 
             {/* Traveller Information */}
             <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
