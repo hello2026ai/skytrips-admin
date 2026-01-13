@@ -34,8 +34,20 @@ export interface Booking {
   dateOfPayment?: string;
   payment: string;
   travelDate?: string;
+  travellers?: Traveller[];
   created_at?: string;
   updated_at?: string;
+}
+
+export interface Traveller {
+  id?: string; // unique temp id for frontend list management
+  firstName: string;
+  lastName: string;
+  passportNumber?: string;
+  passportExpiry?: string;
+  dob?: string;
+  nationality?: string;
+  customerId?: string | number;
 }
 
 export interface Address {

@@ -195,42 +195,136 @@ export default function BookingDetailsPage() {
                 Traveller Information
               </h3>
               <span className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full bg-blue-50 text-primary border border-blue-100">
-                Existing Traveller
+                {booking.travellers && booking.travellers.length > 0
+                  ? `${booking.travellers.length} Traveller${
+                      booking.travellers.length > 1 ? "s" : ""
+                    }`
+                  : "Existing Traveller"}
               </span>
             </div>
             <div className="p-6">
-              <div className="mb-6">
-                <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Traveller Full Name</label>
-                <p className="text-sm font-bold text-slate-900 uppercase">
-                  {booking.travellerFirstName} {booking.travellerLastName}
-                </p>
-              </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-y-6 gap-x-4">
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Passport Number</label>
-                  <p className="text-sm font-bold text-slate-900">{booking.passportNumber || "A1234567X"}</p>
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Passport Expiry Date</label>
-                  <p className="text-sm font-bold text-slate-900">{booking.passportExpiry || "2029-05-20"}</p>
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Date of Birth</label>
-                  <p className="text-sm font-bold text-slate-900">{booking.dob || "1985-03-15"}</p>
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Passport Issue Date</label>
-                  <p className="text-sm font-bold text-slate-900">2019-05-20</p>
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Place of Issue</label>
-                  <p className="text-sm font-bold text-slate-900">Kathmandu</p>
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Nationality</label>
-                  <p className="text-sm font-bold text-slate-900">{booking.nationality || "Nepalese"}</p>
-                </div>
-              </div>
+              {booking.travellers && booking.travellers.length > 0 ? (
+                booking.travellers.map((traveller, index) => (
+                  <div
+                    key={index}
+                    className={
+                      index > 0 ? "mt-8 pt-8 border-t border-slate-100" : ""
+                    }
+                  >
+                    {booking.travellers && booking.travellers.length > 1 && (
+                      <h4 className="font-bold text-slate-800 text-sm mb-4 flex items-center gap-2">
+                        <span className="flex items-center justify-center w-5 h-5 rounded-full bg-blue-100 text-blue-600 text-xs">
+                          {index + 1}
+                        </span>
+                        Traveller Details
+                      </h4>
+                    )}
+                    <div className="mb-6">
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                        Traveller Full Name
+                      </label>
+                      <p className="text-sm font-bold text-slate-900 uppercase">
+                        {traveller.firstName} {traveller.lastName}
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-y-6 gap-x-4">
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                          Passport Number
+                        </label>
+                        <p className="text-sm font-bold text-slate-900">
+                          {traveller.passportNumber || "N/A"}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                          Passport Expiry Date
+                        </label>
+                        <p className="text-sm font-bold text-slate-900">
+                          {traveller.passportExpiry || "N/A"}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                          Date of Birth
+                        </label>
+                        <p className="text-sm font-bold text-slate-900">
+                          {traveller.dob || "N/A"}
+                        </p>
+                      </div>
+                      <div>
+                        <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                          Nationality
+                        </label>
+                        <p className="text-sm font-bold text-slate-900">
+                          {traveller.nationality || "Nepalese"}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <>
+                  <div className="mb-6">
+                    <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                      Traveller Full Name
+                    </label>
+                    <p className="text-sm font-bold text-slate-900 uppercase">
+                      {booking.travellerFirstName} {booking.travellerLastName}
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-y-6 gap-x-4">
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                        Passport Number
+                      </label>
+                      <p className="text-sm font-bold text-slate-900">
+                        {booking.passportNumber || "A1234567X"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                        Passport Expiry Date
+                      </label>
+                      <p className="text-sm font-bold text-slate-900">
+                        {booking.passportExpiry || "2029-05-20"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                        Date of Birth
+                      </label>
+                      <p className="text-sm font-bold text-slate-900">
+                        {booking.dob || "1985-03-15"}
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                        Passport Issue Date
+                      </label>
+                      <p className="text-sm font-bold text-slate-900">
+                        2019-05-20
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                        Place of Issue
+                      </label>
+                      <p className="text-sm font-bold text-slate-900">
+                        Kathmandu
+                      </p>
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">
+                        Nationality
+                      </label>
+                      <p className="text-sm font-bold text-slate-900">
+                        {booking.nationality || "Nepalese"}
+                      </p>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           </div>
 

@@ -5,7 +5,7 @@ import AirportAutocomplete from "@/components/AirportAutocomplete";
 import AirlineAutocomplete from "@/components/AirlineAutocomplete";
 import CustomerSearch from "@/components/CustomerSearch";
 import countryData from "../../../../libs/shared-utils/constants/country.json";
-import { Booking, Customer } from "@/types";
+import { Booking, Customer, Traveller } from "@/types";
 
 interface BookingModalProps {
   isOpen: boolean;
@@ -37,12 +37,13 @@ interface Prices {
 interface FormData {
   email: string;
   phone: string;
-  travellerFirstName: string;
-  travellerLastName: string;
-  passportNumber: string;
-  passportExpiry: string;
-  nationality: string;
-  dob: string;
+  travellers: Traveller[]; // Array of travellers
+  travellerFirstName: string; // Deprecated
+  travellerLastName: string; // Deprecated
+  passportNumber: string; // Deprecated
+  passportExpiry: string; // Deprecated
+  nationality: string; // Deprecated
+  dob: string; // Deprecated
   tripType: string;
   travelDate: string;
   origin: string;
@@ -90,9 +91,12 @@ export default function BookingModal({
 }: BookingModalProps) {
   const [isMealModalOpen, setIsMealModalOpen] = useState(false);
   const [showStopover, setShowStopover] = useState(false);
+  const [searchingTravellerIndex, setSearchingTravellerIndex] = useState<number | null>(null);
+  
   const [formData, setFormData] = useState<FormData>({
     email: "sarita.p@example.com",
     phone: "+61 412 345 678",
+    travellers: [],
     travellerFirstName: "",
     travellerLastName: "",
     passportNumber: "",
@@ -145,9 +149,32 @@ export default function BookingModal({
 
   useEffect(() => {
     if (booking) {
+      let loadedTravellers: Traveller[] = [];
+      if (
+        (booking as any).travellers &&
+        Array.isArray((booking as any).travellers) &&
+        (booking as any).travellers.length > 0
+      ) {
+        loadedTravellers = (booking as any).travellers;
+      } else {
+        // Fallback to flat fields
+        loadedTravellers = [
+          {
+            id: Date.now().toString(),
+            firstName: booking.travellerFirstName || "",
+            lastName: booking.travellerLastName || "",
+            passportNumber: booking.passportNumber || "",
+            passportExpiry: booking.passportExpiry || "",
+            dob: booking.dob || "",
+            nationality: booking.nationality || "Nepalese",
+          },
+        ];
+      }
+
       setFormData((prev) => ({
         ...prev,
         ...booking,
+        travellers: loadedTravellers,
         pnr: booking.PNR || prev.pnr,
         // Ensure all fields are mapped
         issueMonth: booking.issueMonth || "",
@@ -173,6 +200,17 @@ export default function BookingModal({
       setFormData({
         email: "",
         phone: "",
+        travellers: [
+          {
+            id: Date.now().toString(),
+            firstName: "",
+            lastName: "",
+            passportNumber: "",
+            passportExpiry: "",
+            nationality: "Australian",
+            dob: "",
+          }
+        ],
         travellerFirstName: "",
         travellerLastName: "",
         passportNumber: "",
@@ -263,6 +301,53 @@ export default function BookingModal({
   };
 
   const handleCustomerSelect = (customer: Customer) => {
+    if (searchingTravellerIndex !== null) {
+      // Update specific traveller
+      setFormData((prev) => {
+        const newTravellers = [...prev.travellers];
+        if (!newTravellers[searchingTravellerIndex]) {
+          newTravellers[searchingTravellerIndex] = {
+             id: Date.now().toString(),
+             firstName: "",
+             lastName: "",
+          };
+        }
+        newTravellers[searchingTravellerIndex] = {
+          ...newTravellers[searchingTravellerIndex],
+          firstName: customer.firstName,
+          lastName: customer.lastName,
+          passportNumber: customer.passport?.number || "",
+          passportExpiry: customer.passport?.expiryDate || "",
+          dob: customer.dateOfBirth || "",
+          nationality: customer.country || "Nepalese",
+          customerId: customer.id,
+        };
+        
+        const updates: any = { travellers: newTravellers };
+        
+        // Sync primary if index 0
+        if (searchingTravellerIndex === 0) {
+          updates.travellerFirstName = customer.firstName;
+          updates.travellerLastName = customer.lastName;
+          updates.passportNumber = customer.passport?.number || "";
+          updates.passportExpiry = customer.passport?.expiryDate || "";
+          updates.dob = customer.dateOfBirth || "";
+          updates.nationality = customer.country || "Nepalese";
+          
+          // Also sync contact info if needed
+          updates.email = prev.email || customer.email;
+          updates.phone = prev.phone || customer.phone;
+          updates.customerid = customer.id?.toString();
+          updates.customerType = "existing";
+        }
+        
+        return { ...prev, ...updates };
+      });
+      setSearchingTravellerIndex(null);
+      return;
+    }
+
+    // Fallback for "Existing Customer" contact search (not traveller search)
     setFormData((prev) => ({
       ...prev,
       // Common fields
@@ -277,7 +362,75 @@ export default function BookingModal({
       passportNumber: customer.passport?.number || prev.passportNumber,
       passportExpiry: customer.passport?.expiryDate || prev.passportExpiry,
       dob: customer.dateOfBirth || prev.dob,
+      
+      // Update first traveller in array too
+      travellers: prev.travellers.map((t, i) => 
+        i === 0 ? {
+          ...t,
+          firstName: customer.firstName,
+          lastName: customer.lastName,
+          passportNumber: customer.passport?.number || t.passportNumber,
+          passportExpiry: customer.passport?.expiryDate || t.passportExpiry,
+          dob: customer.dateOfBirth || t.dob,
+          nationality: customer.country || t.nationality,
+          customerId: customer.id
+        } : t
+      )
     }));
+  };
+
+  const handleTravellerChange = (
+    index: number,
+    field: keyof Traveller,
+    value: any
+  ) => {
+    setFormData((prev) => {
+      const newTravellers = [...prev.travellers];
+      newTravellers[index] = { ...newTravellers[index], [field]: value };
+
+      // Sync primary traveller (index 0) with flat fields
+      if (index === 0) {
+        const mapping: any = {
+          firstName: "travellerFirstName",
+          lastName: "travellerLastName",
+          passportNumber: "passportNumber",
+          passportExpiry: "passportExpiry",
+          dob: "dob",
+          nationality: "nationality",
+        };
+        if (mapping[field]) {
+          (prev as any)[mapping[field]] = value;
+        }
+      }
+      return { ...prev, travellers: newTravellers };
+    });
+  };
+
+  const addTraveller = () => {
+    setFormData((prev) => ({
+      ...prev,
+      travellers: [
+        ...prev.travellers,
+        {
+          id: Date.now().toString(),
+          firstName: "",
+          lastName: "",
+          passportNumber: "",
+          passportExpiry: "",
+          dob: "",
+          nationality: "Nepalese",
+        },
+      ],
+    }));
+  };
+
+  const removeTraveller = (index: number) => {
+    setFormData((prev) => {
+      if (prev.travellers.length <= 1) return prev;
+      const newTravellers = [...prev.travellers];
+      newTravellers.splice(index, 1);
+      return { ...prev, travellers: newTravellers };
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -329,6 +482,7 @@ export default function BookingModal({
       dateOfPayment: formData.paymentDate,
       stopoverLocation: formData.stopoverLocation,
       customerid: formData.customerid,
+      travellers: formData.travellers, // Include travellers array
       // Add custom fields that might not be in Booking interface yet but are in state
       ...({
         customerType: formData.customerType,
@@ -526,185 +680,183 @@ export default function BookingModal({
                       </h3>
                     </div>
                     <div className="p-8">
-                      <div className="mb-8 p-6 bg-slate-50/50 rounded-xl border border-slate-100">
-                        <div className="flex flex-col sm:flex-row sm:items-center gap-6">
-                          <div className="flex items-center gap-4 w-full sm:w-auto">
-                            <div className="flex items-center h-6">
-                              <input
-                                checked={formData.customerType === "existing"}
-                                onChange={() =>
-                                  setFormData((prev) => ({
-                                    ...prev,
-                                    customerType: "existing",
-                                  }))
+                      {formData.travellers.map((traveller, index) => (
+                        <div key={traveller.id || index} className="mb-8 p-6 bg-slate-50/50 rounded-xl border border-slate-100 relative group">
+                          <div className="flex justify-between items-center mb-6">
+                            <h4 className="font-bold text-slate-800 text-lg flex items-center gap-2">
+                              <span className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-100 text-blue-600 text-sm">
+                                {index + 1}
+                              </span>
+                              Traveller Details
+                            </h4>
+                            <div className="flex gap-2">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setSearchingTravellerIndex(
+                                    searchingTravellerIndex === index ? null : index
+                                  )
                                 }
-                                className="focus:ring-primary h-5 w-5 text-primary border-slate-300 cursor-pointer"
-                                id="existing-customer"
-                                name="customer-type"
-                                type="radio"
-                                value="existing"
-                              />
-                            </div>
-                            <label
-                              className="font-bold text-slate-700 text-sm whitespace-nowrap cursor-pointer hover:text-slate-900"
-                              htmlFor="existing-customer"
-                            >
-                              Existing Traveller
-                            </label>
-                          </div>
-                          <div className="flex items-center gap-4 w-full sm:w-auto">
-                            <div className="flex items-center h-6">
-                              <input
-                                checked={formData.customerType === "new"}
-                                onChange={() =>
-                                  setFormData((prev) => ({
-                                    ...prev,
-                                    customerType: "new",
-                                  }))
-                                }
-                                className="focus:ring-primary h-5 w-5 text-primary border-slate-300 cursor-pointer"
-                                id="new-customer"
-                                name="customer-type"
-                                type="radio"
-                                value="new"
-                              />
-                            </div>
-                            <label
-                              className="font-bold text-slate-700 text-sm whitespace-nowrap cursor-pointer hover:text-slate-900"
-                              htmlFor="new-customer"
-                            >
-                              New Traveller
-                            </label>
-                          </div>
-                        </div>
-
-                        {formData.customerType === "existing" && (
-                          <div className="w-full mt-6 relative">
-                            <CustomerSearch
-                              onSelect={handleCustomerSelect}
-                              className="w-full"
-                            />
-                          </div>
-                        )}
-                      </div>
-
-                      {formData.customerType === "new" && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                          <div className="col-span-1">
-                            <label className="block text-sm font-bold text-slate-700 mb-2 tracking-tight">
-                              First Name
-                            </label>
-                            <input
-                              className="block w-full h-12 rounded-lg border-slate-200 shadow-sm focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium pl-4"
-                              name="travellerFirstName"
-                              type="text"
-                              value={formData.travellerFirstName}
-                              onChange={handleChange}
-                              disabled={isReadOnly}
-                              placeholder="e.g. John"
-                            />
-                          </div>
-                          <div className="col-span-1">
-                            <label className="block text-sm font-bold text-slate-700 mb-2 tracking-tight">
-                              Last Name
-                            </label>
-                            <input
-                              className="block w-full h-12 rounded-lg border-slate-200 shadow-sm focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium pl-4"
-                              name="travellerLastName"
-                              type="text"
-                              value={formData.travellerLastName}
-                              onChange={handleChange}
-                              disabled={isReadOnly}
-                              placeholder="e.g. Doe"
-                            />
-                          </div>
-                          <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8 p-6 bg-slate-50/50 rounded-xl border border-slate-100">
-                            <div>
-                              <label
-                                className="block text-sm font-bold text-slate-700 mb-2 tracking-tight"
-                                htmlFor="passport-number"
+                                className={`text-xs px-3 py-1.5 rounded-lg font-bold transition-all flex items-center gap-1 ${
+                                  searchingTravellerIndex === index
+                                    ? "bg-slate-200 text-slate-700"
+                                    : "bg-blue-50 text-blue-600 hover:bg-blue-100"
+                                }`}
                               >
-                                Passport Number
-                              </label>
-                              <div className="relative rounded-lg shadow-sm">
-                                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
-                                  <span
-                                    className="material-symbols-outlined text-slate-400"
-                                    style={{ fontSize: "20px" }}
-                                  >
-                                    badge
+                                <span className="material-symbols-outlined text-[16px]">
+                                  {searchingTravellerIndex === index
+                                    ? "close"
+                                    : "person_search"}
+                                </span>
+                                {searchingTravellerIndex === index
+                                  ? "Cancel"
+                                  : "Link Profile"}
+                              </button>
+
+                              {formData.travellers.length > 1 && (
+                                <button
+                                  type="button"
+                                  onClick={() => removeTraveller(index)}
+                                  className="text-xs bg-red-50 text-red-600 px-3 py-1.5 rounded-lg font-bold hover:bg-red-100 flex items-center gap-1"
+                                >
+                                  <span className="material-symbols-outlined text-[16px]">
+                                    delete
                                   </span>
-                                </div>
+                                  Remove
+                                </button>
+                              )}
+                            </div>
+                          </div>
+
+                          {searchingTravellerIndex === index ? (
+                            <div className="mb-4 animate-in fade-in slide-in-from-top-2 duration-200 bg-white p-4 rounded-xl border border-blue-100 shadow-sm">
+                              <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest mb-2">
+                                Search Existing Customer
+                              </label>
+                              <CustomerSearch onSelect={handleCustomerSelect} />
+                              <p className="text-xs text-slate-500 mt-2">
+                                Select a customer to auto-fill this traveller's
+                                details.
+                              </p>
+                            </div>
+                          ) : (
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                              <div className="col-span-1">
+                                <label className="block text-sm font-bold text-slate-700 mb-2 tracking-tight">
+                                  First Name
+                                </label>
                                 <input
-                                  className="block w-full h-12 rounded-lg border-slate-200 pl-11 focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium"
-                                  name="passportNumber"
-                                  placeholder="e.g. A1234567X"
-                                  type="text"
-                                  value={formData.passportNumber}
-                                  onChange={handleChange}
+                                  className="block w-full h-12 rounded-lg border-slate-200 shadow-sm focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium pl-4 uppercase"
+                                  value={traveller.firstName}
+                                  onChange={(e) =>
+                                    handleTravellerChange(index, "firstName", e.target.value)
+                                  }
                                   disabled={isReadOnly}
+                                  placeholder="Given Name"
                                 />
                               </div>
+                              <div className="col-span-1">
+                                <label className="block text-sm font-bold text-slate-700 mb-2 tracking-tight">
+                                  Last Name
+                                </label>
+                                <input
+                                  className="block w-full h-12 rounded-lg border-slate-200 shadow-sm focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium pl-4 uppercase"
+                                  value={traveller.lastName}
+                                  onChange={(e) =>
+                                    handleTravellerChange(index, "lastName", e.target.value)
+                                  }
+                                  disabled={isReadOnly}
+                                  placeholder="Surname"
+                                />
+                              </div>
+                              <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8 p-6 bg-slate-50/50 rounded-xl border border-slate-100">
+                                <div>
+                                  <label className="block text-sm font-bold text-slate-700 mb-2 tracking-tight">
+                                    Passport Number
+                                  </label>
+                                  <div className="relative rounded-lg shadow-sm">
+                                    <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                                      <span
+                                        className="material-symbols-outlined text-slate-400"
+                                        style={{ fontSize: "20px" }}
+                                      >
+                                        badge
+                                      </span>
+                                    </div>
+                                    <input
+                                      className="block w-full h-12 rounded-lg border-slate-200 pl-11 focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium uppercase"
+                                      value={traveller.passportNumber || ""}
+                                      onChange={(e) =>
+                                        handleTravellerChange(index, "passportNumber", e.target.value)
+                                      }
+                                      disabled={isReadOnly}
+                                      placeholder="e.g. A1234567X"
+                                    />
+                                  </div>
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-bold text-slate-700 mb-2 tracking-tight">
+                                    Passport Expiry Date
+                                  </label>
+                                  <input
+                                    className="block w-full h-12 rounded-lg border-slate-200 shadow-sm focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium px-4"
+                                    type="date"
+                                    value={traveller.passportExpiry || ""}
+                                    onChange={(e) =>
+                                      handleTravellerChange(index, "passportExpiry", e.target.value)
+                                    }
+                                    disabled={isReadOnly}
+                                  />
+                                </div>
+                              </div>
+                              <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8 p-6 bg-slate-50/50 rounded-xl border border-slate-100">
+                                <div>
+                                  <label className="block text-sm font-bold text-slate-700 mb-2 tracking-tight">
+                                    Nationality
+                                  </label>
+                                  <select
+                                    className="block w-full h-12 rounded-lg border-slate-200 shadow-sm focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium px-4"
+                                    value={traveller.nationality || "Nepalese"}
+                                    onChange={(e) =>
+                                      handleTravellerChange(index, "nationality", e.target.value)
+                                    }
+                                    disabled={isReadOnly}
+                                  >
+                                    {countryData.countries.map((c) => (
+                                      <option key={c.value} value={c.label}>
+                                        {c.label}
+                                      </option>
+                                    ))}
+                                  </select>
+                                </div>
+                                <div>
+                                  <label className="block text-sm font-bold text-slate-700 mb-2 tracking-tight">
+                                    Date of Birth
+                                  </label>
+                                  <input
+                                    className="block w-full h-12 rounded-lg border-slate-200 shadow-sm focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium px-4"
+                                    type="date"
+                                    value={traveller.dob || ""}
+                                    onChange={(e) =>
+                                      handleTravellerChange(index, "dob", e.target.value)
+                                    }
+                                    disabled={isReadOnly}
+                                  />
+                                </div>
+                              </div>
                             </div>
-                            <div>
-                              <label
-                                className="block text-sm font-bold text-slate-700 mb-2 tracking-tight"
-                                htmlFor="passport-expiry"
-                              >
-                                Passport Expiry Date
-                              </label>
-                              <input
-                                className="block w-full h-12 rounded-lg border-slate-200 shadow-sm focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium px-4"
-                                name="passportExpiry"
-                                type="date"
-                                value={formData.passportExpiry}
-                                onChange={handleChange}
-                                disabled={isReadOnly}
-                              />
-                            </div>
-                          </div>
-                          <div className="col-span-1 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-8 p-6 bg-slate-50/50 rounded-xl border border-slate-100">
-                            <div>
-                              <label
-                                className="block text-sm font-bold text-slate-700 mb-2 tracking-tight"
-                                htmlFor="nationality"
-                              >
-                                Nationality
-                              </label>
-                              <select
-                                className="block w-full h-12 rounded-lg border-slate-200 shadow-sm focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium px-4"
-                                name="nationality"
-                                value={formData.nationality}
-                                onChange={handleChange}
-                                disabled={isReadOnly}
-                              >
-                                <option value="">Select Nationality</option>
-                                {countryData.countries.map((c) => (
-                                  <option key={c.value} value={c.label}>
-                                    {c.label}
-                                  </option>
-                                ))}
-                              </select>
-                            </div>
-                            <div>
-                              <label
-                                className="block text-sm font-bold text-slate-700 mb-2 tracking-tight"
-                                htmlFor="dob"
-                              >
-                                Date of Birth
-                              </label>
-                              <input
-                                className="block w-full h-12 rounded-lg border-slate-200 shadow-sm focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium px-4"
-                                name="dob"
-                                type="date"
-                                value={formData.dob}
-                                onChange={handleChange}
-                                disabled={isReadOnly}
-                              />
-                            </div>
-                          </div>
+                          )}
                         </div>
-                      )}
+                      ))}
+
+                      <button
+                        type="button"
+                        onClick={addTraveller}
+                        className="w-full py-4 border-2 border-dashed border-slate-300 rounded-xl text-slate-500 font-bold hover:border-primary hover:text-primary hover:bg-blue-50/50 transition-all flex items-center justify-center gap-2"
+                      >
+                        <span className="material-symbols-outlined">person_add</span>
+                        Add Another Traveller
+                      </button>
                     </div>
                   </div>
 
