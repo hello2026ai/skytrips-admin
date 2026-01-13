@@ -97,3 +97,10 @@ export interface Customer {
   preferredCurrency?: string;
   marketingConsent?: boolean;
 }
+
+export interface ManageBooking {
+  uid: string;
+  booking_id: string;
+  created_at: string;
+  updated_at?: string | null;
+}
