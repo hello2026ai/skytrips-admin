@@ -16,12 +16,15 @@ export default function ManageBookingPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isSearchModalOpen, setIsSearchModalOpen] = useState(false);
+  const [isContentVisible, setIsContentVisible] = useState(false);
 
   const [actionStates, setActionStates] = useState<Record<string, 'select_booking' | 'cancel_booking'>>({});
 
   useEffect(() => {
-    fetchBookings();
-  }, []);
+    if (isContentVisible) {
+      fetchBookings();
+    }
+  }, [isContentVisible]);
 
   const fetchBookings = async () => {
     setLoading(true);
@@ -91,7 +94,10 @@ export default function ManageBookingPage() {
           </p>
         </div>
         <button 
-          onClick={() => setIsSearchModalOpen(true)}
+          onClick={() => {
+            setIsSearchModalOpen(true);
+            setIsContentVisible(true);
+          }}
           className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-sm hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all"
         >
           <span className="material-symbols-outlined text-[20px]">add</span>
@@ -184,81 +190,88 @@ export default function ManageBookingPage() {
         </div>
       )}
 
-      {/* Results Section */}
-      {error && (
-        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 flex items-center gap-2">
-          <span className="material-symbols-outlined text-[20px]">error</span>
-          {error}
-        </div>
-      )}
-
-      {!loading && searchResults.length === 0 && !error && (
-        <div className="flex flex-col items-center justify-center py-12 bg-white border border-dashed border-slate-200 rounded-xl">
-          <div className="size-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
-            <span className="material-symbols-outlined text-slate-400 text-3xl">search_off</span>
+      {/* Results Section Container */}
+      <div
+        role="region"
+        aria-live="polite"
+        aria-hidden={!isContentVisible}
+        className={`transition-all duration-300 ${isContentVisible ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none h-0 overflow-hidden"}`}
+      >
+        {error && (
+          <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 flex items-center gap-2">
+            <span className="material-symbols-outlined text-[20px]">error</span>
+            {error}
           </div>
-          <h3 className="text-lg font-bold text-slate-900 mb-1">No bookings found</h3>
-          <p className="text-slate-500 text-sm">
-            Try adjusting your search criteria or double-check the booking details.
-          </p>
-        </div>
-      )}
+        )}
 
-      {searchResults.length > 0 && (
-        <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-slate-500 font-bold uppercase text-xs border-b border-slate-200">
-                <tr>
-                  <th className="px-6 py-4">Booking Ref</th>
-                  <th className="px-6 py-4">PNR</th>
-                  <th className="px-6 py-4">Traveller</th>
-                  <th className="px-6 py-4">Flight Route</th>
-                  <th className="px-6 py-4 text-right">Status & Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {searchResults.map((booking) => (
-                  <tr key={booking.id} className="group hover:bg-slate-50/50 transition-colors">
-                    <td className="px-6 py-4 font-mono font-medium text-primary">#{booking.id}</td>
-                    <td className="px-6 py-4 font-mono font-bold text-slate-700 bg-slate-100/50 rounded w-fit px-2 py-1">{booking.PNR}</td>
-                    <td className="px-6 py-4">
-                      <div className="font-bold text-slate-900">{booking.travellerFirstName} {booking.travellerLastName}</div>
-                      <div className="text-xs text-slate-500">{booking.email}</div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2 font-medium text-slate-900">
-                        {booking.origin}
-                        <span className="material-symbols-outlined text-slate-400 text-[16px]">arrow_right_alt</span>
-                        {booking.destination}
-                      </div>
-                      <div className="text-xs text-slate-500">{booking.airlines}</div>
-                    </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex flex-col items-end gap-2">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
-                          booking.status === 'Confirmed' ? 'bg-green-50 text-green-700 border-green-200' :
-                          booking.status === 'Pending' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' :
-                          'bg-slate-100 text-slate-600 border-slate-200'
-                        }`}>
-                          {booking.status || 'Unknown'}
-                        </span>
-                        <button 
-                          onClick={() => router.push(`/dashboard/booking/${booking.id}/manage`)}
-                          className="text-sm font-bold text-primary hover:text-primary/80 hover:underline transition-all flex items-center gap-1"
-                        >
-                          View Details
-                          <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
-                        </button>
-                      </div>
-                    </td>
+        {!loading && searchResults.length === 0 && !error && (
+          <div className="flex flex-col items-center justify-center py-12 bg-white border border-dashed border-slate-200 rounded-xl">
+            <div className="size-16 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+              <span className="material-symbols-outlined text-slate-400 text-3xl">search_off</span>
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 mb-1">No bookings found</h3>
+            <p className="text-slate-500 text-sm">
+              Try adjusting your search criteria or double-check the booking details.
+            </p>
+          </div>
+        )}
+
+        {searchResults.length > 0 && (
+          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-sm">
+                <thead className="bg-slate-50 text-slate-500 font-bold uppercase text-xs border-b border-slate-200">
+                  <tr>
+                    <th className="px-6 py-4">Booking Ref</th>
+                    <th className="px-6 py-4">PNR</th>
+                    <th className="px-6 py-4">Traveller</th>
+                    <th className="px-6 py-4">Flight Route</th>
+                    <th className="px-6 py-4 text-right">Status & Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {searchResults.map((booking) => (
+                    <tr key={booking.id} className="group hover:bg-slate-50/50 transition-colors">
+                      <td className="px-6 py-4 font-mono font-medium text-primary">#{booking.id}</td>
+                      <td className="px-6 py-4 font-mono font-bold text-slate-700 bg-slate-100/50 rounded w-fit px-2 py-1">{booking.PNR}</td>
+                      <td className="px-6 py-4">
+                        <div className="font-bold text-slate-900">{booking.travellerFirstName} {booking.travellerLastName}</div>
+                        <div className="text-xs text-slate-500">{booking.email}</div>
+                      </td>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2 font-medium text-slate-900">
+                          {booking.origin}
+                          <span className="material-symbols-outlined text-slate-400 text-[16px]">arrow_right_alt</span>
+                          {booking.destination}
+                        </div>
+                        <div className="text-xs text-slate-500">{booking.airlines}</div>
+                      </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex flex-col items-end gap-2">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${
+                            booking.status === 'Confirmed' ? 'bg-green-50 text-green-700 border-green-200' :
+                            booking.status === 'Pending' ? 'bg-yellow-50 text-yellow-700 border-yellow-200' :
+                            'bg-slate-100 text-slate-600 border-slate-200'
+                          }`}>
+                            {booking.status || 'Unknown'}
+                          </span>
+                          <button 
+                            onClick={() => router.push(`/dashboard/booking/${booking.id}/manage`)}
+                            className="text-sm font-bold text-primary hover:text-primary/80 hover:underline transition-all flex items-center gap-1"
+                          >
+                            View Details
+                            <span className="material-symbols-outlined text-[16px]">arrow_forward</span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

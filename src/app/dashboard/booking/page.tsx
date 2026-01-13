@@ -1,10 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { Booking } from "@/types";
 import BookingModal from "./BookingModal";
+import BookingRowMenu from "@/components/BookingRowMenu";
+
 
 export default function BookingPage() {
   const router = useRouter();
@@ -540,26 +542,31 @@ export default function BookingPage() {
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() => handleView(booking)}
-                          className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-primary transition-colors"
-                          title="View Details"
-                        >
-                          <span className="material-symbols-outlined text-[20px]">
-                            visibility
-                          </span>
-                        </button>
-                        <button
-                          onClick={() => router.push(`/dashboard/booking/edit/${booking.id}`)}
-                          className="rounded p-1 text-slate-400 hover:bg-slate-100 hover:text-primary transition-colors"
-                          title="Edit Booking"
-                        >
-                          <span className="material-symbols-outlined text-[20px]">
-                            edit
-                          </span>
-                        </button>
+                    <td className="px-6 py-4 text-right align-top">
+                      <div className="inline-flex flex-col items-end gap-2">
+                        <div className="flex items-center justify-end gap-4">
+                          <button
+                            onClick={() => handleView(booking)}
+                            className="rounded p-2 text-slate-600 hover:bg-slate-100 hover:text-primary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                            aria-label="View booking"
+                            tabIndex={0}
+                          >
+                            <span className="material-symbols-outlined text-[18px] transition-transform duration-200 hover:scale-105">
+                              visibility
+                            </span>
+                          </button>
+                          <button
+                            onClick={() => router.push(`/dashboard/booking/edit/${booking.id}`)}
+                            className="rounded p-2 text-slate-600 hover:bg-slate-100 hover:text-primary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/30"
+                            aria-label="Edit booking"
+                            tabIndex={0}
+                          >
+                            <span className="material-symbols-outlined text-[18px] transition-transform duration-200 hover:scale-105">
+                              edit
+                            </span>
+                          </button>
+                        </div>
+                        <BookingRowMenu bookingId={booking.id} onRefund={() => router.push(`/dashboard/booking/${booking.id}/manage/status?action=refund`)} onReissue={() => router.push(`/dashboard/booking/${booking.id}/manage/status?action=reissue`)} />
                       </div>
                     </td>
                   </tr>
