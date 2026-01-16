@@ -3,6 +3,7 @@
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { supabase, getCurrentUser } from "@/lib/supabase";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
@@ -137,19 +138,21 @@ export default function DashboardLayout({
             className="flex items-center gap-3 cursor-pointer"
             onClick={() => router.push("/dashboard")}
           >
-            <div
-              className="bg-center bg-no-repeat bg-cover rounded-xl size-10 shadow-sm border border-primary/20 bg-primary/5"
-              style={{
-                backgroundImage:
-                  'url("https://lh3.googleusercontent.com/aida-public/AB6AXuBITXaAg6zaUCIOjUTE68Ge0G4SmMV4Pv3Lcqnku1BN_EltI3RchuZZ2qNbptNXQqdfZeXiyDf1piWwfpuBC1nvCEdNcp4CvSAUrRlEn1kFwiNird4P5EFYVdH-3Fom70VdDFXNpoxIMrLapPyNuPU3TR4PgFcQQ6AaQg9BOOy5Rtntf9UeV6IsH7QHo9zwL2Qe-kwKhfCcFDen2t2Fnw9utzNilh-XO-UZoKpYoQ8K-VJOKnyj20c1yEcAnYbxQXI_SbVjKO-Pzts")',
-              }}
-            ></div>
+            <div className="relative rounded-xl size-10 shadow-sm border border-primary/20 bg-primary/5 overflow-hidden">
+              <Image
+                src="https://tjrmemmsieltajotxddk.supabase.co/storage/v1/object/public/media/2026/01/1768379811331_o7lm8v.svg"
+                alt="SkyTrips Logo"
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              />
+            </div>
             <h1
               className={`text-primary text-xl font-black leading-normal tracking-tight ${
                 sidebarCollapsed ? "sr-only" : ""
               }`}
             >
-              SkyTrips
+              admin panel
             </h1>
             <button
               type="button"
@@ -261,6 +264,29 @@ export default function DashboardLayout({
             <p className={`text-sm font-medium leading-normal ${sidebarCollapsed ? "sr-only" : ""}`}>Bookings</p>
           </Link>
 
+          {/* Payments */}
+          <Link
+            href="/dashboard/payments"
+            className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-3"} px-3 py-3 rounded-lg transition-all ${
+              pathname === "/dashboard/payments"
+                ? "bg-primary text-primary-foreground shadow-md shadow-blue-200 dark:shadow-none"
+                : "text-sidebar-foreground hover:bg-muted hover:text-foreground group"
+            }`}
+            aria-label="Payments"
+            title="Payments"
+          >
+            <span
+              className={`material-symbols-outlined ${
+                pathname === "/dashboard/payments"
+                  ? "active-icon"
+                  : "group-hover:text-primary transition-colors"
+              }`}
+            >
+              payments
+            </span>
+            <p className={`text-sm font-medium leading-normal ${sidebarCollapsed ? "sr-only" : ""}`}>Payments</p>
+          </Link>
+
           {/* Manage Booking */}
           <Link
             href="/dashboard/manage-booking"
@@ -304,7 +330,7 @@ export default function DashboardLayout({
             >
               perm_media
             </span>
-            <p className={`text-sm font-medium leading-normal ${sidebarCollapsed ? "sr-only" : ""}`}>Media Management</p>
+            <p className={`text-sm font-medium leading-normal ${sidebarCollapsed ? "sr-only" : ""}`}>Media</p>
           </Link>
 
           {/* Agency */}

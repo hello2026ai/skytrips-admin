@@ -41,6 +41,8 @@ const parsePrice = (price: string | number | undefined): number => {
   return parseFloat(price.replace(/[^0-9.-]+/g, "")) || 0;
 };
 
+import TotalBookingsCard from "@/components/agency/TotalBookingsCard";
+
 export default function AgencyDetailPage({ params }: { params: Promise<{ uid: string }> }) {
   const { uid } = use(params);
   const [agency, setAgency] = useState<Agency | null>(null);
@@ -216,22 +218,7 @@ export default function AgencyDetailPage({ params }: { params: Promise<{ uid: st
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {/* Total Bookings Card */}
-          <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
-            <div className="flex items-start justify-between mb-4">
-              <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Bookings</h3>
-              <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
-                <span className="material-symbols-outlined text-[18px]">flight</span>
-              </div>
-            </div>
-            <div className="text-3xl font-bold text-slate-900 mb-2">{stats.totalBookings.toLocaleString()}</div>
-            <div className="flex items-center gap-1 text-xs font-bold">
-              <span className="text-emerald-600 flex items-center">
-                <span className="material-symbols-outlined text-[14px]">trending_up</span>
-                +12.5%
-              </span>
-              <span className="text-slate-400 ml-1">vs last month</span>
-            </div>
-          </div>
+          <TotalBookingsCard uid={uid} initialCount={stats.totalBookings} />
 
           {/* Total CP Card */}
           <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
@@ -298,11 +285,6 @@ export default function AgencyDetailPage({ params }: { params: Promise<{ uid: st
               <h2 className="text-lg font-bold text-slate-900">Recent Bookings</h2>
             </div>
             <div className="h-6 w-px bg-slate-200 hidden md:block"></div>
-            <button className="bg-[#00A76F] text-white px-4 py-2 rounded-lg text-sm font-bold flex items-center gap-2 hover:bg-[#009462] transition-colors">
-              <span className="material-symbols-outlined text-[18px]">edit_note</span>
-              Bulk Edit Payment
-              <span className="material-symbols-outlined text-[18px]">expand_more</span>
-            </button>
             <span className="text-sm text-slate-500 font-medium hidden md:block">2 bookings selected</span>
           </div>
 

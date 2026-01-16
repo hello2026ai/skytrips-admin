@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
 import { MediaFile } from "@/lib/media-service";
 import CompanyManager from "@/components/CompanyManager";
+import PaymentMethodsManager from "@/components/settings/PaymentMethodsManager";
 import { MediaSelectorModal } from "@/components/media/MediaSelectorModal";
 
 export default function SettingsPage() {
@@ -101,7 +102,7 @@ export default function SettingsPage() {
       {/* Tabs */}
       <div className="border-b border-border">
         <nav className="flex gap-8" aria-label="Tabs">
-          {["Company Settings", "General Settings", "Currency"].map((tab) => {
+          {["Company Settings", "General Settings", "Currency", "Payment Methods"].map((tab) => {
             const tabId = tab.toLowerCase().split(" ")[0];
             const isActive = activeTab === tabId;
             return (
@@ -128,6 +129,11 @@ export default function SettingsPage() {
                   {tabId === "currency" && (
                     <span className="material-symbols-outlined text-[18px]">
                       payments
+                    </span>
+                  )}
+                  {tabId === "payment" && (
+                    <span className="material-symbols-outlined text-[18px]">
+                      credit_card
                     </span>
                   )}
                   {tab}
@@ -254,8 +260,17 @@ export default function SettingsPage() {
         </div>
       )}
 
+      {/* Payment Methods Tab */}
+      {activeTab === "payment" && (
+        <div className="space-y-8 animate-in fade-in duration-300">
+           <div className="bg-card border border-border rounded-xl p-6 shadow-sm">
+             <PaymentMethodsManager />
+           </div>
+        </div>
+      )}
+
       {/* Placeholder for other tabs */}
-      {activeTab !== "company" && (
+      {activeTab !== "company" && activeTab !== "payment" && (
         <div className="flex flex-col items-center justify-center py-20 bg-card border border-border rounded-xl border-dashed">
           <span className="material-symbols-outlined text-4xl text-muted-foreground mb-4">
             construction
