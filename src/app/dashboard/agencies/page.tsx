@@ -8,6 +8,11 @@ type Agency = {
   contact_person: string;
   number: string;
   status: string;
+  stats?: {
+    bookings: number;
+    revenue: number;
+    change: number;
+  };
 };
 
 export default function AgenciesPage() {
@@ -23,13 +28,25 @@ export default function AgenciesPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
 
-  // Mock data generator for new columns (bookings, revenue, change)
-  const getMockStats = (uid: string) => {
-    const hash = uid.split("").reduce((a, b) => a + b.charCodeAt(0), 0);
-    const bookings = (hash % 3000) + 500;
-    const revenue = bookings * ((hash % 200) + 100);
-    const change = (hash % 40) - 10; // -10% to +30%
-    return { bookings, revenue, change };
+  // Global stats state
+  const [globalStats, setGlobalStats] = useState({
+    totalPartners: 0,
+    totalRevenue: 0,
+    totalBookings: 0,
+    totalDueAmount: 0,
+    activeBookings: 0
+  });
+
+  const fetchGlobalStats = async () => {
+    try {
+      const res = await fetch("/api/agencies/stats");
+      const j = await res.json();
+      if (res.ok) {
+        setGlobalStats(j);
+      }
+    } catch (e) {
+      console.error("Failed to fetch global stats:", e);
+    }
   };
 
   const fetchData = async () => {
@@ -58,6 +75,10 @@ export default function AgenciesPage() {
   };
 
   useEffect(() => {
+    fetchGlobalStats();
+  }, []); // Fetch global stats once on mount
+
+  useEffect(() => {
     const t = setTimeout(fetchData, 250);
     return () => clearTimeout(t);
   }, [page, pageSize, q, status, sortKey, sortDir]);
@@ -84,34 +105,60 @@ export default function AgenciesPage() {
         <p className="text-slate-500 text-lg">A directory of all partner travel agencies globally.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white rounded-xl shadow-sm p-6 flex items-center gap-4 border border-slate-100">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div className="bg-white rounded-xl shadow-sm p-6 flex items-center gap-4 border border-slate-100 relative group">
           <div className="size-12 rounded-full bg-indigo-50 flex items-center justify-center text-indigo-600">
             <span className="material-symbols-outlined text-2xl">group</span>
           </div>
           <div>
-            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">TOTALPARTNERS</div>
-            <div className="text-2xl font-bold text-slate-900">{totalCount.toLocaleString()}</div>
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+              TOTAL PARTNERS
+              <span className="material-symbols-outlined text-[14px] text-slate-300 cursor-help" title="Total number of active agency partners">help</span>
+            </div>
+            <div className="text-2xl font-bold text-slate-900">{globalStats.totalPartners.toLocaleString()}</div>
           </div>
         </div>
         
-        <div className="bg-white rounded-xl shadow-sm p-6 flex items-center gap-4 border border-slate-100">
+        <div className="bg-white rounded-xl shadow-sm p-6 flex items-center gap-4 border border-slate-100 relative group">
           <div className="size-12 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
             <span className="material-symbols-outlined text-2xl">payments</span>
           </div>
           <div>
-            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">TOTALREVENUE</div>
-            <div className="text-2xl font-bold text-slate-900">$1.42M</div>
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+              TOTAL REVENUE
+              <span className="material-symbols-outlined text-[14px] text-slate-300 cursor-help" title="Aggregate sum of all CP (Cost Price) costs">help</span>
+            </div>
+            <div className="text-2xl font-bold text-slate-900">
+              {globalStats.totalRevenue.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
           </div>
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-6 flex items-center gap-4 border border-slate-100">
+        <div className="bg-white rounded-xl shadow-sm p-6 flex items-center gap-4 border border-slate-100 relative group">
           <div className="size-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
             <span className="material-symbols-outlined text-2xl">confirmation_number</span>
           </div>
           <div>
-            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">ACTIVE BOOKINGS</div>
-            <div className="text-2xl font-bold text-slate-900">8,432</div>
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+              TOTAL BOOKINGS
+              <span className="material-symbols-outlined text-[14px] text-slate-300 cursor-help" title="Aggregate sum of all agency bookings">help</span>
+            </div>
+            <div className="text-2xl font-bold text-slate-900">{globalStats.totalBookings.toLocaleString()}</div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl shadow-sm p-6 flex items-center gap-4 border border-slate-100 relative group">
+          <div className="size-12 rounded-full bg-red-50 flex items-center justify-center text-red-600">
+            <span className="material-symbols-outlined text-2xl">account_balance_wallet</span>
+          </div>
+          <div>
+            <div className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center gap-1">
+              TOTAL DUE AMOUNT
+              <span className="material-symbols-outlined text-[14px] text-slate-300 cursor-help" title="Sum of all outstanding payments">help</span>
+            </div>
+            <div className={`text-2xl font-bold ${globalStats.totalDueAmount > 10000 ? 'text-red-600' : 'text-slate-900'}`}>
+              {globalStats.totalDueAmount.toLocaleString("en-US", { style: "currency", currency: "USD", minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+            </div>
           </div>
         </div>
       </div>
@@ -178,7 +225,7 @@ export default function AgenciesPage() {
               <tr>
                 <th className="px-6 py-4 cursor-pointer" onClick={() => onSort("agency_name")}>AGENCY NAME</th>
                 <th className="px-6 py-4">TOTAL BOOKINGS</th>
-                <th className="px-6 py-4">TOTAL PAID AMOUNT</th>
+                <th className="px-6 py-4">CP AMOUNT</th>
                 <th className="px-6 py-4 text-right">ACTIONS</th>
               </tr>
             </thead>
@@ -198,7 +245,7 @@ export default function AgenciesPage() {
                 </tr>
               ) : (
                 data.map((a, i) => {
-                  const stats = getMockStats(a.uid);
+                  const stats = a.stats || { bookings: 0, revenue: 0, change: 0 };
                   return (
                     <tr key={a.uid} className="hover:bg-slate-50/50 transition-colors">
                       <td className="px-6 py-4">
@@ -229,7 +276,10 @@ export default function AgenciesPage() {
                             onClick={async () => {
                               if (!confirm("Delete agency?")) return;
                               const res = await fetch(`/api/agencies/${a.uid}`, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ mode: "soft" }) });
-                              if (res.ok) fetchData();
+                              if (res.ok) {
+                                fetchData();
+                                fetchGlobalStats();
+                              }
                             }}
                             className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                           >

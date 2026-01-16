@@ -264,6 +264,29 @@ export default function DashboardLayout({
             <p className={`text-sm font-medium leading-normal ${sidebarCollapsed ? "sr-only" : ""}`}>Bookings</p>
           </Link>
 
+          {/* Payments */}
+          <Link
+            href="/dashboard/payments"
+            className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-3"} px-3 py-3 rounded-lg transition-all ${
+              pathname === "/dashboard/payments"
+                ? "bg-primary text-primary-foreground shadow-md shadow-blue-200 dark:shadow-none"
+                : "text-sidebar-foreground hover:bg-muted hover:text-foreground group"
+            }`}
+            aria-label="Payments"
+            title="Payments"
+          >
+            <span
+              className={`material-symbols-outlined ${
+                pathname === "/dashboard/payments"
+                  ? "active-icon"
+                  : "group-hover:text-primary transition-colors"
+              }`}
+            >
+              payments
+            </span>
+            <p className={`text-sm font-medium leading-normal ${sidebarCollapsed ? "sr-only" : ""}`}>Payments</p>
+          </Link>
+
           {/* Manage Booking */}
           <Link
             href="/dashboard/manage-booking"

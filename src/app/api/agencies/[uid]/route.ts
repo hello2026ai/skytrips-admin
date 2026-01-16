@@ -36,7 +36,8 @@ export async function GET(_: Request, { params }: { params: Promise<{ uid: strin
       .from("bookings")
       .select("*")
       .in("id", Array.from(bookingIds))
-      .order("created_at", { ascending: false }); // Show recent first
+      .order("created_at", { ascending: false })
+      .limit(500); // Limit to 500 recent bookings to prevent timeouts
     fullBookings = bookingsRes.data || [];
   }
 
@@ -71,14 +72,65 @@ export async function DELETE(req: Request, { params }: { params: Promise<{ uid: 
   const { uid } = await params;
   const supabase = getAdminClient();
   if (!supabase) return NextResponse.json({ error: "Server config missing" }, { status: 500 });
+  
+  // Log the deletion attempt
+  console.log(`[DELETE] Attempting to delete agency: ${uid}`);
+
   const body = await req.json().catch(() => null);
   const mode = body?.mode || "soft";
-  if (mode === "soft") {
-    const { error } = await supabase.from("agencies").update({ status: "inactive", deleted_at: new Date().toISOString() }).eq("uid", uid);
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  try {
+    // Check if agency exists first
+    const { data: existing, error: checkError } = await supabase
+      .from("agencies")
+      .select("uid, agency_name")
+      .eq("uid", uid)
+      .single();
+
+    if (checkError || !existing) {
+        console.error(`[DELETE] Agency not found: ${uid}`, checkError);
+        return NextResponse.json({ error: "Agency not found" }, { status: 404 });
+    }
+
+    if (mode === "soft") {
+        console.log(`[DELETE] Soft deleting agency: ${existing.agency_name} (${uid})`);
+        const { error } = await supabase
+            .from("agencies")
+            .update({ status: "inactive", deleted_at: new Date().toISOString() })
+            .eq("uid", uid);
+        
+        if (error) {
+            console.error(`[DELETE] Soft delete failed for ${uid}:`, error);
+            return NextResponse.json({ error: error.message }, { status: 500 });
+        }
+        return NextResponse.json({ ok: true });
+    }
+
+    // Hard delete
+    console.log(`[DELETE] Hard deleting agency: ${existing.agency_name} (${uid})`);
+    
+    // First remove related booking refs to satisfy foreign key constraints if cascading isn't set
+    const { error: refError } = await supabase
+        .from("agency_booking_refs")
+        .delete()
+        .eq("agency_uid", uid);
+
+    if (refError) {
+        console.error(`[DELETE] Failed to delete booking refs for ${uid}:`, refError);
+        // We might continue if it's just that there were no refs, but error usually implies DB issue.
+        // If the error is foreign key violation elsewhere, we need to know.
+    }
+
+    const { error } = await supabase.from("agencies").delete().eq("uid", uid);
+    if (error) {
+        console.error(`[DELETE] Hard delete failed for ${uid}:`, error);
+        return NextResponse.json({ error: error.message }, { status: 500 });
+    }
+
     return NextResponse.json({ ok: true });
+
+  } catch (err) {
+      console.error(`[DELETE] Unexpected error deleting ${uid}:`, err);
+      return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
-  const { error } = await supabase.from("agencies").delete().eq("uid", uid);
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json({ ok: true });
 }
