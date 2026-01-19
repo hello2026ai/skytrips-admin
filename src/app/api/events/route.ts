@@ -15,7 +15,6 @@ export async function POST(req: Request) {
     const email = String(data?.email || "");
     const fullName = String(data?.fullName || "");
     const role = String(data?.role || "");
-    const readablePassword = String(data?.readable_password || "");
     if (!email) {
       return NextResponse.json({ ok: true, warning: "no_email" });
     }
@@ -24,7 +23,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ ok: true, warning: "mail_not_configured" });
     }
     try {
-      const mailRes = await sendWelcomeUser({ email, fullName, role, readablePassword });
+      const mailRes = await sendWelcomeUser({ email, fullName, role });
       return NextResponse.json({ ok: true, mailgun: mailRes });
     } catch(e) {
       return NextResponse.json({ ok: true, warning: "mail_failed", error: e instanceof Error ? e.message : String(e) });
