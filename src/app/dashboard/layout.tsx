@@ -43,10 +43,15 @@ export default function DashboardLayout({
 
   const checkAuth = async () => {
     try {
-      const res = await fetch("/api/auth/me", { cache: "no-store", credentials: "include" });
-      if (res.ok) {
-        const data = await res.json();
-        setUserEmail(data.user?.email || "");
+      const token = typeof window !== "undefined" ? localStorage.getItem("sky_admin_session") : null;
+      const userStr = typeof window !== "undefined" ? localStorage.getItem("sky_admin_user") : null;
+      if (token && userStr) {
+        try {
+          const user = JSON.parse(userStr);
+          setUserEmail(user?.email || "");
+        } catch {
+          setUserEmail("");
+        }
         setIsAuthenticated(true);
       } else {
         setIsAuthenticated(false);
@@ -61,7 +66,10 @@ export default function DashboardLayout({
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
+      try {
+        localStorage.removeItem("sky_admin_session");
+        localStorage.removeItem("sky_admin_user");
+      } catch {}
       window.location.href = "/";
     } catch (error) {
       console.error("Logout error:", error);
