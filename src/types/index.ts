@@ -1,7 +1,7 @@
 export interface Booking {
   id?: number;
-  travellerFirstName: string;
-  travellerLastName: string;
+  travellerFirstName?: string;
+  travellerLastName?: string;
   PNR: string;
   ticketNumber: string;
   airlines: string;
@@ -31,7 +31,7 @@ export interface Booking {
   paymentStatus?: string;
   paymentMethod?: string;
   transactionId?: string;
-  dateOfPayment?: string;
+  dateofpayment?: string;
   payment: string;
   travelDate?: string; // Keeping for backward compatibility if needed, or can be deprecated
   departureDate?: string;
@@ -43,8 +43,45 @@ export interface Booking {
   issuedthroughagency?: string;
   travellers?: Traveller[];
   customer?: Customer;
+  customerid?: string;
+  customerType?: string;
+  contactType?: string;
+  addons?: Addons;
   created_at?: string;
   updated_at?: string;
+  itineraries?: FlightItinerary[];
+}
+
+export interface Addons {
+  meals: boolean;
+  wheelchair: boolean;
+  pickup: boolean;
+  dropoff: boolean;
+  luggage: boolean;
+}
+
+export interface FlightEndpoint {
+  iataCode: string;
+  terminal?: string;
+  at: string;
+}
+
+export interface FlightSegment {
+  id?: string;
+  departure: FlightEndpoint;
+  arrival: FlightEndpoint;
+  carrierCode: string;
+  number: string;
+  aircraft?: { code: string };
+  operating?: { carrierCode: string };
+  duration?: string;
+  numberOfStops?: number;
+  blacklistedInEU?: boolean;
+}
+
+export interface FlightItinerary {
+  duration?: string;
+  segments: FlightSegment[];
 }
 
 export interface ManageBooking {
