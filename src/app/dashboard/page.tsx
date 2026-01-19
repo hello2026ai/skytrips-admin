@@ -1,3 +1,5 @@
+import RecentBookings from '@/components/dashboard/RecentBookings';
+
 export default function DashboardPage() {
   return (
     <div className="max-w-[1200px] mx-auto flex flex-col gap-6">
@@ -68,64 +70,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Recent Bookings Table */}
-      <div className="rounded-xl border border-border bg-card shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-border flex justify-between items-center">
-          <h3 className="text-foreground text-lg font-bold">Recent Bookings</h3>
-          <a className="text-sm text-primary font-medium hover:underline" href="#">View All</a>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="w-full text-left border-collapse">
-            <thead>
-              <tr className="bg-muted/50">
-                <th className="px-6 py-3 text-muted-foreground text-xs font-bold uppercase tracking-wider">ID</th>
-                <th className="px-6 py-3 text-muted-foreground text-xs font-bold uppercase tracking-wider">Passenger</th>
-                <th className="px-6 py-3 text-muted-foreground text-xs font-bold uppercase tracking-wider">Route</th>
-                <th className="px-6 py-3 text-muted-foreground text-xs font-bold uppercase tracking-wider">Date</th>
-                <th className="px-6 py-3 text-muted-foreground text-xs font-bold uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-muted-foreground text-xs font-bold uppercase tracking-wider text-right">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {[
-                { id: '#BK-001', name: 'Alice Johnson', route: 'JFK → LHR', date: 'Oct 24, 2023', status: 'Confirmed', statusColor: 'bg-success/20 text-success' },
-                { id: '#BK-002', name: 'Mark Smith', route: 'LAX → TYO', date: 'Oct 24, 2023', status: 'Pending', statusColor: 'bg-warning/20 text-warning' },
-                { id: '#BK-003', name: 'Sarah Lee', route: 'DXB → CDG', date: 'Oct 23, 2023', status: 'Confirmed', statusColor: 'bg-success/20 text-success' },
-                { id: '#BK-004', name: 'John Doe', route: 'SIN → SYD', date: 'Oct 23, 2023', status: 'Cancelled', statusColor: 'bg-destructive/20 text-destructive' },
-                { id: '#BK-005', name: 'Emily Davis', route: 'YYZ → MUC', date: 'Oct 22, 2023', status: 'Confirmed', statusColor: 'bg-success/20 text-success' },
-              ].map((booking, i) => (
-                <tr key={i} className="hover:bg-muted/50 transition-colors">
-                  <td className="px-6 py-4 text-sm font-medium text-foreground">{booking.id}</td>
-                  <td className="px-6 py-4 text-sm text-foreground">
-                    <div className="flex items-center gap-3">
-                      <div 
-                        className="size-8 rounded-full bg-cover bg-center" 
-                        style={{ backgroundImage: `url("https://ui-avatars.com/api/?name=${encodeURIComponent(booking.name)}&background=random")` }}
-                      ></div>
-                      {booking.name}
-                    </div>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-muted-foreground">{booking.route}</td>
-                  <td className="px-6 py-4 text-sm text-muted-foreground">{booking.date}</td>
-                  <td className="px-6 py-4">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${booking.statusColor}`}>
-                      {booking.status}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    <button 
-                      className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-primary transition-all duration-200"
-                      aria-label={`View details for booking ${booking.id}`}
-                      title="View Details"
-                    >
-                      <span className="material-symbols-outlined text-[20px]">visibility</span>
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <RecentBookings />
     </div>
   );
 }

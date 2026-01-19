@@ -47,6 +47,13 @@ export interface Booking {
   updated_at?: string;
 }
 
+export interface ManageBooking {
+  uid: string;
+  booking_id: string | number;
+  created_at: string;
+  [key: string]: any;
+}
+
 export interface Traveller {
   id?: string; // unique temp id for frontend list management
   firstName: string;
@@ -103,11 +110,4 @@ export interface Customer {
   preferredLanguage?: string;
   preferredCurrency?: string;
   marketingConsent?: boolean;
-}
-
-export interface ManageBooking {
-  uid: string;
-  booking_id: string;
-  created_at: string;
-  updated_at?: string | null;
 }
