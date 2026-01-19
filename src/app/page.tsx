@@ -79,6 +79,9 @@ export default function LoginPage() {
         return;
       }
       router.replace("/dashboard");
+      if (typeof window !== "undefined") {
+        window.location.href = "/dashboard";
+      }
     } catch (err: unknown) {
       console.error("Login error:", err);
       const errorMessage = err instanceof Error ? err.message : "An error occurred during login";
