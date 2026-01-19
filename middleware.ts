@@ -1,24 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
-  const token = req.cookies.get("sky_admin_session")?.value;
-
-  if (pathname.startsWith("/dashboard")) {
-    if (!token) {
-      const loginUrl = new URL("/", req.url);
-      return NextResponse.redirect(loginUrl);
-    }
-    return NextResponse.next();
-  }
-
-  if (pathname === "/") {
-    if (token) {
-      const dashboardUrl = new URL("/dashboard", req.url);
-      return NextResponse.redirect(dashboardUrl);
-    }
-    return NextResponse.next();
-  }
+  // With localStorage-based auth, server can't enforce access.
+  // Allow all routes to proceed; client-side checks in layout handle auth.
   return NextResponse.next();
 }
 

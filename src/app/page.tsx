@@ -15,8 +15,8 @@ export default function LoginPage() {
   useEffect(() => {
     const checkExistingAuth = async () => {
       try {
-        const res = await fetch("/api/auth/me", { cache: "no-store", credentials: "include" });
-        if (res.ok) {
+        const token = typeof window !== "undefined" ? localStorage.getItem("sky_admin_session") : null;
+        if (token) {
           router.replace("/dashboard");
         }
       } catch {}
@@ -56,7 +56,6 @@ export default function LoginPage() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        credentials: "include",
         body: JSON.stringify({ email: email.trim(), password }),
       });
       if (!res.ok) {
@@ -78,6 +77,13 @@ export default function LoginPage() {
         }
         setIsLoading(false);
         return;
+      }
+      const data = await res.json().catch(() => ({}));
+      if (data?.ok && data?.token && data?.user) {
+        try {
+          localStorage.setItem("sky_admin_session", data.token);
+          localStorage.setItem("sky_admin_user", JSON.stringify(data.user));
+        } catch {}
       }
       router.replace("/dashboard");
       if (typeof window !== "undefined") {

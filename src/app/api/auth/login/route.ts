@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import bcrypt from "bcrypt";
 import { getAdminClient } from "@/lib/supabase-server";
-import { signSession, setSessionCookie } from "@/lib/auth";
+import { signSession } from "@/lib/auth";
 
 export const runtime = "nodejs";
 
@@ -39,7 +39,5 @@ export async function POST(req: Request) {
 
   const name = [user.first_name, user.last_name].filter(Boolean).join(" ").trim();
   const token = signSession({ id: user.id, email: user.email, role: user.role, name });
-  const res = NextResponse.json({ ok: true, user: { id: user.id, email: user.email, role: user.role, name } });
-  setSessionCookie(res, token);
-  return res;
+  return NextResponse.json({ ok: true, token, user: { id: user.id, email: user.email, role: user.role, name } });
 }
