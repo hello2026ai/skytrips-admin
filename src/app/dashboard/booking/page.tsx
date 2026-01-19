@@ -544,7 +544,9 @@ export default function BookingPage() {
                     </td>
                     <td className="px-6 py-4">
                       <span className="text-slate-900 font-medium text-sm">
-                        {booking.travellerLastName}
+                        {booking.travellerLastName ||
+                          booking.travellers?.[0]?.lastName ||
+                          "N/A"}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -553,12 +555,22 @@ export default function BookingPage() {
                           className="size-9 rounded-full bg-cover bg-center"
                           style={{
                             backgroundImage: `url("https://ui-avatars.com/api/?name=${encodeURIComponent(
-                              `${booking.travellerFirstName} ${booking.travellerLastName}`
+                              `${
+                                booking.travellerFirstName ||
+                                booking.travellers?.[0]?.firstName ||
+                                ""
+                              } ${
+                                booking.travellerLastName ||
+                                booking.travellers?.[0]?.lastName ||
+                                ""
+                              }`
                             )}&background=random")`,
                           }}
                         ></div>
                         <span className="text-slate-900 font-medium text-sm">
-                          {booking.travellerFirstName}
+                          {booking.travellerFirstName ||
+                            booking.travellers?.[0]?.firstName ||
+                            "N/A"}
                         </span>
                       </div>
                     </td>

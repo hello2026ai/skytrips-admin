@@ -683,7 +683,7 @@ export default function BookingDetailsPage({
                     Date of Payment
                   </label>
                   <p className="text-sm font-bold text-slate-900">
-                    {booking.dateOfPayment || "10 Aug 2021"}
+                    {booking.dateofpayment || "10 Aug 2021"}
                   </p>
                 </div>
               </div>

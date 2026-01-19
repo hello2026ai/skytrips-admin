@@ -5,7 +5,14 @@ import AirportAutocomplete from "@/components/AirportAutocomplete";
 import AirlineAutocomplete from "@/components/AirlineAutocomplete";
 import CustomerSearch from "@/components/CustomerSearch";
 import countryData from "../../../../libs/shared-utils/constants/country.json";
-import { Booking, Customer, Traveller } from "@/types";
+import {
+  Booking,
+  Customer,
+  Traveller,
+  FlightItinerary,
+  FlightSegment,
+  Addons,
+} from "@/types";
 
 type Agency = {
   uid: string;
@@ -21,14 +28,6 @@ interface BookingModalProps {
   booking: Booking | null;
   isLoading: boolean;
   isReadOnly?: boolean;
-}
-
-interface Addons {
-  meals: boolean;
-  wheelchair: boolean;
-  pickup: boolean;
-  dropoff: boolean;
-  luggage: boolean;
 }
 
 interface Prices {
@@ -52,6 +51,7 @@ interface FormData {
   dob: string; // Deprecated
   tripType: string;
   travelDate: string;
+  returnDate?: string;
   origin: string;
   destination: string;
   transit: string;
@@ -84,6 +84,7 @@ interface FormData {
   customerType: string;
   contactType: string;
   customerid?: string;
+  itineraries: FlightItinerary[];
 }
 
 export default function BookingModal({
@@ -118,6 +119,7 @@ export default function BookingModal({
     dob: "1985-03-15",
     tripType: "One Way",
     travelDate: "",
+    returnDate: "",
     origin: "",
     destination: "",
     transit: "",
@@ -158,6 +160,11 @@ export default function BookingModal({
     },
     customerType: "existing",
     contactType: "existing",
+    itineraries: [
+      {
+        segments: [],
+      },
+    ],
   });
 
   useEffect(() => {
@@ -224,6 +231,7 @@ export default function BookingModal({
         issueYear: booking.issueYear || "",
         buyingPrice: booking.buyingPrice || "0.00",
         payment: booking.payment || "Pending",
+        paymentDate: booking.dateofpayment || "",
         customerType: (booking as any).customerType || "existing",
         contactType: (booking as any).contactType || "existing",
         addons: (booking as any).addons || prev.addons,
@@ -234,6 +242,8 @@ export default function BookingModal({
           (booking as any).customerid ||
           (booking as any).customerId ||
           undefined,
+        returnDate: booking.returnDate || "",
+        itineraries: booking.itineraries || [{ segments: [] }],
       }));
       if ((booking as any).customer) {
         setSelectedCustomer((booking as any).customer as unknown as Customer);
@@ -265,6 +275,7 @@ export default function BookingModal({
         dob: "",
         tripType: "One Way",
         travelDate: "",
+        returnDate: "",
         origin: "",
         destination: "",
         transit: "",
@@ -306,6 +317,7 @@ export default function BookingModal({
         customerType: "existing",
         contactType: "existing",
         customerid: undefined,
+        itineraries: [{ segments: [] }],
       });
       setShowStopover(false);
     }
@@ -316,6 +328,21 @@ export default function BookingModal({
   const handleChange = (e: any) => {
     if (isReadOnly) return;
     const { name, value, type, checked } = e.target;
+
+    if (name === "tripType") {
+      let newItineraries = [...formData.itineraries];
+      if (value === "Round Trip" && newItineraries.length < 2) {
+        newItineraries.push({ segments: [] });
+      } else if (value === "One Way" && newItineraries.length > 1) {
+        newItineraries = [newItineraries[0]];
+      }
+      setFormData((prev) => ({
+        ...prev,
+        tripType: value,
+        itineraries: newItineraries,
+      }));
+      return;
+    }
 
     if (type === "checkbox" && name.startsWith("addon-")) {
       const addonName = name.replace("addon-", "") as keyof Addons;
@@ -482,6 +509,53 @@ export default function BookingModal({
     });
   };
 
+  const addSegment = (itineraryIndex: number) => {
+    setFormData((prev) => {
+      const newItineraries = [...prev.itineraries];
+      newItineraries[itineraryIndex].segments.push({
+        departure: { iataCode: "", at: "" },
+        arrival: { iataCode: "", at: "" },
+        carrierCode: "",
+        number: "",
+        duration: "",
+      });
+      return { ...prev, itineraries: newItineraries };
+    });
+  };
+
+  const removeSegment = (itineraryIndex: number, segmentIndex: number) => {
+    setFormData((prev) => {
+      const newItineraries = [...prev.itineraries];
+      newItineraries[itineraryIndex].segments.splice(segmentIndex, 1);
+      return { ...prev, itineraries: newItineraries };
+    });
+  };
+
+  const handleSegmentChange = (
+    itineraryIndex: number,
+    segmentIndex: number,
+    field: string,
+    value: any,
+    nestedField?: string
+  ) => {
+    setFormData((prev) => {
+      const newItineraries = [...prev.itineraries];
+      const segment = newItineraries[itineraryIndex].segments[segmentIndex];
+
+      if (nestedField) {
+        // Handle nested fields like departure.iataCode
+        (segment as any)[field] = {
+          ...(segment as any)[field],
+          [nestedField]: value,
+        };
+      } else {
+        (segment as any)[field] = value;
+      }
+
+      return { ...prev, itineraries: newItineraries };
+    });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (isReadOnly) return;
@@ -496,13 +570,29 @@ export default function BookingModal({
       return;
     }
 
+    // Helper to convert empty strings to null for date fields
+    const toDateOrNull = (dateStr: string | undefined) => {
+      if (!dateStr || dateStr.trim() === "") return null;
+      return dateStr;
+    };
+
     // Map back to the Booking interface structure before saving
     const bookingToSave: Partial<Booking> = {
-      travellerFirstName: formData.travellerFirstName,
-      travellerLastName: formData.travellerLastName,
+      // Legacy flat fields - keeping firstName/lastName for list view compatibility if columns exist
+      // But prioritizing travellers array for data integrity
+      travellerFirstName:
+        formData.travellers[0]?.firstName || formData.travellerFirstName,
+      travellerLastName:
+        formData.travellers[0]?.lastName || formData.travellerLastName,
+
+      // Core booking fields
       PNR: formData.pnr,
       ticketNumber: formData.ticketNumber || formData.pnr + "01",
       airlines: formData.airlines,
+      travelDate: toDateOrNull(formData.travelDate),
+      departureDate: toDateOrNull(formData.travelDate),
+      returnDate: toDateOrNull(formData.returnDate),
+      itineraries: formData.itineraries,
       origin: formData.origin,
       transit: formData.transit,
       destination: formData.destination,
@@ -512,34 +602,41 @@ export default function BookingModal({
       issueYear: formData.issueYear || new Date().getFullYear() + "",
       buyingPrice: formData.buyingPrice,
       sellingPrice: formData.sellingPrice,
-      payment: formData.paymentStatus, // Or use formData.payment
+      payment: formData.paymentStatus,
       status: formData.status,
+
+      // Re-enabled fields as columns are added to DB
       email: formData.email,
       phone: formData.phone,
-      passportNumber: formData.passportNumber,
-      passportExpiry: formData.passportExpiry,
-      nationality: formData.nationality,
-      dob: formData.dob,
+
+      // Passport info - prefer travellers array but keep flat if needed for some legacy view
+      passportNumber:
+        formData.travellers[0]?.passportNumber || formData.passportNumber,
+      passportExpiry: toDateOrNull(
+        formData.travellers[0]?.passportExpiry || formData.passportExpiry
+      ),
+      nationality: formData.travellers[0]?.nationality || formData.nationality,
+      dob: toDateOrNull(formData.dob),
+
       flightNumber: formData.flightNumber,
       flightClass: formData.flightClass,
       frequentFlyer: formData.frequentFlyer,
-      agency: formData.agency,
+      issuedthroughagency: formData.agency,
       handledBy: formData.handledBy,
       paymentStatus: formData.paymentStatus,
       paymentMethod: formData.paymentMethod,
       transactionId: formData.transactionId,
-      dateOfPayment: formData.paymentDate,
+      dateofpayment: toDateOrNull(formData.paymentDate), // Mapped to correct DB column
       stopoverLocation: formData.stopoverLocation,
       customerid: formData.customerid,
-      travellers: formData.travellers, // Include travellers array
-      customer: selectedCustomer || undefined, // Add customer snapshot
-      // Add custom fields that might not be in Booking interface yet but are in state
-      ...({
-        customerType: formData.customerType,
-        contactType: formData.contactType,
-        addons: formData.addons,
-        prices: formData.prices,
-      } as any),
+      travellers: formData.travellers, // The Source of Truth
+      customer: selectedCustomer || undefined,
+
+      // Custom fields
+      customerType: formData.customerType,
+      contactType: formData.contactType,
+      addons: formData.addons,
+      prices: formData.prices,
     };
     onSave(bookingToSave);
   };
@@ -950,23 +1047,9 @@ export default function BookingModal({
                         </span>
                         Route & Trip Details
                       </h3>
-                      <button
-                        type="button"
-                        onClick={() => setShowStopover(!showStopover)}
-                        className={`text-sm font-bold transition-all flex items-center px-4 py-2 rounded-lg ${
-                          showStopover
-                            ? "text-red-600 bg-red-50 hover:bg-red-100"
-                            : "text-primary bg-blue-50 hover:bg-blue-100"
-                        }`}
-                      >
-                        <span className="material-symbols-outlined text-base mr-2">
-                          {showStopover ? "remove_circle" : "add_circle"}
-                        </span>
-                        {showStopover ? "Remove Stopover" : "Add Stopover"}
-                      </button>
                     </div>
                     <div className="p-8">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                         <div>
                           <label className="block text-sm font-bold text-slate-700 mb-2 tracking-tight">
                             Trip Type
@@ -983,18 +1066,35 @@ export default function BookingModal({
                             <option>Multi City</option>
                           </select>
                         </div>
-                        <div>
-                          <label className="block text-sm font-bold text-slate-700 mb-2 tracking-tight">
-                            Travel Date
-                          </label>
-                          <input
-                            className="block w-full h-12 rounded-lg border-slate-200 shadow-sm focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium px-4"
-                            name="travelDate"
-                            type="date"
-                            value={formData.travelDate}
-                            onChange={handleChange}
-                            disabled={isReadOnly}
-                          />
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-bold text-slate-700 mb-2 tracking-tight">
+                              Departure Date
+                            </label>
+                            <input
+                              className="block w-full h-12 rounded-lg border-slate-200 shadow-sm focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium px-4"
+                              name="travelDate"
+                              type="date"
+                              value={formData.travelDate}
+                              onChange={handleChange}
+                              disabled={isReadOnly}
+                            />
+                          </div>
+                          {formData.tripType === "Round Trip" && (
+                            <div>
+                              <label className="block text-sm font-bold text-slate-700 mb-2 tracking-tight">
+                                Return Date
+                              </label>
+                              <input
+                                className="block w-full h-12 rounded-lg border-slate-200 shadow-sm focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium px-4"
+                                name="returnDate"
+                                type="date"
+                                value={formData.returnDate}
+                                onChange={handleChange}
+                                disabled={isReadOnly}
+                              />
+                            </div>
+                          )}
                         </div>
                         <div>
                           <AirportAutocomplete
@@ -1016,134 +1116,288 @@ export default function BookingModal({
                             icon="flight_land"
                           />
                         </div>
+                      </div>
 
-                        {showStopover && (
-                          <div className="md:col-span-2 bg-slate-50/50 border border-slate-100 rounded-xl p-6 mt-2 mb-2 relative transition-all duration-300">
-                            <h4 className="text-sm font-bold text-slate-900 mb-6 flex items-center gap-3">
-                              <span className="w-2.5 h-2.5 rounded-full bg-primary shadow-[0_0_8px_rgba(59,130,246,0.5)]"></span>
-                              Stopover Segment Details
-                            </h4>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                              <div className="md:col-span-1">
-                                <label className="block text-sm font-bold text-slate-700 mb-2 tracking-tight">
-                                  Stopover Location
-                                </label>
-                                <div className="relative">
-                                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                                    <span
-                                      className="material-symbols-outlined text-slate-400"
-                                      style={{ fontSize: "20px" }}
-                                    >
-                                      place
+                      {/* Detailed Itinerary Segments */}
+                      <div className="space-y-6">
+                        {formData.itineraries?.map((itinerary, itinIndex) => (
+                          <div
+                            key={itinIndex}
+                            className="bg-slate-50 border border-slate-200 rounded-xl p-6"
+                          >
+                            <div className="flex justify-between items-center mb-4">
+                              <h4 className="text-sm font-bold text-slate-800 uppercase tracking-wider">
+                                {itinIndex === 0
+                                  ? "Outbound Flight Segments"
+                                  : "Return Flight Segments"}
+                              </h4>
+                            </div>
+
+                            <div className="space-y-4">
+                              {itinerary.segments.map((segment, segIndex) => (
+                                <div
+                                  key={segIndex}
+                                  className="bg-white p-4 rounded-lg border border-slate-200 shadow-sm relative group"
+                                >
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      removeSegment(itinIndex, segIndex)
+                                    }
+                                    className="absolute top-2 right-2 text-slate-400 hover:text-red-500"
+                                  >
+                                    <span className="material-symbols-outlined text-lg">
+                                      delete
                                     </span>
-                                  </div>
-                                  <input
-                                    className="block w-full h-12 pl-12 rounded-lg border-slate-200 shadow-sm focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium"
-                                    name="stopoverLocation"
-                                    placeholder="City, Airport Code"
-                                    type="text"
-                                    value={formData.stopoverLocation || ""}
-                                    onChange={handleChange}
-                                    disabled={isReadOnly}
-                                  />
-                                </div>
-                              </div>
-                              <div className="md:col-span-1">
-                                <label className="block text-sm font-bold text-slate-700 mb-2 tracking-tight">
-                                  Arrival Date
-                                </label>
-                                <input
-                                  className="block w-full h-12 rounded-lg border-slate-200 shadow-sm focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium px-4"
-                                  name="stopoverArrival"
-                                  type="date"
-                                  value={formData.stopoverArrival || ""}
-                                  onChange={handleChange}
-                                  disabled={isReadOnly}
-                                />
-                              </div>
-                              <div className="md:col-span-1">
-                                <label className="block text-sm font-bold text-slate-700 mb-2 tracking-tight">
-                                  Departure Date
-                                </label>
-                                <input
-                                  className="block w-full h-12 rounded-lg border-slate-200 shadow-sm focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium px-4"
-                                  name="stopoverDeparture"
-                                  type="date"
-                                  value={formData.stopoverDeparture || ""}
-                                  onChange={handleChange}
-                                  disabled={isReadOnly}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        )}
+                                  </button>
 
-                        <div className="md:col-span-2 border-t border-slate-100 pt-8 mt-4">
-                          <div className="flex justify-between items-center mb-6">
-                            <h4 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">
-                              Flight Details
-                            </h4>
-                          </div>
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                            <div className="md:col-span-1">
-                              <AirlineAutocomplete
-                                label="Airline"
-                                name="airlines"
-                                value={formData.airlines}
-                                onChange={handleChange}
-                                disabled={isReadOnly}
-                                icon="airlines"
-                              />
-                            </div>
-                            <div className="md:col-span-1">
-                              <label className="block text-sm font-bold text-slate-700 mb-2 tracking-tight">
-                                Flight No.
-                              </label>
-                              <input
-                                className="block w-full h-12 rounded-lg border-slate-200 shadow-sm focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium px-4"
-                                name="flightNumber"
-                                placeholder="e.g. SQ218"
-                                type="text"
-                                value={formData.flightNumber}
-                                onChange={handleChange}
-                                disabled={isReadOnly}
-                              />
-                            </div>
-                            <div className="md:col-span-1">
-                              <label className="block text-sm font-bold text-slate-700 mb-2 tracking-tight">
-                                Class
-                              </label>
-                              <select
-                                className="block w-full h-12 rounded-lg border-slate-200 shadow-sm focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium px-4"
-                                name="flightClass"
-                                value={formData.flightClass}
-                                onChange={handleChange}
-                                disabled={isReadOnly}
+                                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                                    {/* Departure */}
+                                    <div className="col-span-1 md:col-span-2">
+                                      <label className="text-xs font-bold text-slate-500 uppercase">
+                                        Departure
+                                      </label>
+                                      <div className="grid grid-cols-3 gap-2 mt-1">
+                                        <input
+                                          placeholder="IATA"
+                                          className="block w-full rounded-md border-slate-200 text-sm"
+                                          value={segment.departure?.iataCode}
+                                          onChange={(e) =>
+                                            handleSegmentChange(
+                                              itinIndex,
+                                              segIndex,
+                                              "departure",
+                                              e.target.value,
+                                              "iataCode"
+                                            )
+                                          }
+                                        />
+                                        <input
+                                          placeholder="Terminal"
+                                          className="block w-full rounded-md border-slate-200 text-sm"
+                                          value={segment.departure?.terminal}
+                                          onChange={(e) =>
+                                            handleSegmentChange(
+                                              itinIndex,
+                                              segIndex,
+                                              "departure",
+                                              e.target.value,
+                                              "terminal"
+                                            )
+                                          }
+                                        />
+                                        <input
+                                          type="datetime-local"
+                                          className="block w-full rounded-md border-slate-200 text-sm"
+                                          value={segment.departure?.at}
+                                          onChange={(e) =>
+                                            handleSegmentChange(
+                                              itinIndex,
+                                              segIndex,
+                                              "departure",
+                                              e.target.value,
+                                              "at"
+                                            )
+                                          }
+                                        />
+                                      </div>
+                                    </div>
+
+                                    {/* Arrival */}
+                                    <div className="col-span-1 md:col-span-2">
+                                      <label className="text-xs font-bold text-slate-500 uppercase">
+                                        Arrival
+                                      </label>
+                                      <div className="grid grid-cols-3 gap-2 mt-1">
+                                        <input
+                                          placeholder="IATA"
+                                          className="block w-full rounded-md border-slate-200 text-sm"
+                                          value={segment.arrival?.iataCode}
+                                          onChange={(e) =>
+                                            handleSegmentChange(
+                                              itinIndex,
+                                              segIndex,
+                                              "arrival",
+                                              e.target.value,
+                                              "iataCode"
+                                            )
+                                          }
+                                        />
+                                        <input
+                                          placeholder="Terminal"
+                                          className="block w-full rounded-md border-slate-200 text-sm"
+                                          value={segment.arrival?.terminal}
+                                          onChange={(e) =>
+                                            handleSegmentChange(
+                                              itinIndex,
+                                              segIndex,
+                                              "arrival",
+                                              e.target.value,
+                                              "terminal"
+                                            )
+                                          }
+                                        />
+                                        <input
+                                          type="datetime-local"
+                                          className="block w-full rounded-md border-slate-200 text-sm"
+                                          value={segment.arrival?.at}
+                                          onChange={(e) =>
+                                            handleSegmentChange(
+                                              itinIndex,
+                                              segIndex,
+                                              "arrival",
+                                              e.target.value,
+                                              "at"
+                                            )
+                                          }
+                                        />
+                                      </div>
+                                    </div>
+                                  </div>
+
+                                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                                    <div>
+                                      <label className="text-xs font-bold text-slate-500 uppercase">
+                                        Carrier
+                                      </label>
+                                      <input
+                                        placeholder="Code (e.g. QF)"
+                                        className="block w-full mt-1 rounded-md border-slate-200 text-sm"
+                                        value={segment.carrierCode}
+                                        onChange={(e) =>
+                                          handleSegmentChange(
+                                            itinIndex,
+                                            segIndex,
+                                            "carrierCode",
+                                            e.target.value
+                                          )
+                                        }
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="text-xs font-bold text-slate-500 uppercase">
+                                        Flight No.
+                                      </label>
+                                      <input
+                                        placeholder="Number"
+                                        className="block w-full mt-1 rounded-md border-slate-200 text-sm"
+                                        value={segment.number}
+                                        onChange={(e) =>
+                                          handleSegmentChange(
+                                            itinIndex,
+                                            segIndex,
+                                            "number",
+                                            e.target.value
+                                          )
+                                        }
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="text-xs font-bold text-slate-500 uppercase">
+                                        Aircraft
+                                      </label>
+                                      <input
+                                        placeholder="Code"
+                                        className="block w-full mt-1 rounded-md border-slate-200 text-sm"
+                                        value={segment.aircraft?.code}
+                                        onChange={(e) =>
+                                          handleSegmentChange(
+                                            itinIndex,
+                                            segIndex,
+                                            "aircraft",
+                                            e.target.value,
+                                            "code"
+                                          )
+                                        }
+                                      />
+                                    </div>
+                                    <div>
+                                      <label className="text-xs font-bold text-slate-500 uppercase">
+                                        Duration
+                                      </label>
+                                      <input
+                                        placeholder="PTxxHxxM"
+                                        className="block w-full mt-1 rounded-md border-slate-200 text-sm"
+                                        value={segment.duration}
+                                        onChange={(e) =>
+                                          handleSegmentChange(
+                                            itinIndex,
+                                            segIndex,
+                                            "duration",
+                                            e.target.value
+                                          )
+                                        }
+                                      />
+                                    </div>
+                                  </div>
+                                </div>
+                              ))}
+                              <button
+                                type="button"
+                                onClick={() => addSegment(itinIndex)}
+                                className="w-full py-3 border-2 border-dashed border-slate-300 rounded-lg text-slate-500 font-bold hover:border-primary hover:text-primary hover:bg-blue-50/50 transition-all flex items-center justify-center gap-2 text-sm"
                               >
-                                <option>Economy</option>
-                                <option>Premium Economy</option>
-                                <option>Business</option>
-                                <option>First Class</option>
-                              </select>
+                                <span className="material-symbols-outlined text-lg">
+                                  add
+                                </span>
+                                Add Flight Segment
+                              </button>
                             </div>
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="mt-8 pt-6 border-t border-slate-100">
+                        <div className="flex justify-between items-center mb-6">
+                          <h4 className="text-xs font-black text-slate-400 uppercase tracking-[0.2em]">
+                            Global Flight Details
+                          </h4>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                          <div className="md:col-span-1">
+                            <AirlineAutocomplete
+                              label="Primary Airline"
+                              name="airlines"
+                              value={formData.airlines}
+                              onChange={handleChange}
+                              disabled={isReadOnly}
+                              icon="airlines"
+                            />
+                          </div>
+                          <div className="md:col-span-1">
+                            <label className="block text-sm font-bold text-slate-700 mb-2 tracking-tight">
+                              Class
+                            </label>
+                            <select
+                              className="block w-full h-12 rounded-lg border-slate-200 shadow-sm focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium px-4"
+                              name="flightClass"
+                              value={formData.flightClass}
+                              onChange={handleChange}
+                              disabled={isReadOnly}
+                            >
+                              <option>Economy</option>
+                              <option>Premium Economy</option>
+                              <option>Business</option>
+                              <option>First Class</option>
+                            </select>
                           </div>
                         </div>
+                      </div>
 
-                        <div className="md:col-span-2 mt-2">
-                          <div className="p-3 bg-blue-50 border border-blue-100 rounded-md flex items-start gap-3">
-                            <span className="material-symbols-outlined text-blue-500 mt-0.5">
-                              info
-                            </span>
-                            <div>
-                              <p className="text-sm text-blue-800 font-medium">
-                                Itinerary Modification
-                              </p>
-                              <p className="text-xs text-blue-600 mt-0.5">
-                                Changing origin, destination, or dates may
-                                affect pricing. Ensure to re-calculate fares
-                                after modifying the itinerary.
-                              </p>
-                            </div>
+                      <div className="mt-6">
+                        <div className="p-3 bg-blue-50 border border-blue-100 rounded-md flex items-start gap-3">
+                          <span className="material-symbols-outlined text-blue-500 mt-0.5">
+                            info
+                          </span>
+                          <div>
+                            <p className="text-sm text-blue-800 font-medium">
+                              Itinerary Modification
+                            </p>
+                            <p className="text-xs text-blue-600 mt-0.5">
+                              Changing origin, destination, or dates may affect
+                              pricing. Ensure to re-calculate fares after
+                              modifying the itinerary.
+                            </p>
                           </div>
                         </div>
                       </div>
