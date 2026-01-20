@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { Booking, ManageBooking } from "@/types";
+import { Booking, ManageBooking, Reason } from "@/types";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
@@ -19,12 +19,27 @@ export default function ManageBookingViewPage() {
     email: string;
     agency?: string;
   } | null>(null);
+  const [reasons, setReasons] = useState<Reason[]>([]);
 
   useEffect(() => {
     if (id) {
       fetchRecord(id);
     }
+    fetchReasons();
   }, [id]);
+
+  const fetchReasons = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("reasons")
+        .select("*")
+        .order("title", { ascending: true });
+      if (error) throw error;
+      setReasons(data || []);
+    } catch (err) {
+      console.error("Error fetching reasons:", err);
+    }
+  };
 
   const fetchRecord = async (uid: string) => {
     try {
@@ -298,15 +313,25 @@ export default function ManageBookingViewPage() {
                     className="block w-full rounded-md border-0 py-2.5 px-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6"
                     id="reason"
                     name="reason"
-                    defaultValue={record.reason || "Select a reason..."}
+                    defaultValue={record.reason || ""}
                   >
-                    <option>Select a reason...</option>
-                    <option>Customer Refund Request</option>
-                    <option>Flight Cancellation</option>
-                    <option>Schedule Change</option>
-                    <option>Duplicate Booking</option>
-                    <option>Ticket Reissue</option>
-                    <option>Other</option>
+                    <option value="">Select a reason...</option>
+                    {reasons.length > 0 ? (
+                      reasons.map((reason) => (
+                        <option key={reason.id} value={reason.title}>
+                          {reason.title}
+                        </option>
+                      ))
+                    ) : (
+                      <>
+                        <option>Customer Refund Request</option>
+                        <option>Flight Cancellation</option>
+                        <option>Schedule Change</option>
+                        <option>Duplicate Booking</option>
+                        <option>Ticket Reissue</option>
+                        <option>Other</option>
+                      </>
+                    )}
                   </select>
                 </div>
               </div>
