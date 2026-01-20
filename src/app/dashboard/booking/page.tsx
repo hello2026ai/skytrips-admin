@@ -600,7 +600,7 @@ export default function BookingPage() {
                                 booking.travellerLastName ||
                                 booking.travellers?.[0]?.lastName ||
                                 ""
-                              }`
+                              }`,
                             )}&background=random")`,
                           }}
                         ></div>
@@ -682,7 +682,7 @@ export default function BookingPage() {
                           <button
                             onClick={() =>
                               router.push(
-                                `/dashboard/booking/edit/${booking.id}`
+                                `/dashboard/booking/edit/${booking.id}`,
                               )
                             }
                             className="rounded p-2 text-slate-600 hover:bg-slate-100 hover:text-primary transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/30"
@@ -697,15 +697,9 @@ export default function BookingPage() {
                         <BookingRowMenu
                           booking={booking}
                           onRefund={() =>
-                            router.push(
-                              `/dashboard/booking/${booking.id}/manage/status?action=refund`
-                            )
+                            router.push(`/dashboard/manage-booking`)
                           }
-                          onReissue={() =>
-                            router.push(
-                              `/dashboard/booking/${booking.id}/manage/status?action=reissue`
-                            )
-                          }
+                          onReissue={() => router.push(`/dashboard/booking/`)}
                         />
                       </div>
                     </td>
