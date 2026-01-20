@@ -715,8 +715,88 @@ export default function EditBookingPage({
         return dateStr;
       };
 
+      // Handle New Customer Creation logic
+      let customerIdToUse = selectedCustomerId;
+
+      if (formData.contactType === "new" && formData.email) {
+        console.log("Processing new customer creation for:", formData.email);
+
+        // 1. Check if customer already exists
+        const { data: existingCustomer, error: searchError } = await supabase
+          .from("customers")
+          .select("id")
+          .eq("email", formData.email)
+          .single();
+
+        if (searchError && searchError.code !== "PGRST116") {
+          console.error("Error searching for existing customer:", searchError);
+        }
+
+        if (existingCustomer) {
+          console.log(
+            "Customer already exists, linking to ID:",
+            existingCustomer.id,
+          );
+          customerIdToUse = existingCustomer.id;
+        } else {
+          // 2. Create new customer
+          const firstName =
+            formData.travellerFirstName ||
+            formData.travellers?.[0]?.firstName ||
+            "Unknown";
+          const lastName =
+            formData.travellerLastName ||
+            formData.travellers?.[0]?.lastName ||
+            "Traveller";
+
+          const newCustomer = {
+            firstName,
+            lastName,
+            email: formData.email,
+            phone: formData.phone || "",
+            country: formData.nationality || "Nepalese",
+            isActive: "true",
+            isVerified: "false",
+            userType: "Traveler",
+            isDisabled: "false",
+            phoneCountryCode: "+977",
+            dateOfBirth: formData.travellers?.[0]?.dob || formData.dob || "",
+            gender: "N/A",
+            address: {},
+            passport: {
+              number:
+                formData.passportNumber ||
+                formData.travellers?.[0]?.passportNumber ||
+                "",
+              expiryDate:
+                formData.passportExpiry ||
+                formData.travellers?.[0]?.passportExpiry ||
+                "",
+              issueCountry: formData.nationality || "Nepalese",
+            },
+            // created_at: new Date().toISOString(),
+          };
+
+          const { data: createdCustomer, error: createError } = await supabase
+            .from("customers")
+            .insert([newCustomer])
+            .select("id")
+            .single();
+
+          if (createError) {
+            console.error("Failed to create new customer:", createError);
+            throw new Error(
+              `Failed to create customer profile: ${createError.message}`,
+            );
+          }
+
+          console.log("New customer created successfully:", createdCustomer.id);
+          customerIdToUse = createdCustomer.id;
+        }
+      }
+
       const rawUpdateData = {
-        customerid: selectedCustomerId,
+        customerid: customerIdToUse,
         email: formData.email,
         phone: formData.phone,
         // address: formData.address, // Still excluded
@@ -1091,6 +1171,50 @@ export default function EditBookingPage({
                   }`}
                 >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 pt-2">
+                    {/* First Name */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest mb-2">
+                        First Name
+                      </label>
+                      <div className="relative">
+                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                          <span className="material-symbols-outlined text-slate-400 text-[18px]">
+                            person
+                          </span>
+                        </div>
+                        <input
+                          className="block w-full h-10 rounded-lg border pl-10 focus:ring sm:text-sm font-medium transition-colors border-slate-200 focus:border-primary focus:ring-primary/10 uppercase"
+                          id="travellerFirstName"
+                          name="travellerFirstName"
+                          type="text"
+                          value={formData.travellerFirstName}
+                          onChange={handleChange}
+                          placeholder="Given Name"
+                        />
+                      </div>
+                    </div>
+                    {/* Last Name */}
+                    <div>
+                      <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest mb-2">
+                        Last Name
+                      </label>
+                      <div className="relative">
+                        <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                          <span className="material-symbols-outlined text-slate-400 text-[18px]">
+                            person
+                          </span>
+                        </div>
+                        <input
+                          className="block w-full h-10 rounded-lg border pl-10 focus:ring sm:text-sm font-medium transition-colors border-slate-200 focus:border-primary focus:ring-primary/10 uppercase"
+                          id="travellerLastName"
+                          name="travellerLastName"
+                          type="text"
+                          value={formData.travellerLastName}
+                          onChange={handleChange}
+                          placeholder="Surname"
+                        />
+                      </div>
+                    </div>
                     <div className="md:col-span-2">
                       <label className="block text-xs font-bold text-slate-700 uppercase tracking-widest mb-2">
                         Email Address

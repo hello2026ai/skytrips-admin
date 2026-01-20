@@ -839,8 +839,67 @@ export default function BookingModal({
                       </div>
 
                       {formData.contactType === "new" && (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                          <div>
+                        <div className="space-y-6">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                              <label
+                                className="block text-sm font-bold text-slate-700 mb-2 tracking-tight"
+                                htmlFor="travellerFirstName"
+                              >
+                                First Name
+                              </label>
+                              <div className="relative rounded-lg shadow-sm">
+                                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                                  <span
+                                    className="material-symbols-outlined text-slate-400"
+                                    style={{ fontSize: "20px" }}
+                                  >
+                                    person
+                                  </span>
+                                </div>
+                                <input
+                                  className="block w-full h-12 rounded-lg border-slate-200 pl-11 focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium uppercase"
+                                  id="travellerFirstName"
+                                  name="travellerFirstName"
+                                  type="text"
+                                  value={formData.travellerFirstName}
+                                  onChange={handleChange}
+                                  placeholder="Given Name"
+                                  disabled={isReadOnly}
+                                />
+                              </div>
+                            </div>
+                            <div>
+                              <label
+                                className="block text-sm font-bold text-slate-700 mb-2 tracking-tight"
+                                htmlFor="travellerLastName"
+                              >
+                                Last Name
+                              </label>
+                              <div className="relative rounded-lg shadow-sm">
+                                <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4">
+                                  <span
+                                    className="material-symbols-outlined text-slate-400"
+                                    style={{ fontSize: "20px" }}
+                                  >
+                                    person
+                                  </span>
+                                </div>
+                                <input
+                                  className="block w-full h-12 rounded-lg border-slate-200 pl-11 focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium uppercase"
+                                  id="travellerLastName"
+                                  name="travellerLastName"
+                                  type="text"
+                                  value={formData.travellerLastName}
+                                  onChange={handleChange}
+                                  placeholder="Surname"
+                                  disabled={isReadOnly}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
                             <label
                               className="block text-sm font-bold text-slate-700 mb-2 tracking-tight"
                               htmlFor="email"
@@ -897,6 +956,7 @@ export default function BookingModal({
                             </div>
                           </div>
                         </div>
+                      </div>
                       )}
                     </div>
                   </div>
