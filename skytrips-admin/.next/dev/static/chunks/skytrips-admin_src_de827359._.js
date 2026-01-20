@@ -4019,7 +4019,7 @@ var __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_mo
 var _s = __turbopack_context__.k.signature();
 "use client";
 ;
-function RefundConfirmModal({ isOpen, bookingId, bookingDate, amount, onConfirm, onCancel, isProcessing = false, isAuthenticated = true, onRequireAuth }) {
+function RefundConfirmModal({ isOpen, bookingId, bookingDate, amount, onConfirm, onCancel, isProcessing = false, isAuthenticated = true, onRequireAuth, hideWarning = false }) {
     _s();
     const dialogRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(null);
     const firstBtnRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(null);
@@ -4080,7 +4080,7 @@ function RefundConfirmModal({ isOpen, bookingId, bookingDate, amount, onConfirm,
                 className: "absolute inset-0 bg-black/40 animate-in fade-in duration-200"
             }, void 0, false, {
                 fileName: "[project]/skytrips-admin/src/components/RefundConfirmModal.tsx",
-                lineNumber: 74,
+                lineNumber: 76,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4095,12 +4095,12 @@ function RefundConfirmModal({ isOpen, bookingId, bookingDate, amount, onConfirm,
                             children: "Confirm Refund Request"
                         }, void 0, false, {
                             fileName: "[project]/skytrips-admin/src/components/RefundConfirmModal.tsx",
-                            lineNumber: 80,
+                            lineNumber: 82,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/skytrips-admin/src/components/RefundConfirmModal.tsx",
-                        lineNumber: 79,
+                        lineNumber: 81,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4118,13 +4118,13 @@ function RefundConfirmModal({ isOpen, bookingId, bookingDate, amount, onConfirm,
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/skytrips-admin/src/components/RefundConfirmModal.tsx",
-                                        lineNumber: 86,
+                                        lineNumber: 88,
                                         columnNumber: 25
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/skytrips-admin/src/components/RefundConfirmModal.tsx",
-                                lineNumber: 85,
+                                lineNumber: 87,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4136,13 +4136,13 @@ function RefundConfirmModal({ isOpen, bookingId, bookingDate, amount, onConfirm,
                                         children: bookingDate || "-"
                                     }, void 0, false, {
                                         fileName: "[project]/skytrips-admin/src/components/RefundConfirmModal.tsx",
-                                        lineNumber: 88,
+                                        lineNumber: 90,
                                         columnNumber: 57
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/skytrips-admin/src/components/RefundConfirmModal.tsx",
-                                lineNumber: 88,
+                                lineNumber: 90,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4157,27 +4157,27 @@ function RefundConfirmModal({ isOpen, bookingId, bookingDate, amount, onConfirm,
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/skytrips-admin/src/components/RefundConfirmModal.tsx",
-                                        lineNumber: 89,
+                                        lineNumber: 91,
                                         columnNumber: 59
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/skytrips-admin/src/components/RefundConfirmModal.tsx",
-                                lineNumber: 89,
+                                lineNumber: 91,
                                 columnNumber: 11
                             }, this),
-                            /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
+                            !hideWarning && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
                                 className: "text-xs text-red-600 mt-2",
                                 children: "This action cannot be undone. The booking will be marked for refund processing."
                             }, void 0, false, {
                                 fileName: "[project]/skytrips-admin/src/components/RefundConfirmModal.tsx",
-                                lineNumber: 90,
-                                columnNumber: 11
+                                lineNumber: 93,
+                                columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/skytrips-admin/src/components/RefundConfirmModal.tsx",
-                        lineNumber: 84,
+                        lineNumber: 86,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4194,12 +4194,12 @@ function RefundConfirmModal({ isOpen, bookingId, bookingDate, amount, onConfirm,
                                     children: "Cancel"
                                 }, void 0, false, {
                                     fileName: "[project]/skytrips-admin/src/components/RefundConfirmModal.tsx",
-                                    lineNumber: 96,
+                                    lineNumber: 100,
                                     columnNumber: 13
                                 }, this)
                             }, void 0, false, {
                                 fileName: "[project]/skytrips-admin/src/components/RefundConfirmModal.tsx",
-                                lineNumber: 95,
+                                lineNumber: 99,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -4219,20 +4219,20 @@ function RefundConfirmModal({ isOpen, bookingId, bookingDate, amount, onConfirm,
                                         className: "size-4 border-2 border-white/30 border-t-white rounded-full animate-spin"
                                     }, void 0, false, {
                                         fileName: "[project]/skytrips-admin/src/components/RefundConfirmModal.tsx",
-                                        lineNumber: 120,
+                                        lineNumber: 124,
                                         columnNumber: 15
                                     }, this) : null,
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                         children: "Confirm Refund"
                                     }, void 0, false, {
                                         fileName: "[project]/skytrips-admin/src/components/RefundConfirmModal.tsx",
-                                        lineNumber: 122,
+                                        lineNumber: 126,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/skytrips-admin/src/components/RefundConfirmModal.tsx",
-                                lineNumber: 106,
+                                lineNumber: 110,
                                 columnNumber: 11
                             }, this),
                             !isAuthenticated && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4241,25 +4241,25 @@ function RefundConfirmModal({ isOpen, bookingId, bookingDate, amount, onConfirm,
                                 children: "Sign in required"
                             }, void 0, false, {
                                 fileName: "[project]/skytrips-admin/src/components/RefundConfirmModal.tsx",
-                                lineNumber: 125,
+                                lineNumber: 129,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/skytrips-admin/src/components/RefundConfirmModal.tsx",
-                        lineNumber: 94,
+                        lineNumber: 98,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/skytrips-admin/src/components/RefundConfirmModal.tsx",
-                lineNumber: 75,
+                lineNumber: 77,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/skytrips-admin/src/components/RefundConfirmModal.tsx",
-        lineNumber: 65,
+        lineNumber: 67,
         columnNumber: 5
     }, this);
 }
@@ -4469,6 +4469,53 @@ function BookingRowMenu({ booking, onRefund, onReissue }) {
     const [isSubmitting, setIsSubmitting] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const [isAuthenticated, setIsAuthenticated] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
     const [isSignInPromptOpen, setIsSignInPromptOpen] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [isAuthorizedUser, setIsAuthorizedUser] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [localUser, setLocalUser] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(null);
+    (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
+        "BookingRowMenu.useEffect": ()=>{
+            const checkUserAuthorization = {
+                "BookingRowMenu.useEffect.checkUserAuthorization": async ()=>{
+                    let emailToCheck = "";
+                    let userId = "";
+                    // 1. Try localStorage "sky_admin_user"
+                    if ("TURBOPACK compile-time truthy", 1) {
+                        const storedStr = localStorage.getItem("sky_admin_user");
+                        if (storedStr) {
+                            try {
+                                const parsed = JSON.parse(storedStr);
+                                if (parsed.email) {
+                                    emailToCheck = parsed.email;
+                                    userId = parsed.id;
+                                }
+                            } catch (e) {
+                                console.error("Error parsing sky_admin_user", e);
+                            }
+                        }
+                    }
+                    // 2. Fallback to Supabase auth if not found in localStorage
+                    if (!emailToCheck) {
+                        const { data: { user } } = await __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$src$2f$lib$2f$supabase$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["supabase"].auth.getUser();
+                        if (user && user.email) {
+                            emailToCheck = user.email;
+                            userId = user.id;
+                        }
+                    }
+                    if (emailToCheck) {
+                        // Check if user exists in the 'users' list
+                        const { data } = await __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$src$2f$lib$2f$supabase$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["supabase"].from("users").select("email").eq("email", emailToCheck).maybeSingle();
+                        if (data) {
+                            setIsAuthorizedUser(true);
+                            setLocalUser({
+                                id: userId,
+                                email: emailToCheck
+                            });
+                        }
+                    }
+                }
+            }["BookingRowMenu.useEffect.checkUserAuthorization"];
+            checkUserAuthorization();
+        }
+    }["BookingRowMenu.useEffect"], []);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "BookingRowMenu.useEffect": ()=>{
             const handleClickOutside = {
@@ -4569,12 +4616,12 @@ function BookingRowMenu({ booking, onRefund, onReissue }) {
                     children: "more_vert"
                 }, void 0, false, {
                     fileName: "[project]/skytrips-admin/src/components/BookingRowMenu.tsx",
-                    lineNumber: 109,
+                    lineNumber: 174,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/skytrips-admin/src/components/BookingRowMenu.tsx",
-                lineNumber: 99,
+                lineNumber: 164,
                 columnNumber: 7
             }, this),
             open && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4601,35 +4648,35 @@ function BookingRowMenu({ booking, onRefund, onReissue }) {
                                         children: opt.icon
                                     }, void 0, false, {
                                         fileName: "[project]/skytrips-admin/src/components/BookingRowMenu.tsx",
-                                        lineNumber: 132,
+                                        lineNumber: 197,
                                         columnNumber: 19
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                         children: opt.label
                                     }, void 0, false, {
                                         fileName: "[project]/skytrips-admin/src/components/BookingRowMenu.tsx",
-                                        lineNumber: 135,
+                                        lineNumber: 200,
                                         columnNumber: 19
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/skytrips-admin/src/components/BookingRowMenu.tsx",
-                                lineNumber: 120,
+                                lineNumber: 185,
                                 columnNumber: 17
                             }, this)
                         }, opt.label, false, {
                             fileName: "[project]/skytrips-admin/src/components/BookingRowMenu.tsx",
-                            lineNumber: 119,
+                            lineNumber: 184,
                             columnNumber: 15
                         }, this))
                 }, void 0, false, {
                     fileName: "[project]/skytrips-admin/src/components/BookingRowMenu.tsx",
-                    lineNumber: 117,
+                    lineNumber: 182,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/skytrips-admin/src/components/BookingRowMenu.tsx",
-                lineNumber: 112,
+                lineNumber: 177,
                 columnNumber: 9
             }, this),
             isRefundOpen && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$src$2f$components$2f$RefundConfirmModal$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -4637,8 +4684,9 @@ function BookingRowMenu({ booking, onRefund, onReissue }) {
                 bookingId: booking.id,
                 bookingDate: booking.travelDate || `${booking.IssueDay || ""} ${booking.issueMonth || ""} ${booking.issueYear || ""}`,
                 amount: Number(booking.sellingPrice || booking.buyingPrice || 0),
-                isAuthenticated: isAuthenticated,
+                isAuthenticated: isAuthenticated || !!localUser,
                 onRequireAuth: ()=>setIsSignInPromptOpen(true),
+                hideWarning: isAuthorizedUser,
                 onConfirm: async ()=>{
                     console.log("analytics:event", {
                         type: "refund_confirmed",
@@ -4646,13 +4694,19 @@ function BookingRowMenu({ booking, onRefund, onReissue }) {
                         amount: booking.sellingPrice || booking.buyingPrice || 0
                     });
                     setIsSubmitting(true);
+                    let finalUserId = "";
                     const { data: { session }, error: sessError } = await __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$src$2f$lib$2f$supabase$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["supabase"].auth.getSession();
-                    if (sessError) {
+                    if (session) {
+                        finalUserId = session.user.id;
+                    } else if (localUser && localUser.id) {
+                        finalUserId = localUser.id;
+                    }
+                    if (sessError && !finalUserId) {
                         alert("Authentication check failed");
                         setIsSubmitting(false);
                         return;
                     }
-                    if (!session) {
+                    if (!finalUserId) {
                         alert("Sign in required");
                         setIsSubmitting(false);
                         return;
@@ -4668,28 +4722,22 @@ function BookingRowMenu({ booking, onRefund, onReissue }) {
                         return;
                     }
                     try {
-                        const { error } = await __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$src$2f$lib$2f$supabase$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["supabase"].from("manage_booking").insert([
-                            {
+                        // Use API to create manage booking record with type and details
+                        const res = await fetch("/api/manage-booking", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json"
+                            },
+                            body: JSON.stringify({
                                 uid: pendingUid,
-                                booking_id: String(booking.id),
-                                user_id: session.user.id
-                            }
-                        ]);
-                        if (error) {
-                            const code = error.code;
-                            const message = error.message;
-                            const details = error.details;
-                            const hint = error.hint;
-                            console.error("Insert manage_booking error:", {
-                                code,
-                                message,
-                                details,
-                                hint
-                            });
-                            const friendly = code === "PGRST205" ? "Manage booking table not found. Apply the Supabase SQL migration for 'manage_booking'." : code === "42501" ? "Permission denied by Row Level Security." : message || "Failed to create manage booking record";
-                            alert(friendly);
-                            setIsSubmitting(false);
-                            return;
+                                booking: booking,
+                                user_id: finalUserId,
+                                type: "Refund"
+                            })
+                        });
+                        if (!res.ok) {
+                            const j = await res.json();
+                            throw new Error(j.error || "Failed to create manage booking record");
                         }
                     } catch (e) {
                         console.error("Insert exception:", e instanceof Error ? e.message : e);
@@ -4711,7 +4759,7 @@ function BookingRowMenu({ booking, onRefund, onReissue }) {
                 isProcessing: isSubmitting
             }, void 0, false, {
                 fileName: "[project]/skytrips-admin/src/components/BookingRowMenu.tsx",
-                lineNumber: 143,
+                lineNumber: 208,
                 columnNumber: 9
             }, this),
             isSignInPromptOpen && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$src$2f$components$2f$SignInPromptModal$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -4719,17 +4767,17 @@ function BookingRowMenu({ booking, onRefund, onReissue }) {
                 onClose: ()=>setIsSignInPromptOpen(false)
             }, void 0, false, {
                 fileName: "[project]/skytrips-admin/src/components/BookingRowMenu.tsx",
-                lineNumber: 216,
+                lineNumber: 304,
                 columnNumber: 9
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/skytrips-admin/src/components/BookingRowMenu.tsx",
-        lineNumber: 98,
+        lineNumber: 163,
         columnNumber: 5
     }, this);
 }
-_s(BookingRowMenu, "Sb9xWFYTSQHhY1rCP2tbJguceuM=");
+_s(BookingRowMenu, "/haUtnzLYGChrCXs4fPXWgmR1i0=");
 _c = BookingRowMenu;
 var _c;
 __turbopack_context__.k.register(_c, "BookingRowMenu");
