@@ -27,7 +27,7 @@ function validateConfig() {
     const config = {
         supabase: {
             url: ("TURBOPACK compile-time value", "https://tjrmemmsieltajotxddk.supabase.co") || '',
-            anonKey: ("TURBOPACK compile-time value", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqcm1lbW1zaWVsdGFqb3R4ZGRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwODYxNzQsImV4cCI6MjA4MjY2MjE3NH0.5O8u_mavEgSS17lW8aL08iYQOqsgnAoFAI7PfNNNS5E") || '',
+            anonKey: ("TURBOPACK compile-time value", "sb_publishable_GxUlFYif0EEYIEYCEkqIGg_Xee1B4qZ") || '',
             serviceRoleKey: __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$build$2f$polyfills$2f$process$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"].env.SUPABASE_SERVICE_ROLE_KEY || ''
         }
     };
@@ -136,21 +136,29 @@ __turbopack_context__.s([
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/skytrips-admin/node_modules/next/dist/compiled/react/jsx-dev-runtime.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/skytrips-admin/node_modules/next/dist/compiled/react/index.js [app-client] (ecmascript)");
-var __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$libs$2f$shared$2d$utils$2f$constants$2f$airport$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/skytrips-admin/libs/shared-utils/constants/airport.js [app-client] (ecmascript)");
 ;
 var _s = __turbopack_context__.k.signature();
 "use client";
 ;
-;
 const AirportAutocomplete = ({ label, name, value, onChange, disabled, icon })=>{
     _s();
     const [isOpen, setIsOpen] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
+    const [allAirports, setAllAirports] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
     const [filteredOptions, setFilteredOptions] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
     const [activeIndex, setActiveIndex] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(-1);
     const wrapperRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(null);
     const listboxId = `${name}-listbox`;
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "AirportAutocomplete.useEffect": ()=>{
+            __turbopack_context__.A("[project]/skytrips-admin/libs/shared-utils/constants/airport.js [app-client] (ecmascript, async loader)").then({
+                "AirportAutocomplete.useEffect": (mod)=>{
+                    setAllAirports(mod.airports);
+                }
+            }["AirportAutocomplete.useEffect"]).catch({
+                "AirportAutocomplete.useEffect": ()=>{
+                    setAllAirports([]);
+                }
+            }["AirportAutocomplete.useEffect"]);
             const handleClickOutside = {
                 "AirportAutocomplete.useEffect.handleClickOutside": (event)=>{
                     if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
@@ -166,12 +174,12 @@ const AirportAutocomplete = ({ label, name, value, onChange, disabled, icon })=>
     }["AirportAutocomplete.useEffect"], []);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "AirportAutocomplete.useEffect": ()=>{
-            if (isOpen) {
+            if (isOpen && allAirports.length > 0) {
                 if (!value) {
-                    setFilteredOptions(__TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$libs$2f$shared$2d$utils$2f$constants$2f$airport$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["airports"].slice(0, 50));
+                    setFilteredOptions(allAirports.slice(0, 50));
                 } else {
                     const lower = value.toLowerCase();
-                    const filtered = __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$libs$2f$shared$2d$utils$2f$constants$2f$airport$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["airports"].filter({
+                    const filtered = allAirports.filter({
                         "AirportAutocomplete.useEffect.filtered": (a)=>a.name && a.name.toLowerCase().includes(lower) || a.IATA && a.IATA.toLowerCase().includes(lower) || a.city && a.city.toLowerCase().includes(lower)
                     }["AirportAutocomplete.useEffect.filtered"]);
                     setFilteredOptions(filtered.slice(0, 50));
@@ -180,7 +188,8 @@ const AirportAutocomplete = ({ label, name, value, onChange, disabled, icon })=>
         }
     }["AirportAutocomplete.useEffect"], [
         value,
-        isOpen
+        isOpen,
+        allAirports
     ]);
     const highlight = (text, query)=>{
         const idx = text.toLowerCase().indexOf(query.toLowerCase());
@@ -193,7 +202,7 @@ const AirportAutocomplete = ({ label, name, value, onChange, disabled, icon })=>
                     children: text.slice(idx, idx + query.length)
                 }, void 0, false, {
                     fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-                    lineNumber: 66,
+                    lineNumber: 74,
                     columnNumber: 9
                 }, ("TURBOPACK compile-time value", void 0)),
                 text.slice(idx + query.length)
@@ -235,7 +244,7 @@ const AirportAutocomplete = ({ label, name, value, onChange, disabled, icon })=>
                 children: label
             }, void 0, false, {
                 fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-                lineNumber: 101,
+                lineNumber: 109,
                 columnNumber: 7
             }, ("TURBOPACK compile-time value", void 0)),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -251,12 +260,12 @@ const AirportAutocomplete = ({ label, name, value, onChange, disabled, icon })=>
                             children: icon
                         }, void 0, false, {
                             fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-                            lineNumber: 106,
+                            lineNumber: 114,
                             columnNumber: 11
                         }, ("TURBOPACK compile-time value", void 0))
                     }, void 0, false, {
                         fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-                        lineNumber: 105,
+                        lineNumber: 113,
                         columnNumber: 9
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -279,7 +288,7 @@ const AirportAutocomplete = ({ label, name, value, onChange, disabled, icon })=>
                         autoComplete: "off"
                     }, void 0, false, {
                         fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-                        lineNumber: 110,
+                        lineNumber: 118,
                         columnNumber: 9
                     }, ("TURBOPACK compile-time value", void 0)),
                     value && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -300,18 +309,18 @@ const AirportAutocomplete = ({ label, name, value, onChange, disabled, icon })=>
                             children: "close"
                         }, void 0, false, {
                             fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-                            lineNumber: 139,
+                            lineNumber: 147,
                             columnNumber: 13
                         }, ("TURBOPACK compile-time value", void 0))
                     }, void 0, false, {
                         fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-                        lineNumber: 130,
+                        lineNumber: 138,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0))
                 ]
             }, void 0, true, {
                 fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-                lineNumber: 104,
+                lineNumber: 112,
                 columnNumber: 7
             }, ("TURBOPACK compile-time value", void 0)),
             isOpen && filteredOptions.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("ul", {
@@ -342,7 +351,7 @@ const AirportAutocomplete = ({ label, name, value, onChange, disabled, icon })=>
                                             children: highlight(option.city, value)
                                         }, void 0, false, {
                                             fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-                                            lineNumber: 168,
+                                            lineNumber: 176,
                                             columnNumber: 19
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -350,13 +359,13 @@ const AirportAutocomplete = ({ label, name, value, onChange, disabled, icon })=>
                                             children: highlight(option.name, value)
                                         }, void 0, false, {
                                             fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-                                            lineNumber: 171,
+                                            lineNumber: 179,
                                             columnNumber: 19
                                         }, ("TURBOPACK compile-time value", void 0))
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-                                    lineNumber: 167,
+                                    lineNumber: 175,
                                     columnNumber: 17
                                 }, ("TURBOPACK compile-time value", void 0)),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -364,33 +373,33 @@ const AirportAutocomplete = ({ label, name, value, onChange, disabled, icon })=>
                                     children: highlight(option.IATA, value)
                                 }, void 0, false, {
                                     fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-                                    lineNumber: 175,
+                                    lineNumber: 183,
                                     columnNumber: 17
                                 }, ("TURBOPACK compile-time value", void 0))
                             ]
                         }, void 0, true, {
                             fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-                            lineNumber: 166,
+                            lineNumber: 174,
                             columnNumber: 15
                         }, ("TURBOPACK compile-time value", void 0))
                     }, index, false, {
                         fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-                        lineNumber: 150,
+                        lineNumber: 158,
                         columnNumber: 13
                     }, ("TURBOPACK compile-time value", void 0)))
             }, void 0, false, {
                 fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-                lineNumber: 144,
+                lineNumber: 152,
                 columnNumber: 9
             }, ("TURBOPACK compile-time value", void 0))
         ]
     }, void 0, true, {
         fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-        lineNumber: 100,
+        lineNumber: 108,
         columnNumber: 5
     }, ("TURBOPACK compile-time value", void 0));
 };
-_s(AirportAutocomplete, "GVmE1uCr3LEudSPQXRIexc934gk=");
+_s(AirportAutocomplete, "8Be6vrNMZ9Sd4REjoDfy+h4ngfI=");
 _c = AirportAutocomplete;
 const __TURBOPACK__default__export__ = AirportAutocomplete;
 var _c;
@@ -1980,58 +1989,125 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                     columnNumber: 23
                                                                 }, this),
                                                                 formData.contactType === "new" && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                                    className: "grid grid-cols-1 md:grid-cols-2 gap-8",
+                                                                    className: "space-y-6",
                                                                     children: [
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                            className: "grid grid-cols-1 md:grid-cols-2 gap-8",
                                                                             children: [
-                                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
-                                                                                    className: "block text-sm font-bold text-slate-700 mb-2 tracking-tight",
-                                                                                    htmlFor: "email",
-                                                                                    children: "Email Address"
-                                                                                }, void 0, false, {
-                                                                                    fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                    lineNumber: 844,
-                                                                                    columnNumber: 29
-                                                                                }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                                                    className: "relative rounded-lg shadow-sm",
                                                                                     children: [
-                                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                                                            className: "pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4",
-                                                                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                                                                className: "material-symbols-outlined text-slate-400",
-                                                                                                style: {
-                                                                                                    fontSize: "20px"
-                                                                                                },
-                                                                                                children: "email"
-                                                                                            }, void 0, false, {
-                                                                                                fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                lineNumber: 852,
-                                                                                                columnNumber: 33
-                                                                                            }, this)
+                                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
+                                                                                            className: "block text-sm font-bold text-slate-700 mb-2 tracking-tight",
+                                                                                            htmlFor: "travellerFirstName",
+                                                                                            children: "First Name"
                                                                                         }, void 0, false, {
                                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                            lineNumber: 851,
+                                                                                            lineNumber: 845,
                                                                                             columnNumber: 31
                                                                                         }, this),
-                                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
-                                                                                            className: "block w-full h-12 rounded-lg border-slate-200 pl-11 focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium",
-                                                                                            id: "email",
-                                                                                            name: "email",
-                                                                                            type: "email",
-                                                                                            value: formData.email,
-                                                                                            onChange: handleChange,
-                                                                                            placeholder: "customer@email.com",
-                                                                                            disabled: isReadOnly
-                                                                                        }, void 0, false, {
+                                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                                            className: "relative rounded-lg shadow-sm",
+                                                                                            children: [
+                                                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                                                    className: "pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4",
+                                                                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                                                        className: "material-symbols-outlined text-slate-400",
+                                                                                                        style: {
+                                                                                                            fontSize: "20px"
+                                                                                                        },
+                                                                                                        children: "person"
+                                                                                                    }, void 0, false, {
+                                                                                                        fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
+                                                                                                        lineNumber: 853,
+                                                                                                        columnNumber: 35
+                                                                                                    }, this)
+                                                                                                }, void 0, false, {
+                                                                                                    fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
+                                                                                                    lineNumber: 852,
+                                                                                                    columnNumber: 33
+                                                                                                }, this),
+                                                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
+                                                                                                    className: "block w-full h-12 rounded-lg border-slate-200 pl-11 focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium uppercase",
+                                                                                                    id: "travellerFirstName",
+                                                                                                    name: "travellerFirstName",
+                                                                                                    type: "text",
+                                                                                                    value: formData.travellerFirstName,
+                                                                                                    onChange: handleChange,
+                                                                                                    placeholder: "Given Name",
+                                                                                                    disabled: isReadOnly
+                                                                                                }, void 0, false, {
+                                                                                                    fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
+                                                                                                    lineNumber: 860,
+                                                                                                    columnNumber: 33
+                                                                                                }, this)
+                                                                                            ]
+                                                                                        }, void 0, true, {
                                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                            lineNumber: 859,
+                                                                                            lineNumber: 851,
                                                                                             columnNumber: 31
                                                                                         }, this)
                                                                                     ]
                                                                                 }, void 0, true, {
                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                    lineNumber: 850,
+                                                                                    lineNumber: 844,
+                                                                                    columnNumber: 29
+                                                                                }, this),
+                                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                                    children: [
+                                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
+                                                                                            className: "block text-sm font-bold text-slate-700 mb-2 tracking-tight",
+                                                                                            htmlFor: "travellerLastName",
+                                                                                            children: "Last Name"
+                                                                                        }, void 0, false, {
+                                                                                            fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
+                                                                                            lineNumber: 873,
+                                                                                            columnNumber: 31
+                                                                                        }, this),
+                                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                                            className: "relative rounded-lg shadow-sm",
+                                                                                            children: [
+                                                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                                                    className: "pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4",
+                                                                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                                                        className: "material-symbols-outlined text-slate-400",
+                                                                                                        style: {
+                                                                                                            fontSize: "20px"
+                                                                                                        },
+                                                                                                        children: "person"
+                                                                                                    }, void 0, false, {
+                                                                                                        fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
+                                                                                                        lineNumber: 881,
+                                                                                                        columnNumber: 35
+                                                                                                    }, this)
+                                                                                                }, void 0, false, {
+                                                                                                    fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
+                                                                                                    lineNumber: 880,
+                                                                                                    columnNumber: 33
+                                                                                                }, this),
+                                                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
+                                                                                                    className: "block w-full h-12 rounded-lg border-slate-200 pl-11 focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium uppercase",
+                                                                                                    id: "travellerLastName",
+                                                                                                    name: "travellerLastName",
+                                                                                                    type: "text",
+                                                                                                    value: formData.travellerLastName,
+                                                                                                    onChange: handleChange,
+                                                                                                    placeholder: "Surname",
+                                                                                                    disabled: isReadOnly
+                                                                                                }, void 0, false, {
+                                                                                                    fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
+                                                                                                    lineNumber: 888,
+                                                                                                    columnNumber: 33
+                                                                                                }, this)
+                                                                                            ]
+                                                                                        }, void 0, true, {
+                                                                                            fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
+                                                                                            lineNumber: 879,
+                                                                                            columnNumber: 31
+                                                                                        }, this)
+                                                                                    ]
+                                                                                }, void 0, true, {
+                                                                                    fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
+                                                                                    lineNumber: 872,
                                                                                     columnNumber: 29
                                                                                 }, this)
                                                                             ]
@@ -2041,61 +2117,128 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                             columnNumber: 27
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                            className: "grid grid-cols-1 md:grid-cols-2 gap-8",
                                                                             children: [
-                                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
-                                                                                    className: "block text-sm font-bold text-slate-700 mb-2 tracking-tight",
-                                                                                    htmlFor: "phone",
-                                                                                    children: "Phone Number"
-                                                                                }, void 0, false, {
-                                                                                    fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                    lineNumber: 872,
-                                                                                    columnNumber: 29
-                                                                                }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                                                    className: "relative rounded-lg shadow-sm",
                                                                                     children: [
-                                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                                                                            className: "pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4",
-                                                                                            children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
-                                                                                                className: "material-symbols-outlined text-slate-400",
-                                                                                                style: {
-                                                                                                    fontSize: "20px"
-                                                                                                },
-                                                                                                children: "phone"
-                                                                                            }, void 0, false, {
-                                                                                                fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                lineNumber: 880,
-                                                                                                columnNumber: 33
-                                                                                            }, this)
+                                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
+                                                                                            className: "block text-sm font-bold text-slate-700 mb-2 tracking-tight",
+                                                                                            htmlFor: "email",
+                                                                                            children: "Email Address"
                                                                                         }, void 0, false, {
                                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                            lineNumber: 879,
-                                                                                            columnNumber: 31
+                                                                                            lineNumber: 903,
+                                                                                            columnNumber: 29
                                                                                         }, this),
-                                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
-                                                                                            className: "block w-full h-12 rounded-lg border-slate-200 pl-11 focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium",
-                                                                                            id: "phone",
-                                                                                            name: "phone",
-                                                                                            type: "tel",
-                                                                                            value: formData.phone,
-                                                                                            onChange: handleChange,
-                                                                                            placeholder: "+61 XXX XXX XXX",
-                                                                                            disabled: isReadOnly
-                                                                                        }, void 0, false, {
+                                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                                            className: "relative rounded-lg shadow-sm",
+                                                                                            children: [
+                                                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                                                    className: "pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4",
+                                                                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                                                        className: "material-symbols-outlined text-slate-400",
+                                                                                                        style: {
+                                                                                                            fontSize: "20px"
+                                                                                                        },
+                                                                                                        children: "email"
+                                                                                                    }, void 0, false, {
+                                                                                                        fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
+                                                                                                        lineNumber: 911,
+                                                                                                        columnNumber: 33
+                                                                                                    }, this)
+                                                                                                }, void 0, false, {
+                                                                                                    fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
+                                                                                                    lineNumber: 910,
+                                                                                                    columnNumber: 31
+                                                                                                }, this),
+                                                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
+                                                                                                    className: "block w-full h-12 rounded-lg border-slate-200 pl-11 focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium",
+                                                                                                    id: "email",
+                                                                                                    name: "email",
+                                                                                                    type: "email",
+                                                                                                    value: formData.email,
+                                                                                                    onChange: handleChange,
+                                                                                                    placeholder: "customer@email.com",
+                                                                                                    disabled: isReadOnly
+                                                                                                }, void 0, false, {
+                                                                                                    fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
+                                                                                                    lineNumber: 918,
+                                                                                                    columnNumber: 31
+                                                                                                }, this)
+                                                                                            ]
+                                                                                        }, void 0, true, {
                                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                            lineNumber: 887,
-                                                                                            columnNumber: 31
+                                                                                            lineNumber: 909,
+                                                                                            columnNumber: 29
                                                                                         }, this)
                                                                                     ]
                                                                                 }, void 0, true, {
                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                    lineNumber: 878,
+                                                                                    lineNumber: 902,
                                                                                     columnNumber: 29
+                                                                                }, this),
+                                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                                    children: [
+                                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
+                                                                                            className: "block text-sm font-bold text-slate-700 mb-2 tracking-tight",
+                                                                                            htmlFor: "phone",
+                                                                                            children: "Phone Number"
+                                                                                        }, void 0, false, {
+                                                                                            fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
+                                                                                            lineNumber: 931,
+                                                                                            columnNumber: 29
+                                                                                        }, this),
+                                                                                        /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                                            className: "relative rounded-lg shadow-sm",
+                                                                                            children: [
+                                                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                                                                                    className: "pointer-events-none absolute inset-y-0 left-0 flex items-center pl-4",
+                                                                                                    children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
+                                                                                                        className: "material-symbols-outlined text-slate-400",
+                                                                                                        style: {
+                                                                                                            fontSize: "20px"
+                                                                                                        },
+                                                                                                        children: "phone"
+                                                                                                    }, void 0, false, {
+                                                                                                        fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
+                                                                                                        lineNumber: 939,
+                                                                                                        columnNumber: 33
+                                                                                                    }, this)
+                                                                                                }, void 0, false, {
+                                                                                                    fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
+                                                                                                    lineNumber: 938,
+                                                                                                    columnNumber: 31
+                                                                                                }, this),
+                                                                                                /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
+                                                                                                    className: "block w-full h-12 rounded-lg border-slate-200 pl-11 focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium",
+                                                                                                    id: "phone",
+                                                                                                    name: "phone",
+                                                                                                    type: "tel",
+                                                                                                    value: formData.phone,
+                                                                                                    onChange: handleChange,
+                                                                                                    placeholder: "+61 XXX XXX XXX",
+                                                                                                    disabled: isReadOnly
+                                                                                                }, void 0, false, {
+                                                                                                    fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
+                                                                                                    lineNumber: 946,
+                                                                                                    columnNumber: 31
+                                                                                                }, this)
+                                                                                            ]
+                                                                                        }, void 0, true, {
+                                                                                            fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
+                                                                                            lineNumber: 937,
+                                                                                            columnNumber: 29
+                                                                                        }, this)
+                                                                                    ]
+                                                                                }, void 0, true, {
+                                                                                    fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
+                                                                                    lineNumber: 930,
+                                                                                    columnNumber: 27
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                            lineNumber: 871,
+                                                                            lineNumber: 901,
                                                                             columnNumber: 27
                                                                         }, this)
                                                                     ]
@@ -2129,19 +2272,19 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                         children: "person"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                        lineNumber: 908,
+                                                                        lineNumber: 968,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     "Traveller Information"
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                lineNumber: 907,
+                                                                lineNumber: 967,
                                                                 columnNumber: 23
                                                             }, this)
                                                         }, void 0, false, {
                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                            lineNumber: 906,
+                                                            lineNumber: 966,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2161,14 +2304,14 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                 children: index + 1
                                                                                             }, void 0, false, {
                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                lineNumber: 922,
+                                                                                                lineNumber: 982,
                                                                                                 columnNumber: 31
                                                                                             }, this),
                                                                                             "Traveller Details"
                                                                                         ]
                                                                                     }, void 0, true, {
                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                        lineNumber: 921,
+                                                                                        lineNumber: 981,
                                                                                         columnNumber: 29
                                                                                     }, this),
                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2183,25 +2326,25 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                     children: "delete"
                                                                                                 }, void 0, false, {
                                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                    lineNumber: 934,
+                                                                                                    lineNumber: 994,
                                                                                                     columnNumber: 35
                                                                                                 }, this),
                                                                                                 "Remove"
                                                                                             ]
                                                                                         }, void 0, true, {
                                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                            lineNumber: 929,
+                                                                                            lineNumber: 989,
                                                                                             columnNumber: 33
                                                                                         }, this)
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                        lineNumber: 927,
+                                                                                        lineNumber: 987,
                                                                                         columnNumber: 29
                                                                                     }, this)
                                                                                 ]
                                                                             }, void 0, true, {
                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                lineNumber: 920,
+                                                                                lineNumber: 980,
                                                                                 columnNumber: 27
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2227,12 +2370,12 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                         value: "existing"
                                                                                                     }, void 0, false, {
                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                        lineNumber: 947,
+                                                                                                        lineNumber: 1007,
                                                                                                         columnNumber: 35
                                                                                                     }, this)
                                                                                                 }, void 0, false, {
                                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                    lineNumber: 946,
+                                                                                                    lineNumber: 1006,
                                                                                                     columnNumber: 33
                                                                                                 }, this),
                                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -2241,13 +2384,13 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                     children: "Existing Traveller"
                                                                                                 }, void 0, false, {
                                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                    lineNumber: 960,
+                                                                                                    lineNumber: 1020,
                                                                                                     columnNumber: 33
                                                                                                 }, this)
                                                                                             ]
                                                                                         }, void 0, true, {
                                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                            lineNumber: 945,
+                                                                                            lineNumber: 1005,
                                                                                             columnNumber: 31
                                                                                         }, this),
                                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2268,12 +2411,12 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                         value: "new"
                                                                                                     }, void 0, false, {
                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                        lineNumber: 969,
+                                                                                                        lineNumber: 1029,
                                                                                                         columnNumber: 35
                                                                                                     }, this)
                                                                                                 }, void 0, false, {
                                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                    lineNumber: 968,
+                                                                                                    lineNumber: 1028,
                                                                                                     columnNumber: 33
                                                                                                 }, this),
                                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -2282,24 +2425,24 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                     children: "New Traveller"
                                                                                                 }, void 0, false, {
                                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                    lineNumber: 982,
+                                                                                                    lineNumber: 1042,
                                                                                                     columnNumber: 33
                                                                                                 }, this)
                                                                                             ]
                                                                                         }, void 0, true, {
                                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                            lineNumber: 967,
+                                                                                            lineNumber: 1027,
                                                                                             columnNumber: 31
                                                                                         }, this)
                                                                                     ]
                                                                                 }, void 0, true, {
                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                    lineNumber: 944,
+                                                                                    lineNumber: 1004,
                                                                                     columnNumber: 29
                                                                                 }, this)
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                lineNumber: 943,
+                                                                                lineNumber: 1003,
                                                                                 columnNumber: 27
                                                                             }, this),
                                                                             travellerType === "existing" && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2310,7 +2453,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                         children: "Search Existing Traveller"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                        lineNumber: 994,
+                                                                                        lineNumber: 1054,
                                                                                         columnNumber: 31
                                                                                     }, this),
                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$src$2f$components$2f$TravellerSearch$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -2319,7 +2462,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                         }
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                        lineNumber: 997,
+                                                                                        lineNumber: 1057,
                                                                                         columnNumber: 31
                                                                                     }, this),
                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2327,13 +2470,13 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                         children: "Select a traveller to auto-fill their details."
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                        lineNumber: 1002,
+                                                                                        lineNumber: 1062,
                                                                                         columnNumber: 31
                                                                                     }, this)
                                                                                 ]
                                                                             }, void 0, true, {
                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                lineNumber: 993,
+                                                                                lineNumber: 1053,
                                                                                 columnNumber: 29
                                                                             }, this),
                                                                             (travellerType === "new" || travellerType === "existing" && traveller.firstName) && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2347,7 +2490,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                 children: "First Name"
                                                                                             }, void 0, false, {
                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                lineNumber: 1013,
+                                                                                                lineNumber: 1073,
                                                                                                 columnNumber: 33
                                                                                             }, this),
                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -2358,13 +2501,13 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                 placeholder: "Given Name"
                                                                                             }, void 0, false, {
                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                lineNumber: 1016,
+                                                                                                lineNumber: 1076,
                                                                                                 columnNumber: 33
                                                                                             }, this)
                                                                                         ]
                                                                                     }, void 0, true, {
                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                        lineNumber: 1012,
+                                                                                        lineNumber: 1072,
                                                                                         columnNumber: 31
                                                                                     }, this),
                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2375,7 +2518,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                 children: "Last Name"
                                                                                             }, void 0, false, {
                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                lineNumber: 1031,
+                                                                                                lineNumber: 1091,
                                                                                                 columnNumber: 33
                                                                                             }, this),
                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -2386,13 +2529,13 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                 placeholder: "Surname"
                                                                                             }, void 0, false, {
                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                lineNumber: 1034,
+                                                                                                lineNumber: 1094,
                                                                                                 columnNumber: 33
                                                                                             }, this)
                                                                                         ]
                                                                                     }, void 0, true, {
                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                        lineNumber: 1030,
+                                                                                        lineNumber: 1090,
                                                                                         columnNumber: 31
                                                                                     }, this),
                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2405,7 +2548,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                         children: "Passport Number"
                                                                                                     }, void 0, false, {
                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                        lineNumber: 1050,
+                                                                                                        lineNumber: 1110,
                                                                                                         columnNumber: 35
                                                                                                     }, this),
                                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2421,12 +2564,12 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                                     children: "badge"
                                                                                                                 }, void 0, false, {
                                                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                    lineNumber: 1055,
+                                                                                                                    lineNumber: 1115,
                                                                                                                     columnNumber: 39
                                                                                                                 }, this)
                                                                                                             }, void 0, false, {
                                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                lineNumber: 1054,
+                                                                                                                lineNumber: 1114,
                                                                                                                 columnNumber: 37
                                                                                                             }, this),
                                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -2437,19 +2580,19 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                                 placeholder: "e.g. A1234567X"
                                                                                                             }, void 0, false, {
                                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                lineNumber: 1062,
+                                                                                                                lineNumber: 1122,
                                                                                                                 columnNumber: 37
                                                                                                             }, this)
                                                                                                         ]
                                                                                                     }, void 0, true, {
                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                        lineNumber: 1053,
+                                                                                                        lineNumber: 1113,
                                                                                                         columnNumber: 35
                                                                                                     }, this)
                                                                                                 ]
                                                                                             }, void 0, true, {
                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                lineNumber: 1049,
+                                                                                                lineNumber: 1109,
                                                                                                 columnNumber: 33
                                                                                             }, this),
                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2459,7 +2602,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                         children: "Passport Expiry Date"
                                                                                                     }, void 0, false, {
                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                        lineNumber: 1078,
+                                                                                                        lineNumber: 1138,
                                                                                                         columnNumber: 35
                                                                                                     }, this),
                                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -2470,19 +2613,19 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                         disabled: isReadOnly
                                                                                                     }, void 0, false, {
                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                        lineNumber: 1081,
+                                                                                                        lineNumber: 1141,
                                                                                                         columnNumber: 35
                                                                                                     }, this)
                                                                                                 ]
                                                                                             }, void 0, true, {
                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                lineNumber: 1077,
+                                                                                                lineNumber: 1137,
                                                                                                 columnNumber: 33
                                                                                             }, this)
                                                                                         ]
                                                                                     }, void 0, true, {
                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                        lineNumber: 1048,
+                                                                                        lineNumber: 1108,
                                                                                         columnNumber: 31
                                                                                     }, this),
                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2495,7 +2638,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                         children: "Nationality"
                                                                                                     }, void 0, false, {
                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                        lineNumber: 1098,
+                                                                                                        lineNumber: 1158,
                                                                                                         columnNumber: 35
                                                                                                     }, this),
                                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
@@ -2508,18 +2651,18 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                                 children: c.label
                                                                                                             }, c.value, false, {
                                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                lineNumber: 1114,
+                                                                                                                lineNumber: 1174,
                                                                                                                 columnNumber: 39
                                                                                                             }, this))
                                                                                                     }, void 0, false, {
                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                        lineNumber: 1101,
+                                                                                                        lineNumber: 1161,
                                                                                                         columnNumber: 35
                                                                                                     }, this)
                                                                                                 ]
                                                                                             }, void 0, true, {
                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                lineNumber: 1097,
+                                                                                                lineNumber: 1157,
                                                                                                 columnNumber: 33
                                                                                             }, this),
                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2529,7 +2672,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                         children: "Date of Birth"
                                                                                                     }, void 0, false, {
                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                        lineNumber: 1121,
+                                                                                                        lineNumber: 1181,
                                                                                                         columnNumber: 35
                                                                                                     }, this),
                                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -2540,13 +2683,13 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                         disabled: isReadOnly
                                                                                                     }, void 0, false, {
                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                        lineNumber: 1124,
+                                                                                                        lineNumber: 1184,
                                                                                                         columnNumber: 35
                                                                                                     }, this)
                                                                                                 ]
                                                                                             }, void 0, true, {
                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                lineNumber: 1120,
+                                                                                                lineNumber: 1180,
                                                                                                 columnNumber: 33
                                                                                             }, this),
                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2556,7 +2699,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                         children: "E-Ticket Number"
                                                                                                     }, void 0, false, {
                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                        lineNumber: 1139,
+                                                                                                        lineNumber: 1199,
                                                                                                         columnNumber: 35
                                                                                                     }, this),
                                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2572,12 +2715,12 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                                     children: "confirmation_number"
                                                                                                                 }, void 0, false, {
                                                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                    lineNumber: 1144,
+                                                                                                                    lineNumber: 1204,
                                                                                                                     columnNumber: 39
                                                                                                                 }, this)
                                                                                                             }, void 0, false, {
                                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                lineNumber: 1143,
+                                                                                                                lineNumber: 1203,
                                                                                                                 columnNumber: 37
                                                                                                             }, this),
                                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -2588,19 +2731,19 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                                 placeholder: "E-Ticket No."
                                                                                                             }, void 0, false, {
                                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                lineNumber: 1151,
+                                                                                                                lineNumber: 1211,
                                                                                                                 columnNumber: 37
                                                                                                             }, this)
                                                                                                         ]
                                                                                                     }, void 0, true, {
                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                        lineNumber: 1142,
+                                                                                                        lineNumber: 1202,
                                                                                                         columnNumber: 35
                                                                                                     }, this)
                                                                                                 ]
                                                                                             }, void 0, true, {
                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                lineNumber: 1138,
+                                                                                                lineNumber: 1198,
                                                                                                 columnNumber: 33
                                                                                             }, this),
                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("label", {
@@ -2616,12 +2759,12 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                             disabled: isReadOnly
                                                                                                         }, void 0, false, {
                                                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                            lineNumber: 1168,
+                                                                                                            lineNumber: 1228,
                                                                                                             columnNumber: 37
                                                                                                         }, this)
                                                                                                     }, void 0, false, {
                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                        lineNumber: 1167,
+                                                                                                        lineNumber: 1227,
                                                                                                         columnNumber: 35
                                                                                                     }, this),
                                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2631,7 +2774,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                                 children: "Save to Travellers Database"
                                                                                                             }, void 0, false, {
                                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                lineNumber: 1185,
+                                                                                                                lineNumber: 1245,
                                                                                                                 columnNumber: 37
                                                                                                             }, this),
                                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -2639,37 +2782,37 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                                 children: "Add this person to your saved travellers list for future bookings."
                                                                                                             }, void 0, false, {
                                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                lineNumber: 1188,
+                                                                                                                lineNumber: 1248,
                                                                                                                 columnNumber: 37
                                                                                                             }, this)
                                                                                                         ]
                                                                                                     }, void 0, true, {
                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                        lineNumber: 1184,
+                                                                                                        lineNumber: 1244,
                                                                                                         columnNumber: 35
                                                                                                     }, this)
                                                                                                 ]
                                                                                             }, void 0, true, {
                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                lineNumber: 1166,
+                                                                                                lineNumber: 1226,
                                                                                                 columnNumber: 33
                                                                                             }, this)
                                                                                         ]
                                                                                     }, void 0, true, {
                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                        lineNumber: 1096,
+                                                                                        lineNumber: 1156,
                                                                                         columnNumber: 31
                                                                                     }, this)
                                                                                 ]
                                                                             }, void 0, true, {
                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                lineNumber: 1011,
+                                                                                lineNumber: 1071,
                                                                                 columnNumber: 29
                                                                             }, this)
                                                                         ]
                                                                     }, traveller.id || index, true, {
                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                        lineNumber: 916,
+                                                                        lineNumber: 976,
                                                                         columnNumber: 25
                                                                     }, this)),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -2682,26 +2825,26 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                             children: "person_add"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                            lineNumber: 1205,
+                                                                            lineNumber: 1265,
                                                                             columnNumber: 25
                                                                         }, this),
                                                                         "Add Another Traveller"
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                    lineNumber: 1200,
+                                                                    lineNumber: 1260,
                                                                     columnNumber: 23
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                            lineNumber: 914,
+                                                            lineNumber: 974,
                                                             columnNumber: 21
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                    lineNumber: 905,
+                                                    lineNumber: 965,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2717,19 +2860,19 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                         children: "flight_takeoff"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                        lineNumber: 1217,
+                                                                        lineNumber: 1277,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     "Route & Trip Details"
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                lineNumber: 1216,
+                                                                lineNumber: 1276,
                                                                 columnNumber: 23
                                                             }, this)
                                                         }, void 0, false, {
                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                            lineNumber: 1215,
+                                                            lineNumber: 1275,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2745,7 +2888,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                     children: "Trip Type"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                    lineNumber: 1226,
+                                                                                    lineNumber: 1286,
                                                                                     columnNumber: 27
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
@@ -2759,33 +2902,33 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                             children: "One Way"
                                                                                         }, void 0, false, {
                                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                            lineNumber: 1236,
+                                                                                            lineNumber: 1296,
                                                                                             columnNumber: 29
                                                                                         }, this),
                                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
                                                                                             children: "Round Trip"
                                                                                         }, void 0, false, {
                                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                            lineNumber: 1237,
+                                                                                            lineNumber: 1297,
                                                                                             columnNumber: 29
                                                                                         }, this),
                                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
                                                                                             children: "Multi City"
                                                                                         }, void 0, false, {
                                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                            lineNumber: 1238,
+                                                                                            lineNumber: 1298,
                                                                                             columnNumber: 29
                                                                                         }, this)
                                                                                     ]
                                                                                 }, void 0, true, {
                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                    lineNumber: 1229,
+                                                                                    lineNumber: 1289,
                                                                                     columnNumber: 27
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                            lineNumber: 1225,
+                                                                            lineNumber: 1285,
                                                                             columnNumber: 25
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2798,7 +2941,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                             children: "Departure Date"
                                                                                         }, void 0, false, {
                                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                            lineNumber: 1243,
+                                                                                            lineNumber: 1303,
                                                                                             columnNumber: 29
                                                                                         }, this),
                                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -2810,13 +2953,13 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                             disabled: isReadOnly
                                                                                         }, void 0, false, {
                                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                            lineNumber: 1246,
+                                                                                            lineNumber: 1306,
                                                                                             columnNumber: 29
                                                                                         }, this)
                                                                                     ]
                                                                                 }, void 0, true, {
                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                    lineNumber: 1242,
+                                                                                    lineNumber: 1302,
                                                                                     columnNumber: 27
                                                                                 }, this),
                                                                                 formData.tripType === "Round Trip" && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2826,7 +2969,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                             children: "Return Date"
                                                                                         }, void 0, false, {
                                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                            lineNumber: 1257,
+                                                                                            lineNumber: 1317,
                                                                                             columnNumber: 31
                                                                                         }, this),
                                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -2838,19 +2981,19 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                             disabled: isReadOnly
                                                                                         }, void 0, false, {
                                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                            lineNumber: 1260,
+                                                                                            lineNumber: 1320,
                                                                                             columnNumber: 31
                                                                                         }, this)
                                                                                     ]
                                                                                 }, void 0, true, {
                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                    lineNumber: 1256,
+                                                                                    lineNumber: 1316,
                                                                                     columnNumber: 29
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                            lineNumber: 1241,
+                                                                            lineNumber: 1301,
                                                                             columnNumber: 25
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2863,12 +3006,12 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                 icon: "flight_takeoff"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                lineNumber: 1272,
+                                                                                lineNumber: 1332,
                                                                                 columnNumber: 27
                                                                             }, this)
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                            lineNumber: 1271,
+                                                                            lineNumber: 1331,
                                                                             columnNumber: 25
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2881,18 +3024,18 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                 icon: "flight_land"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                lineNumber: 1282,
+                                                                                lineNumber: 1342,
                                                                                 columnNumber: 27
                                                                             }, this)
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                            lineNumber: 1281,
+                                                                            lineNumber: 1341,
                                                                             columnNumber: 25
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                    lineNumber: 1224,
+                                                                    lineNumber: 1284,
                                                                     columnNumber: 23
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2907,12 +3050,12 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                         children: itinIndex === 0 ? "Outbound Flight Segments" : "Return Flight Segments"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                        lineNumber: 1301,
+                                                                                        lineNumber: 1361,
                                                                                         columnNumber: 31
                                                                                     }, this)
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                    lineNumber: 1300,
+                                                                                    lineNumber: 1360,
                                                                                     columnNumber: 29
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2930,12 +3073,12 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                             children: "delete"
                                                                                                         }, void 0, false, {
                                                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                            lineNumber: 1321,
+                                                                                                            lineNumber: 1381,
                                                                                                             columnNumber: 37
                                                                                                         }, this)
                                                                                                     }, void 0, false, {
                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                        lineNumber: 1314,
+                                                                                                        lineNumber: 1374,
                                                                                                         columnNumber: 35
                                                                                                     }, this),
                                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2949,7 +3092,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                                         children: "Departure"
                                                                                                                     }, void 0, false, {
                                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                        lineNumber: 1329,
+                                                                                                                        lineNumber: 1389,
                                                                                                                         columnNumber: 39
                                                                                                                     }, this),
                                                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -2962,7 +3105,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                                                 onChange: (e)=>handleSegmentChange(itinIndex, segIndex, "departure", e.target.value, "iataCode")
                                                                                                                             }, void 0, false, {
                                                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                                lineNumber: 1333,
+                                                                                                                                lineNumber: 1393,
                                                                                                                                 columnNumber: 41
                                                                                                                             }, this),
                                                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -2972,7 +3115,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                                                 onChange: (e)=>handleSegmentChange(itinIndex, segIndex, "departure", e.target.value, "terminal")
                                                                                                                             }, void 0, false, {
                                                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                                lineNumber: 1347,
+                                                                                                                                lineNumber: 1407,
                                                                                                                                 columnNumber: 41
                                                                                                                             }, this),
                                                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -2982,19 +3125,19 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                                                 onChange: (e)=>handleSegmentChange(itinIndex, segIndex, "departure", e.target.value, "at")
                                                                                                                             }, void 0, false, {
                                                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                                lineNumber: 1361,
+                                                                                                                                lineNumber: 1421,
                                                                                                                                 columnNumber: 41
                                                                                                                             }, this)
                                                                                                                         ]
                                                                                                                     }, void 0, true, {
                                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                        lineNumber: 1332,
+                                                                                                                        lineNumber: 1392,
                                                                                                                         columnNumber: 39
                                                                                                                     }, this)
                                                                                                                 ]
                                                                                                             }, void 0, true, {
                                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                lineNumber: 1328,
+                                                                                                                lineNumber: 1388,
                                                                                                                 columnNumber: 37
                                                                                                             }, this),
                                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3005,7 +3148,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                                         children: "Arrival"
                                                                                                                     }, void 0, false, {
                                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                        lineNumber: 1380,
+                                                                                                                        lineNumber: 1440,
                                                                                                                         columnNumber: 39
                                                                                                                     }, this),
                                                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3018,7 +3161,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                                                 onChange: (e)=>handleSegmentChange(itinIndex, segIndex, "arrival", e.target.value, "iataCode")
                                                                                                                             }, void 0, false, {
                                                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                                lineNumber: 1384,
+                                                                                                                                lineNumber: 1444,
                                                                                                                                 columnNumber: 41
                                                                                                                             }, this),
                                                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -3028,7 +3171,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                                                 onChange: (e)=>handleSegmentChange(itinIndex, segIndex, "arrival", e.target.value, "terminal")
                                                                                                                             }, void 0, false, {
                                                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                                lineNumber: 1398,
+                                                                                                                                lineNumber: 1458,
                                                                                                                                 columnNumber: 41
                                                                                                                             }, this),
                                                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -3038,25 +3181,25 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                                                 onChange: (e)=>handleSegmentChange(itinIndex, segIndex, "arrival", e.target.value, "at")
                                                                                                                             }, void 0, false, {
                                                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                                lineNumber: 1412,
+                                                                                                                                lineNumber: 1472,
                                                                                                                                 columnNumber: 41
                                                                                                                             }, this)
                                                                                                                         ]
                                                                                                                     }, void 0, true, {
                                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                        lineNumber: 1383,
+                                                                                                                        lineNumber: 1443,
                                                                                                                         columnNumber: 39
                                                                                                                     }, this)
                                                                                                                 ]
                                                                                                             }, void 0, true, {
                                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                lineNumber: 1379,
+                                                                                                                lineNumber: 1439,
                                                                                                                 columnNumber: 37
                                                                                                             }, this)
                                                                                                         ]
                                                                                                     }, void 0, true, {
                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                        lineNumber: 1326,
+                                                                                                        lineNumber: 1386,
                                                                                                         columnNumber: 35
                                                                                                     }, this),
                                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3069,7 +3212,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                                         children: "Carrier"
                                                                                                                     }, void 0, false, {
                                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                        lineNumber: 1432,
+                                                                                                                        lineNumber: 1492,
                                                                                                                         columnNumber: 39
                                                                                                                     }, this),
                                                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -3079,13 +3222,13 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                                         onChange: (e)=>handleSegmentChange(itinIndex, segIndex, "carrierCode", e.target.value)
                                                                                                                     }, void 0, false, {
                                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                        lineNumber: 1435,
+                                                                                                                        lineNumber: 1495,
                                                                                                                         columnNumber: 39
                                                                                                                     }, this)
                                                                                                                 ]
                                                                                                             }, void 0, true, {
                                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                lineNumber: 1431,
+                                                                                                                lineNumber: 1491,
                                                                                                                 columnNumber: 37
                                                                                                             }, this),
                                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3095,7 +3238,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                                         children: "Flight No."
                                                                                                                     }, void 0, false, {
                                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                        lineNumber: 1450,
+                                                                                                                        lineNumber: 1510,
                                                                                                                         columnNumber: 39
                                                                                                                     }, this),
                                                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -3105,13 +3248,13 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                                         onChange: (e)=>handleSegmentChange(itinIndex, segIndex, "number", e.target.value)
                                                                                                                     }, void 0, false, {
                                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                        lineNumber: 1453,
+                                                                                                                        lineNumber: 1513,
                                                                                                                         columnNumber: 39
                                                                                                                     }, this)
                                                                                                                 ]
                                                                                                             }, void 0, true, {
                                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                lineNumber: 1449,
+                                                                                                                lineNumber: 1509,
                                                                                                                 columnNumber: 37
                                                                                                             }, this),
                                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3121,7 +3264,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                                         children: "Aircraft"
                                                                                                                     }, void 0, false, {
                                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                        lineNumber: 1468,
+                                                                                                                        lineNumber: 1528,
                                                                                                                         columnNumber: 39
                                                                                                                     }, this),
                                                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -3131,13 +3274,13 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                                         onChange: (e)=>handleSegmentChange(itinIndex, segIndex, "aircraft", e.target.value, "code")
                                                                                                                     }, void 0, false, {
                                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                        lineNumber: 1471,
+                                                                                                                        lineNumber: 1531,
                                                                                                                         columnNumber: 39
                                                                                                                     }, this)
                                                                                                                 ]
                                                                                                             }, void 0, true, {
                                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                lineNumber: 1467,
+                                                                                                                lineNumber: 1527,
                                                                                                                 columnNumber: 37
                                                                                                             }, this),
                                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3147,7 +3290,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                                         children: "Duration"
                                                                                                                     }, void 0, false, {
                                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                        lineNumber: 1487,
+                                                                                                                        lineNumber: 1547,
                                                                                                                         columnNumber: 39
                                                                                                                     }, this),
                                                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -3157,25 +3300,25 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                                         onChange: (e)=>handleSegmentChange(itinIndex, segIndex, "duration", e.target.value)
                                                                                                                     }, void 0, false, {
                                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                        lineNumber: 1490,
+                                                                                                                        lineNumber: 1550,
                                                                                                                         columnNumber: 39
                                                                                                                     }, this)
                                                                                                                 ]
                                                                                                             }, void 0, true, {
                                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                                lineNumber: 1486,
+                                                                                                                lineNumber: 1546,
                                                                                                                 columnNumber: 37
                                                                                                             }, this)
                                                                                                         ]
                                                                                                     }, void 0, true, {
                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                        lineNumber: 1430,
+                                                                                                        lineNumber: 1490,
                                                                                                         columnNumber: 35
                                                                                                     }, this)
                                                                                                 ]
                                                                                             }, segIndex, true, {
                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                lineNumber: 1310,
+                                                                                                lineNumber: 1370,
                                                                                                 columnNumber: 33
                                                                                             }, this)),
                                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -3188,31 +3331,31 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                     children: "add"
                                                                                                 }, void 0, false, {
                                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                    lineNumber: 1512,
+                                                                                                    lineNumber: 1572,
                                                                                                     columnNumber: 33
                                                                                                 }, this),
                                                                                                 "Add Flight Segment"
                                                                                             ]
                                                                                         }, void 0, true, {
                                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                            lineNumber: 1507,
+                                                                                            lineNumber: 1567,
                                                                                             columnNumber: 31
                                                                                         }, this)
                                                                                     ]
                                                                                 }, void 0, true, {
                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                    lineNumber: 1308,
+                                                                                    lineNumber: 1368,
                                                                                     columnNumber: 29
                                                                                 }, this)
                                                                             ]
                                                                         }, itinIndex, true, {
                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                            lineNumber: 1296,
+                                                                            lineNumber: 1356,
                                                                             columnNumber: 27
                                                                         }, this))
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                    lineNumber: 1294,
+                                                                    lineNumber: 1354,
                                                                     columnNumber: 23
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3225,12 +3368,12 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                 children: "Global Flight Details"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                lineNumber: 1524,
+                                                                                lineNumber: 1584,
                                                                                 columnNumber: 27
                                                                             }, this)
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                            lineNumber: 1523,
+                                                                            lineNumber: 1583,
                                                                             columnNumber: 25
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3247,12 +3390,12 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                         icon: "airlines"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                        lineNumber: 1530,
+                                                                                        lineNumber: 1590,
                                                                                         columnNumber: 29
                                                                                     }, this)
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                    lineNumber: 1529,
+                                                                                    lineNumber: 1589,
                                                                                     columnNumber: 27
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3263,7 +3406,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                             children: "Class"
                                                                                         }, void 0, false, {
                                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                            lineNumber: 1540,
+                                                                                            lineNumber: 1600,
                                                                                             columnNumber: 29
                                                                                         }, this),
                                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
@@ -3277,52 +3420,52 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                     children: "Economy"
                                                                                                 }, void 0, false, {
                                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                    lineNumber: 1550,
+                                                                                                    lineNumber: 1610,
                                                                                                     columnNumber: 31
                                                                                                 }, this),
                                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
                                                                                                     children: "Premium Economy"
                                                                                                 }, void 0, false, {
                                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                    lineNumber: 1551,
+                                                                                                    lineNumber: 1611,
                                                                                                     columnNumber: 31
                                                                                                 }, this),
                                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
                                                                                                     children: "Business"
                                                                                                 }, void 0, false, {
                                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                    lineNumber: 1552,
+                                                                                                    lineNumber: 1612,
                                                                                                     columnNumber: 31
                                                                                                 }, this),
                                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
                                                                                                     children: "First Class"
                                                                                                 }, void 0, false, {
                                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                    lineNumber: 1553,
+                                                                                                    lineNumber: 1613,
                                                                                                     columnNumber: 31
                                                                                                 }, this)
                                                                                             ]
                                                                                         }, void 0, true, {
                                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                            lineNumber: 1543,
+                                                                                            lineNumber: 1603,
                                                                                             columnNumber: 29
                                                                                         }, this)
                                                                                     ]
                                                                                 }, void 0, true, {
                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                    lineNumber: 1539,
+                                                                                    lineNumber: 1599,
                                                                                     columnNumber: 27
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                            lineNumber: 1528,
+                                                                            lineNumber: 1588,
                                                                             columnNumber: 25
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                    lineNumber: 1522,
+                                                                    lineNumber: 1582,
                                                                     columnNumber: 23
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3335,7 +3478,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                 children: "info"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                lineNumber: 1561,
+                                                                                lineNumber: 1621,
                                                                                 columnNumber: 27
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3345,7 +3488,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                         children: "Itinerary Modification"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                        lineNumber: 1565,
+                                                                                        lineNumber: 1625,
                                                                                         columnNumber: 29
                                                                                     }, this),
                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -3353,36 +3496,36 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                         children: "Changing origin, destination, or dates may affect pricing. Ensure to re-calculate fares after modifying the itinerary."
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                        lineNumber: 1568,
+                                                                                        lineNumber: 1628,
                                                                                         columnNumber: 29
                                                                                     }, this)
                                                                                 ]
                                                                             }, void 0, true, {
                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                lineNumber: 1564,
+                                                                                lineNumber: 1624,
                                                                                 columnNumber: 27
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                        lineNumber: 1560,
+                                                                        lineNumber: 1620,
                                                                         columnNumber: 25
                                                                     }, this)
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                    lineNumber: 1559,
+                                                                    lineNumber: 1619,
                                                                     columnNumber: 23
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                            lineNumber: 1223,
+                                                            lineNumber: 1283,
                                                             columnNumber: 21
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                    lineNumber: 1214,
+                                                    lineNumber: 1274,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3398,19 +3541,19 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                         children: "extension"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                        lineNumber: 1583,
+                                                                        lineNumber: 1643,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     "Add-ons & Services"
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                lineNumber: 1582,
+                                                                lineNumber: 1642,
                                                                 columnNumber: 23
                                                             }, this)
                                                         }, void 0, false, {
                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                            lineNumber: 1581,
+                                                            lineNumber: 1641,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3426,7 +3569,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                 children: "Ancillary Services"
                                                                             }, void 0, false, {
                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                lineNumber: 1592,
+                                                                                lineNumber: 1652,
                                                                                 columnNumber: 27
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3446,7 +3589,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                         onChange: handleChange
                                                                                                     }, void 0, false, {
                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                        lineNumber: 1598,
+                                                                                                        lineNumber: 1658,
                                                                                                         columnNumber: 33
                                                                                                     }, this),
                                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -3454,13 +3597,13 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                         children: "Meals"
                                                                                                     }, void 0, false, {
                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                        lineNumber: 1605,
+                                                                                                        lineNumber: 1665,
                                                                                                         columnNumber: 33
                                                                                                     }, this)
                                                                                                 ]
                                                                                             }, void 0, true, {
                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                lineNumber: 1597,
+                                                                                                lineNumber: 1657,
                                                                                                 columnNumber: 31
                                                                                             }, this),
                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -3473,20 +3616,20 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                         children: "tune"
                                                                                                     }, void 0, false, {
                                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                        lineNumber: 1614,
+                                                                                                        lineNumber: 1674,
                                                                                                         columnNumber: 33
                                                                                                     }, this),
                                                                                                     "Options"
                                                                                                 ]
                                                                                             }, void 0, true, {
                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                lineNumber: 1609,
+                                                                                                lineNumber: 1669,
                                                                                                 columnNumber: 31
                                                                                             }, this)
                                                                                         ]
                                                                                     }, void 0, true, {
                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                        lineNumber: 1596,
+                                                                                        lineNumber: 1656,
                                                                                         columnNumber: 29
                                                                                     }, this),
                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3499,12 +3642,12 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                     children: "$"
                                                                                                 }, void 0, false, {
                                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                    lineNumber: 1622,
+                                                                                                    lineNumber: 1682,
                                                                                                     columnNumber: 33
                                                                                                 }, this)
                                                                                             }, void 0, false, {
                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                lineNumber: 1621,
+                                                                                                lineNumber: 1681,
                                                                                                 columnNumber: 31
                                                                                             }, this),
                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -3516,19 +3659,19 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                 type: "number"
                                                                                             }, void 0, false, {
                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                lineNumber: 1626,
+                                                                                                lineNumber: 1686,
                                                                                                 columnNumber: 31
                                                                                             }, this)
                                                                                         ]
                                                                                     }, void 0, true, {
                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                        lineNumber: 1620,
+                                                                                        lineNumber: 1680,
                                                                                         columnNumber: 29
                                                                                     }, this)
                                                                                 ]
                                                                             }, void 0, true, {
                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                lineNumber: 1595,
+                                                                                lineNumber: 1655,
                                                                                 columnNumber: 27
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3545,7 +3688,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                 onChange: handleChange
                                                                                             }, void 0, false, {
                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                lineNumber: 1639,
+                                                                                                lineNumber: 1699,
                                                                                                 columnNumber: 31
                                                                                             }, this),
                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -3553,13 +3696,13 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                 children: "Wheelchair"
                                                                                             }, void 0, false, {
                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                lineNumber: 1646,
+                                                                                                lineNumber: 1706,
                                                                                                 columnNumber: 31
                                                                                             }, this)
                                                                                         ]
                                                                                     }, void 0, true, {
                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                        lineNumber: 1638,
+                                                                                        lineNumber: 1698,
                                                                                         columnNumber: 29
                                                                                     }, this),
                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3572,12 +3715,12 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                     children: "$"
                                                                                                 }, void 0, false, {
                                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                    lineNumber: 1652,
+                                                                                                    lineNumber: 1712,
                                                                                                     columnNumber: 33
                                                                                                 }, this)
                                                                                             }, void 0, false, {
                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                lineNumber: 1651,
+                                                                                                lineNumber: 1711,
                                                                                                 columnNumber: 31
                                                                                             }, this),
                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -3589,19 +3732,19 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                 type: "number"
                                                                                             }, void 0, false, {
                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                lineNumber: 1656,
+                                                                                                lineNumber: 1716,
                                                                                                 columnNumber: 31
                                                                                             }, this)
                                                                                         ]
                                                                                     }, void 0, true, {
                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                        lineNumber: 1650,
+                                                                                        lineNumber: 1710,
                                                                                         columnNumber: 29
                                                                                     }, this)
                                                                                 ]
                                                                             }, void 0, true, {
                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                lineNumber: 1637,
+                                                                                lineNumber: 1697,
                                                                                 columnNumber: 27
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3612,7 +3755,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                         children: "Add-ons Subtotal"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                        lineNumber: 1667,
+                                                                                        lineNumber: 1727,
                                                                                         columnNumber: 29
                                                                                     }, this),
                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3623,19 +3766,19 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                         ]
                                                                                     }, void 0, true, {
                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                        lineNumber: 1670,
+                                                                                        lineNumber: 1730,
                                                                                         columnNumber: 29
                                                                                     }, this)
                                                                                 ]
                                                                             }, void 0, true, {
                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                lineNumber: 1666,
+                                                                                lineNumber: 1726,
                                                                                 columnNumber: 27
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                        lineNumber: 1591,
+                                                                        lineNumber: 1651,
                                                                         columnNumber: 25
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3649,7 +3792,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                         children: "Frequent Flyer Number"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                        lineNumber: 1677,
+                                                                                        lineNumber: 1737,
                                                                                         columnNumber: 29
                                                                                     }, this),
                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3665,12 +3808,12 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                     children: "loyalty"
                                                                                                 }, void 0, false, {
                                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                    lineNumber: 1685,
+                                                                                                    lineNumber: 1745,
                                                                                                     columnNumber: 33
                                                                                                 }, this)
                                                                                             }, void 0, false, {
                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                lineNumber: 1684,
+                                                                                                lineNumber: 1744,
                                                                                                 columnNumber: 31
                                                                                             }, this),
                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -3684,19 +3827,19 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                 disabled: isReadOnly
                                                                                             }, void 0, false, {
                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                lineNumber: 1692,
+                                                                                                lineNumber: 1752,
                                                                                                 columnNumber: 31
                                                                                             }, this)
                                                                                         ]
                                                                                     }, void 0, true, {
                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                        lineNumber: 1683,
+                                                                                        lineNumber: 1743,
                                                                                         columnNumber: 29
                                                                                     }, this)
                                                                                 ]
                                                                             }, void 0, true, {
                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                lineNumber: 1676,
+                                                                                lineNumber: 1736,
                                                                                 columnNumber: 27
                                                                             }, this),
                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3706,7 +3849,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                         children: "Seat Selection"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                        lineNumber: 1705,
+                                                                                        lineNumber: 1765,
                                                                                         columnNumber: 29
                                                                                     }, this),
                                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3720,7 +3863,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                 children: "event_seat"
                                                                                             }, void 0, false, {
                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                lineNumber: 1709,
+                                                                                                lineNumber: 1769,
                                                                                                 columnNumber: 31
                                                                                             }, this),
                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -3728,7 +3871,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                 children: "Select Premium Seat"
                                                                                             }, void 0, false, {
                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                lineNumber: 1715,
+                                                                                                lineNumber: 1775,
                                                                                                 columnNumber: 31
                                                                                             }, this),
                                                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -3736,42 +3879,42 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                                 children: "FROM $25.00"
                                                                                             }, void 0, false, {
                                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                                lineNumber: 1718,
+                                                                                                lineNumber: 1778,
                                                                                                 columnNumber: 31
                                                                                             }, this)
                                                                                         ]
                                                                                     }, void 0, true, {
                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                        lineNumber: 1708,
+                                                                                        lineNumber: 1768,
                                                                                         columnNumber: 29
                                                                                     }, this)
                                                                                 ]
                                                                             }, void 0, true, {
                                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                lineNumber: 1704,
+                                                                                lineNumber: 1764,
                                                                                 columnNumber: 27
                                                                             }, this)
                                                                         ]
                                                                     }, void 0, true, {
                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                        lineNumber: 1675,
+                                                                        lineNumber: 1735,
                                                                         columnNumber: 25
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                lineNumber: 1590,
+                                                                lineNumber: 1650,
                                                                 columnNumber: 23
                                                             }, this)
                                                         }, void 0, false, {
                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                            lineNumber: 1589,
+                                                            lineNumber: 1649,
                                                             columnNumber: 21
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                    lineNumber: 1580,
+                                                    lineNumber: 1640,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
@@ -3793,12 +3936,12 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                 children: "Booking Details"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                lineNumber: 1734,
+                                                                lineNumber: 1794,
                                                                 columnNumber: 23
                                                             }, this)
                                                         }, void 0, false, {
                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                            lineNumber: 1733,
+                                                            lineNumber: 1793,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3811,7 +3954,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                             children: "ID Ref (Read Only)"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                            lineNumber: 1740,
+                                                                            lineNumber: 1800,
                                                                             columnNumber: 25
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -3821,13 +3964,13 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                             value: booking?.id ? `#${booking.id}` : "NEW"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                            lineNumber: 1743,
+                                                                            lineNumber: 1803,
                                                                             columnNumber: 25
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                    lineNumber: 1739,
+                                                                    lineNumber: 1799,
                                                                     columnNumber: 23
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3838,7 +3981,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                             children: "PNR Reference"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                            lineNumber: 1751,
+                                                                            lineNumber: 1811,
                                                                             columnNumber: 25
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -3850,13 +3993,13 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                             disabled: isReadOnly
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                            lineNumber: 1757,
+                                                                            lineNumber: 1817,
                                                                             columnNumber: 25
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                    lineNumber: 1750,
+                                                                    lineNumber: 1810,
                                                                     columnNumber: 23
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3867,7 +4010,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                             children: "Issued through"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                            lineNumber: 1767,
+                                                                            lineNumber: 1827,
                                                                             columnNumber: 25
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
@@ -3882,7 +4025,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                     children: agenciesLoading ? "Loading agencies..." : "Select issuing agency"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                    lineNumber: 1780,
+                                                                                    lineNumber: 1840,
                                                                                     columnNumber: 27
                                                                                 }, this),
                                                                                 agencies.map((agency)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -3890,19 +4033,19 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                         children: agency.agency_name
                                                                                     }, agency.uid, false, {
                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                        lineNumber: 1786,
+                                                                                        lineNumber: 1846,
                                                                                         columnNumber: 29
                                                                                     }, this))
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                            lineNumber: 1773,
+                                                                            lineNumber: 1833,
                                                                             columnNumber: 25
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                    lineNumber: 1766,
+                                                                    lineNumber: 1826,
                                                                     columnNumber: 23
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3913,7 +4056,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                             children: "Issued By"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                            lineNumber: 1793,
+                                                                            lineNumber: 1853,
                                                                             columnNumber: 25
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
@@ -3928,7 +4071,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                     children: usersLoading ? "Loading users..." : "Select user"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                    lineNumber: 1806,
+                                                                                    lineNumber: 1866,
                                                                                     columnNumber: 27
                                                                                 }, this),
                                                                                 users.map((user)=>/*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -3936,19 +4079,19 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                         children: user.first_name && user.last_name ? `${user.first_name} ${user.last_name}` : user.username || user.email
                                                                                     }, user.id, false, {
                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                        lineNumber: 1810,
+                                                                                        lineNumber: 1870,
                                                                                         columnNumber: 29
                                                                                     }, this))
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                            lineNumber: 1799,
+                                                                            lineNumber: 1859,
                                                                             columnNumber: 25
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                    lineNumber: 1792,
+                                                                    lineNumber: 1852,
                                                                     columnNumber: 23
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -3959,7 +4102,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                             children: "Booking Status"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                            lineNumber: 1826,
+                                                                            lineNumber: 1886,
                                                                             columnNumber: 25
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
@@ -3973,45 +4116,45 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                     children: "Confirmed"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                    lineNumber: 1839,
+                                                                                    lineNumber: 1899,
                                                                                     columnNumber: 27
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
                                                                                     children: "Pending"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                    lineNumber: 1840,
+                                                                                    lineNumber: 1900,
                                                                                     columnNumber: 27
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
                                                                                     children: "Cancelled"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                    lineNumber: 1841,
+                                                                                    lineNumber: 1901,
                                                                                     columnNumber: 27
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                            lineNumber: 1832,
+                                                                            lineNumber: 1892,
                                                                             columnNumber: 25
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                    lineNumber: 1825,
+                                                                    lineNumber: 1885,
                                                                     columnNumber: 23
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                            lineNumber: 1738,
+                                                            lineNumber: 1798,
                                                             columnNumber: 21
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                    lineNumber: 1732,
+                                                    lineNumber: 1792,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4024,12 +4167,12 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                 children: "Financials Summary"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                lineNumber: 1850,
+                                                                lineNumber: 1910,
                                                                 columnNumber: 23
                                                             }, this)
                                                         }, void 0, false, {
                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                            lineNumber: 1849,
+                                                            lineNumber: 1909,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4043,7 +4186,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                             children: "Payment Status"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                            lineNumber: 1856,
+                                                                            lineNumber: 1916,
                                                                             columnNumber: 25
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
@@ -4057,33 +4200,33 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                     children: "Paid"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                    lineNumber: 1869,
+                                                                                    lineNumber: 1929,
                                                                                     columnNumber: 27
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
                                                                                     children: "Pending"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                    lineNumber: 1870,
+                                                                                    lineNumber: 1930,
                                                                                     columnNumber: 27
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
                                                                                     children: "Refunded"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                    lineNumber: 1871,
+                                                                                    lineNumber: 1931,
                                                                                     columnNumber: 27
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                            lineNumber: 1862,
+                                                                            lineNumber: 1922,
                                                                             columnNumber: 25
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                    lineNumber: 1855,
+                                                                    lineNumber: 1915,
                                                                     columnNumber: 23
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4094,7 +4237,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                             children: "Cost Price ($)"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                            lineNumber: 1875,
+                                                                            lineNumber: 1935,
                                                                             columnNumber: 25
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4107,12 +4250,12 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                         children: "$"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                        lineNumber: 1883,
+                                                                                        lineNumber: 1943,
                                                                                         columnNumber: 29
                                                                                     }, this)
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                    lineNumber: 1882,
+                                                                                    lineNumber: 1942,
                                                                                     columnNumber: 27
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -4125,19 +4268,19 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                     disabled: isReadOnly
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                    lineNumber: 1885,
+                                                                                    lineNumber: 1945,
                                                                                     columnNumber: 27
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                            lineNumber: 1881,
+                                                                            lineNumber: 1941,
                                                                             columnNumber: 25
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                    lineNumber: 1874,
+                                                                    lineNumber: 1934,
                                                                     columnNumber: 23
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4148,7 +4291,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                             children: "Selling Price ($)"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                            lineNumber: 1897,
+                                                                            lineNumber: 1957,
                                                                             columnNumber: 25
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4161,12 +4304,12 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                         children: "$"
                                                                                     }, void 0, false, {
                                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                        lineNumber: 1905,
+                                                                                        lineNumber: 1965,
                                                                                         columnNumber: 29
                                                                                     }, this)
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                    lineNumber: 1904,
+                                                                                    lineNumber: 1964,
                                                                                     columnNumber: 27
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -4179,19 +4322,19 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                     disabled: isReadOnly
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                    lineNumber: 1907,
+                                                                                    lineNumber: 1967,
                                                                                     columnNumber: 27
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                            lineNumber: 1903,
+                                                                            lineNumber: 1963,
                                                                             columnNumber: 25
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                    lineNumber: 1896,
+                                                                    lineNumber: 1956,
                                                                     columnNumber: 23
                                                                 }, this),
                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4205,7 +4348,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                     children: "Net Cost"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                    lineNumber: 1921,
+                                                                                    lineNumber: 1981,
                                                                                     columnNumber: 27
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -4216,13 +4359,13 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                     ]
                                                                                 }, void 0, true, {
                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                    lineNumber: 1924,
+                                                                                    lineNumber: 1984,
                                                                                     columnNumber: 27
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                            lineNumber: 1920,
+                                                                            lineNumber: 1980,
                                                                             columnNumber: 25
                                                                         }, this),
                                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4233,7 +4376,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                     children: "Grand Total"
                                                                                 }, void 0, false, {
                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                    lineNumber: 1929,
+                                                                                    lineNumber: 1989,
                                                                                     columnNumber: 27
                                                                                 }, this),
                                                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -4244,31 +4387,31 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                                     ]
                                                                                 }, void 0, true, {
                                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                                    lineNumber: 1932,
+                                                                                    lineNumber: 1992,
                                                                                     columnNumber: 27
                                                                                 }, this)
                                                                             ]
                                                                         }, void 0, true, {
                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                            lineNumber: 1928,
+                                                                            lineNumber: 1988,
                                                                             columnNumber: 25
                                                                         }, this)
                                                                     ]
                                                                 }, void 0, true, {
                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                    lineNumber: 1919,
+                                                                    lineNumber: 1979,
                                                                     columnNumber: 23
                                                                 }, this)
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                            lineNumber: 1854,
+                                                            lineNumber: 1914,
                                                             columnNumber: 21
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                    lineNumber: 1848,
+                                                    lineNumber: 1908,
                                                     columnNumber: 19
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4284,14 +4427,14 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                                     children: "save"
                                                                 }, void 0, false, {
                                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                                    lineNumber: 1947,
+                                                                    lineNumber: 2007,
                                                                     columnNumber: 23
                                                                 }, this),
                                                                 isLoading ? "SAVING..." : "SAVE CHANGES"
                                                             ]
                                                         }, void 0, true, {
                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                            lineNumber: 1942,
+                                                            lineNumber: 2002,
                                                             columnNumber: 21
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -4301,19 +4444,19 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                             children: "CANCEL"
                                                         }, void 0, false, {
                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                            lineNumber: 1952,
+                                                            lineNumber: 2012,
                                                             columnNumber: 21
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                    lineNumber: 1941,
+                                                    lineNumber: 2001,
                                                     columnNumber: 19
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                            lineNumber: 1730,
+                                            lineNumber: 1790,
                                             columnNumber: 17
                                         }, this)
                                     ]
@@ -4351,7 +4494,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                         onClick: ()=>setIsMealModalOpen(false)
                     }, void 0, false, {
                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                        lineNumber: 1970,
+                        lineNumber: 2030,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4367,7 +4510,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                 children: "Select Meal Options"
                                             }, void 0, false, {
                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                lineNumber: 1977,
+                                                lineNumber: 2037,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -4375,13 +4518,13 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                 children: "Premium Flight Services"
                                             }, void 0, false, {
                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                lineNumber: 1980,
+                                                lineNumber: 2040,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                        lineNumber: 1976,
+                                        lineNumber: 2036,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -4392,18 +4535,18 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                             children: "close"
                                         }, void 0, false, {
                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                            lineNumber: 1988,
+                                            lineNumber: 2048,
                                             columnNumber: 17
                                         }, this)
                                     }, void 0, false, {
                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                        lineNumber: 1984,
+                                        lineNumber: 2044,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                lineNumber: 1975,
+                                lineNumber: 2035,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4445,12 +4588,12 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                     className: "w-5 h-5 text-primary border-slate-300 focus:ring-primary cursor-pointer"
                                                 }, void 0, false, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                    lineNumber: 2026,
+                                                    lineNumber: 2086,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                lineNumber: 2025,
+                                                lineNumber: 2085,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4460,7 +4603,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                         children: meal.name
                                                     }, void 0, false, {
                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                        lineNumber: 2033,
+                                                        lineNumber: 2093,
                                                         columnNumber: 21
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -4468,24 +4611,24 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                                         children: meal.desc
                                                     }, void 0, false, {
                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                        lineNumber: 2036,
+                                                        lineNumber: 2096,
                                                         columnNumber: 21
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                                lineNumber: 2032,
+                                                lineNumber: 2092,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, meal.id, true, {
                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                        lineNumber: 2021,
+                                        lineNumber: 2081,
                                         columnNumber: 17
                                     }, this))
                             }, void 0, false, {
                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                lineNumber: 1993,
+                                lineNumber: 2053,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -4497,7 +4640,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                         children: "CLOSE"
                                     }, void 0, false, {
                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                        lineNumber: 2044,
+                                        lineNumber: 2104,
                                         columnNumber: 15
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -4506,25 +4649,25 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
                                         children: "CONFIRM SELECTION"
                                     }, void 0, false, {
                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                        lineNumber: 2050,
+                                        lineNumber: 2110,
                                         columnNumber: 15
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                                lineNumber: 2043,
+                                lineNumber: 2103,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                        lineNumber: 1974,
+                        lineNumber: 2034,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/BookingModal.tsx",
-                lineNumber: 1969,
+                lineNumber: 2029,
                 columnNumber: 9
             }, this)
         ]
@@ -5399,7 +5542,7 @@ function BookingPage() {
                 search: debouncedSearch
             });
             console.log("Supabase URL:", ("TURBOPACK compile-time value", "https://tjrmemmsieltajotxddk.supabase.co"));
-            console.log("Has Anon Key:", !!("TURBOPACK compile-time value", "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRqcm1lbW1zaWVsdGFqb3R4ZGRrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjcwODYxNzQsImV4cCI6MjA4MjY2MjE3NH0.5O8u_mavEgSS17lW8aL08iYQOqsgnAoFAI7PfNNNS5E"));
+            console.log("Has Anon Key:", !!("TURBOPACK compile-time value", "sb_publishable_GxUlFYif0EEYIEYCEkqIGg_Xee1B4qZ"));
             let query = __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$src$2f$lib$2f$supabase$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["supabase"].from("bookings").select("*", {
                 count: "exact"
             });
@@ -5530,14 +5673,68 @@ function BookingPage() {
     const handleSave = async (booking)=>{
         setActionLoading(-1);
         try {
+            let bookingToSave = {
+                ...booking
+            };
+            // Handle New Customer Creation logic
+            if (booking.contactType === 'new' && booking.email) {
+                console.log("Processing new customer creation for:", booking.email);
+                // 1. Check if customer already exists
+                const { data: existingCustomer, error: searchError } = await __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$src$2f$lib$2f$supabase$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["supabase"].from('customers').select('id').eq('email', booking.email).single();
+                if (searchError && searchError.code !== 'PGRST116') {
+                    // PGRST116 is "Row not found" - ignore that, but log others
+                    console.error("Error searching for existing customer:", searchError);
+                }
+                let customerIdToUse = existingCustomer?.id;
+                if (!customerIdToUse) {
+                    // 2. Create new customer
+                    const firstName = booking.travellerFirstName || booking.travellers?.[0]?.firstName || 'Unknown';
+                    const lastName = booking.travellerLastName || booking.travellers?.[0]?.lastName || 'Traveller';
+                    const newCustomer = {
+                        firstName,
+                        lastName,
+                        email: booking.email,
+                        phone: booking.phone || '',
+                        country: booking.nationality || 'Nepalese',
+                        isActive: 'true',
+                        isVerified: 'false',
+                        userType: 'Traveler',
+                        isDisabled: 'false',
+                        phoneCountryCode: '+977',
+                        dateOfBirth: booking.travellers?.[0]?.dob || booking.dob || '',
+                        gender: 'N/A',
+                        address: {},
+                        passport: {
+                            number: booking.passportNumber || booking.travellers?.[0]?.passportNumber || '',
+                            expiryDate: booking.passportExpiry || booking.travellers?.[0]?.passportExpiry || '',
+                            issueCountry: booking.nationality || 'Nepalese'
+                        }
+                    };
+                    const { data: createdCustomer, error: createError } = await __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$src$2f$lib$2f$supabase$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["supabase"].from('customers').insert([
+                        newCustomer
+                    ]).select("id").single();
+                    if (createError) {
+                        console.error("Failed to create new customer:", createError);
+                        throw new Error(`Failed to create customer profile: ${createError.message}`);
+                    }
+                    console.log("New customer created successfully:", createdCustomer.id);
+                    customerIdToUse = createdCustomer.id;
+                } else {
+                    console.log("Customer already exists, linking to ID:", customerIdToUse);
+                }
+                // Update booking with the customer ID
+                bookingToSave.customerid = customerIdToUse;
+            // Also update the 'customer' object in the booking to reflect the link immediately in UI if needed
+            // bookingToSave.customer = { id: customerIdToUse, ... } as any; 
+            }
             if (editingBooking?.id) {
                 // Update
-                const { error: updateError } = await __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$src$2f$lib$2f$supabase$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["supabase"].from("bookings").update(booking).eq("id", editingBooking.id);
+                const { error: updateError } = await __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$src$2f$lib$2f$supabase$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["supabase"].from("bookings").update(bookingToSave).eq("id", editingBooking.id);
                 if (updateError) throw updateError;
             } else {
                 // Create
                 const { error: createError } = await __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$src$2f$lib$2f$supabase$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["supabase"].from("bookings").insert([
-                    booking
+                    bookingToSave
                 ]);
                 if (createError) throw createError;
                 // Send confirmation email
@@ -5575,6 +5772,7 @@ function BookingPage() {
             await fetchBookings();
         } catch (err) {
             alert(err.message || "Failed to save booking");
+            console.error(err);
         } finally{
             setActionLoading(null);
         }
@@ -5613,7 +5811,7 @@ function BookingPage() {
                         className: "animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"
                     }, void 0, false, {
                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                        lineNumber: 296,
+                        lineNumber: 368,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -5621,18 +5819,18 @@ function BookingPage() {
                         children: "Loading bookings..."
                     }, void 0, false, {
                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                        lineNumber: 297,
+                        lineNumber: 369,
                         columnNumber: 11
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                lineNumber: 295,
+                lineNumber: 367,
                 columnNumber: 9
             }, this)
         }, void 0, false, {
             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-            lineNumber: 294,
+            lineNumber: 366,
             columnNumber: 7
         }, this);
     }
@@ -5648,7 +5846,7 @@ function BookingPage() {
                             children: "Dashboard"
                         }, void 0, false, {
                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                            lineNumber: 308,
+                            lineNumber: 380,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
@@ -5657,12 +5855,12 @@ function BookingPage() {
                                 children: "chevron_right"
                             }, void 0, false, {
                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                lineNumber: 310,
+                                lineNumber: 382,
                                 columnNumber: 13
                             }, this)
                         }, void 0, false, {
                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                            lineNumber: 309,
+                            lineNumber: 381,
                             columnNumber: 11
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("li", {
@@ -5670,18 +5868,18 @@ function BookingPage() {
                             children: "Bookings"
                         }, void 0, false, {
                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                            lineNumber: 314,
+                            lineNumber: 386,
                             columnNumber: 11
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                    lineNumber: 307,
+                    lineNumber: 379,
                     columnNumber: 9
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                lineNumber: 306,
+                lineNumber: 378,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5694,7 +5892,7 @@ function BookingPage() {
                                 children: "Bookings"
                             }, void 0, false, {
                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                lineNumber: 321,
+                                lineNumber: 393,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -5702,13 +5900,13 @@ function BookingPage() {
                                 children: "Manage and track all customer flight reservations."
                             }, void 0, false, {
                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                lineNumber: 324,
+                                lineNumber: 396,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                        lineNumber: 320,
+                        lineNumber: 392,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -5720,26 +5918,26 @@ function BookingPage() {
                                 children: "add"
                             }, void 0, false, {
                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                lineNumber: 332,
+                                lineNumber: 404,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                                 children: "New Booking"
                             }, void 0, false, {
                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                lineNumber: 333,
+                                lineNumber: 405,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                        lineNumber: 328,
+                        lineNumber: 400,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                lineNumber: 319,
+                lineNumber: 391,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5753,7 +5951,7 @@ function BookingPage() {
                                 children: "search"
                             }, void 0, false, {
                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                lineNumber: 340,
+                                lineNumber: 412,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
@@ -5764,13 +5962,13 @@ function BookingPage() {
                                 onChange: (e)=>setSearchTerm(e.target.value)
                             }, void 0, false, {
                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                lineNumber: 343,
+                                lineNumber: 415,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                        lineNumber: 339,
+                        lineNumber: 411,
                         columnNumber: 9
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5784,7 +5982,7 @@ function BookingPage() {
                                         children: "All Statuses"
                                     }, void 0, false, {
                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                        lineNumber: 353,
+                                        lineNumber: 425,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -5792,7 +5990,7 @@ function BookingPage() {
                                         children: "Confirmed"
                                     }, void 0, false, {
                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                        lineNumber: 354,
+                                        lineNumber: 426,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -5800,7 +5998,7 @@ function BookingPage() {
                                         children: "Pending"
                                     }, void 0, false, {
                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                        lineNumber: 355,
+                                        lineNumber: 427,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -5808,13 +6006,13 @@ function BookingPage() {
                                         children: "Cancelled"
                                     }, void 0, false, {
                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                        lineNumber: 356,
+                                        lineNumber: 428,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                lineNumber: 352,
+                                lineNumber: 424,
                                 columnNumber: 11
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -5825,7 +6023,7 @@ function BookingPage() {
                                         children: "filter_list"
                                     }, void 0, false, {
                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                        lineNumber: 359,
+                                        lineNumber: 431,
                                         columnNumber: 13
                                     }, this),
                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -5833,25 +6031,25 @@ function BookingPage() {
                                         children: "More Filters"
                                     }, void 0, false, {
                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                        lineNumber: 362,
+                                        lineNumber: 434,
                                         columnNumber: 13
                                     }, this)
                                 ]
                             }, void 0, true, {
                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                lineNumber: 358,
+                                lineNumber: 430,
                                 columnNumber: 11
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                        lineNumber: 351,
+                        lineNumber: 423,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                lineNumber: 338,
+                lineNumber: 410,
                 columnNumber: 7
             }, this),
             error && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5864,7 +6062,7 @@ function BookingPage() {
                             children: "error"
                         }, void 0, false, {
                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                            lineNumber: 371,
+                            lineNumber: 443,
                             columnNumber: 13
                         }, this),
                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5874,7 +6072,7 @@ function BookingPage() {
                                     children: "Error Loading Bookings"
                                 }, void 0, false, {
                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                    lineNumber: 375,
+                                    lineNumber: 447,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("p", {
@@ -5882,7 +6080,7 @@ function BookingPage() {
                                     children: error
                                 }, void 0, false, {
                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                    lineNumber: 378,
+                                    lineNumber: 450,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5894,7 +6092,7 @@ function BookingPage() {
                                             children: "Retry"
                                         }, void 0, false, {
                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                            lineNumber: 380,
+                                            lineNumber: 452,
                                             columnNumber: 17
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("a", {
@@ -5903,30 +6101,30 @@ function BookingPage() {
                                             children: "Run Diagnostics"
                                         }, void 0, false, {
                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                            lineNumber: 386,
+                                            lineNumber: 458,
                                             columnNumber: 17
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                    lineNumber: 379,
+                                    lineNumber: 451,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                            lineNumber: 374,
+                            lineNumber: 446,
                             columnNumber: 13
                         }, this)
                     ]
                 }, void 0, true, {
                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                    lineNumber: 370,
+                    lineNumber: 442,
                     columnNumber: 11
                 }, this)
             }, void 0, false, {
                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                lineNumber: 369,
+                lineNumber: 441,
                 columnNumber: 9
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -5940,7 +6138,7 @@ function BookingPage() {
                                 children: "No bookings found"
                             }, void 0, false, {
                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                lineNumber: 402,
+                                lineNumber: 474,
                                 columnNumber: 13
                             }, this),
                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -5949,13 +6147,13 @@ function BookingPage() {
                                 children: "Create Your First Booking"
                             }, void 0, false, {
                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                lineNumber: 405,
+                                lineNumber: 477,
                                 columnNumber: 13
                             }, this)
                         ]
                     }, void 0, true, {
                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                        lineNumber: 401,
+                        lineNumber: 473,
                         columnNumber: 11
                     }, this) : /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
                         className: "overflow-x-auto",
@@ -5979,12 +6177,12 @@ function BookingPage() {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                    lineNumber: 429,
+                                                    lineNumber: 501,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                lineNumber: 417,
+                                                lineNumber: 489,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -6000,12 +6198,12 @@ function BookingPage() {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                    lineNumber: 446,
+                                                    lineNumber: 518,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                lineNumber: 434,
+                                                lineNumber: 506,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -6021,12 +6219,12 @@ function BookingPage() {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                    lineNumber: 463,
+                                                    lineNumber: 535,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                lineNumber: 451,
+                                                lineNumber: 523,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -6042,12 +6240,12 @@ function BookingPage() {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                    lineNumber: 480,
+                                                    lineNumber: 552,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                lineNumber: 468,
+                                                lineNumber: 540,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -6063,12 +6261,12 @@ function BookingPage() {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                    lineNumber: 497,
+                                                    lineNumber: 569,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                lineNumber: 485,
+                                                lineNumber: 557,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -6084,12 +6282,12 @@ function BookingPage() {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                    lineNumber: 514,
+                                                    lineNumber: 586,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                lineNumber: 502,
+                                                lineNumber: 574,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -6105,12 +6303,12 @@ function BookingPage() {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                    lineNumber: 531,
+                                                    lineNumber: 603,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                lineNumber: 519,
+                                                lineNumber: 591,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -6126,12 +6324,12 @@ function BookingPage() {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                    lineNumber: 548,
+                                                    lineNumber: 620,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                lineNumber: 536,
+                                                lineNumber: 608,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -6147,12 +6345,12 @@ function BookingPage() {
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                    lineNumber: 565,
+                                                    lineNumber: 637,
                                                     columnNumber: 21
                                                 }, this)
                                             }, void 0, false, {
                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                lineNumber: 553,
+                                                lineNumber: 625,
                                                 columnNumber: 19
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("th", {
@@ -6160,18 +6358,18 @@ function BookingPage() {
                                                 children: "Actions"
                                             }, void 0, false, {
                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                lineNumber: 570,
+                                                lineNumber: 642,
                                                 columnNumber: 19
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                        lineNumber: 416,
+                                        lineNumber: 488,
                                         columnNumber: 17
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                    lineNumber: 415,
+                                    lineNumber: 487,
                                     columnNumber: 15
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("tbody", {
@@ -6184,7 +6382,7 @@ function BookingPage() {
                                                     children: booking.id
                                                 }, void 0, false, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                    lineNumber: 579,
+                                                    lineNumber: 651,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6194,12 +6392,12 @@ function BookingPage() {
                                                         children: booking.travellerLastName || booking.travellers?.[0]?.lastName || "N/A"
                                                     }, void 0, false, {
                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                        lineNumber: 583,
+                                                        lineNumber: 655,
                                                         columnNumber: 23
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                    lineNumber: 582,
+                                                    lineNumber: 654,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6214,7 +6412,7 @@ function BookingPage() {
                                                                 }
                                                             }, void 0, false, {
                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                                lineNumber: 591,
+                                                                lineNumber: 663,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -6222,18 +6420,18 @@ function BookingPage() {
                                                                 children: booking.travellerFirstName || booking.travellers?.[0]?.firstName || "N/A"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                                lineNumber: 607,
+                                                                lineNumber: 679,
                                                                 columnNumber: 25
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                        lineNumber: 590,
+                                                        lineNumber: 662,
                                                         columnNumber: 23
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                    lineNumber: 589,
+                                                    lineNumber: 661,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6243,12 +6441,12 @@ function BookingPage() {
                                                         children: booking.airlines
                                                     }, void 0, false, {
                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                        lineNumber: 615,
+                                                        lineNumber: 687,
                                                         columnNumber: 23
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                    lineNumber: 614,
+                                                    lineNumber: 686,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6258,12 +6456,12 @@ function BookingPage() {
                                                         children: booking.sellingPrice || booking.buyingPrice || "0.00"
                                                     }, void 0, false, {
                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                        lineNumber: 618,
+                                                        lineNumber: 690,
                                                         columnNumber: 23
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                    lineNumber: 617,
+                                                    lineNumber: 689,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6273,12 +6471,12 @@ function BookingPage() {
                                                         children: booking.tripType
                                                     }, void 0, false, {
                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                        lineNumber: 623,
+                                                        lineNumber: 695,
                                                         columnNumber: 23
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                    lineNumber: 622,
+                                                    lineNumber: 694,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6288,12 +6486,12 @@ function BookingPage() {
                                                         children: booking.PNR
                                                     }, void 0, false, {
                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                        lineNumber: 626,
+                                                        lineNumber: 698,
                                                         columnNumber: 23
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                    lineNumber: 625,
+                                                    lineNumber: 697,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6306,7 +6504,7 @@ function BookingPage() {
                                                                 children: booking.departureDate || booking.travelDate || `${booking.IssueDay || ""} ${booking.issueMonth || ""} ${booking.issueYear || ""}`
                                                             }, void 0, false, {
                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                                lineNumber: 632,
+                                                                lineNumber: 704,
                                                                 columnNumber: 25
                                                             }, this),
                                                             booking.returnDate && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -6317,18 +6515,18 @@ function BookingPage() {
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                                lineNumber: 640,
+                                                                lineNumber: 712,
                                                                 columnNumber: 27
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                        lineNumber: 631,
+                                                        lineNumber: 703,
                                                         columnNumber: 23
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                    lineNumber: 630,
+                                                    lineNumber: 702,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6341,7 +6539,7 @@ function BookingPage() {
                                                                 children: booking.origin
                                                             }, void 0, false, {
                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                                lineNumber: 648,
+                                                                lineNumber: 720,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -6349,7 +6547,7 @@ function BookingPage() {
                                                                 children: "arrow_forward"
                                                             }, void 0, false, {
                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                                lineNumber: 651,
+                                                                lineNumber: 723,
                                                                 columnNumber: 25
                                                             }, this),
                                                             booking.transit && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["Fragment"], {
@@ -6359,7 +6557,7 @@ function BookingPage() {
                                                                         children: booking.transit
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                                        lineNumber: 656,
+                                                                        lineNumber: 728,
                                                                         columnNumber: 29
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -6367,7 +6565,7 @@ function BookingPage() {
                                                                         children: "arrow_forward"
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                                        lineNumber: 659,
+                                                                        lineNumber: 731,
                                                                         columnNumber: 29
                                                                     }, this)
                                                                 ]
@@ -6377,18 +6575,18 @@ function BookingPage() {
                                                                 children: booking.destination
                                                             }, void 0, false, {
                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                                lineNumber: 664,
+                                                                lineNumber: 736,
                                                                 columnNumber: 25
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                        lineNumber: 647,
+                                                        lineNumber: 719,
                                                         columnNumber: 23
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                    lineNumber: 646,
+                                                    lineNumber: 718,
                                                     columnNumber: 21
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("td", {
@@ -6409,12 +6607,12 @@ function BookingPage() {
                                                                             children: "visibility"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                                            lineNumber: 678,
+                                                                            lineNumber: 750,
                                                                             columnNumber: 29
                                                                         }, this)
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                                        lineNumber: 672,
+                                                                        lineNumber: 744,
                                                                         columnNumber: 27
                                                                     }, this),
                                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -6427,18 +6625,18 @@ function BookingPage() {
                                                                             children: "edit"
                                                                         }, void 0, false, {
                                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                                            lineNumber: 692,
+                                                                            lineNumber: 764,
                                                                             columnNumber: 29
                                                                         }, this)
                                                                     }, void 0, false, {
                                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                                        lineNumber: 682,
+                                                                        lineNumber: 754,
                                                                         columnNumber: 27
                                                                     }, this)
                                                                 ]
                                                             }, void 0, true, {
                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                                lineNumber: 671,
+                                                                lineNumber: 743,
                                                                 columnNumber: 25
                                                             }, this),
                                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$src$2f$components$2f$BookingRowMenu$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -6447,40 +6645,40 @@ function BookingPage() {
                                                                 onReissue: ()=>router.push(`/dashboard/booking/`)
                                                             }, void 0, false, {
                                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                                lineNumber: 697,
+                                                                lineNumber: 769,
                                                                 columnNumber: 25
                                                             }, this)
                                                         ]
                                                     }, void 0, true, {
                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                        lineNumber: 670,
+                                                        lineNumber: 742,
                                                         columnNumber: 23
                                                     }, this)
                                                 }, void 0, false, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                    lineNumber: 669,
+                                                    lineNumber: 741,
                                                     columnNumber: 21
                                                 }, this)
                                             ]
                                         }, booking.id, true, {
                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                            lineNumber: 575,
+                                            lineNumber: 647,
                                             columnNumber: 19
                                         }, this))
                                 }, void 0, false, {
                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                    lineNumber: 573,
+                                    lineNumber: 645,
                                     columnNumber: 15
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                            lineNumber: 414,
+                            lineNumber: 486,
                             columnNumber: 13
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                        lineNumber: 413,
+                        lineNumber: 485,
                         columnNumber: 11
                     }, this),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6501,7 +6699,7 @@ function BookingPage() {
                                                     children: totalCount === 0 ? 0 : (currentPage - 1) * pageSize + 1
                                                 }, void 0, false, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                    lineNumber: 719,
+                                                    lineNumber: 791,
                                                     columnNumber: 17
                                                 }, this),
                                                 " ",
@@ -6512,7 +6710,7 @@ function BookingPage() {
                                                     children: Math.min(currentPage * pageSize, totalCount)
                                                 }, void 0, false, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                    lineNumber: 723,
+                                                    lineNumber: 795,
                                                     columnNumber: 17
                                                 }, this),
                                                 " ",
@@ -6523,7 +6721,7 @@ function BookingPage() {
                                                     children: totalCount
                                                 }, void 0, false, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                    lineNumber: 727,
+                                                    lineNumber: 799,
                                                     columnNumber: 17
                                                 }, this),
                                                 " ",
@@ -6531,7 +6729,7 @@ function BookingPage() {
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                            lineNumber: 717,
+                                            lineNumber: 789,
                                             columnNumber: 15
                                         }, this),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6542,7 +6740,7 @@ function BookingPage() {
                                                     children: "Rows per page:"
                                                 }, void 0, false, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                    lineNumber: 731,
+                                                    lineNumber: 803,
                                                     columnNumber: 17
                                                 }, this),
                                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("select", {
@@ -6558,7 +6756,7 @@ function BookingPage() {
                                                             children: "10"
                                                         }, void 0, false, {
                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                            lineNumber: 740,
+                                                            lineNumber: 812,
                                                             columnNumber: 19
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -6566,7 +6764,7 @@ function BookingPage() {
                                                             children: "20"
                                                         }, void 0, false, {
                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                            lineNumber: 741,
+                                                            lineNumber: 813,
                                                             columnNumber: 19
                                                         }, this),
                                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("option", {
@@ -6574,25 +6772,25 @@ function BookingPage() {
                                                             children: "50"
                                                         }, void 0, false, {
                                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                            lineNumber: 742,
+                                                            lineNumber: 814,
                                                             columnNumber: 19
                                                         }, this)
                                                     ]
                                                 }, void 0, true, {
                                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                    lineNumber: 732,
+                                                    lineNumber: 804,
                                                     columnNumber: 17
                                                 }, this)
                                             ]
                                         }, void 0, true, {
                                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                            lineNumber: 730,
+                                            lineNumber: 802,
                                             columnNumber: 15
                                         }, this)
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                    lineNumber: 716,
+                                    lineNumber: 788,
                                     columnNumber: 13
                                 }, this),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6611,7 +6809,7 @@ function BookingPage() {
                                                         children: "Previous"
                                                     }, void 0, false, {
                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                        lineNumber: 757,
+                                                        lineNumber: 829,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -6619,13 +6817,13 @@ function BookingPage() {
                                                         children: "chevron_left"
                                                     }, void 0, false, {
                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                        lineNumber: 758,
+                                                        lineNumber: 830,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                lineNumber: 752,
+                                                lineNumber: 824,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -6638,7 +6836,7 @@ function BookingPage() {
                                                         children: currentPage
                                                     }, void 0, false, {
                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                        lineNumber: 765,
+                                                        lineNumber: 837,
                                                         columnNumber: 19
                                                     }, this),
                                                     " ",
@@ -6647,7 +6845,7 @@ function BookingPage() {
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                lineNumber: 763,
+                                                lineNumber: 835,
                                                 columnNumber: 17
                                             }, this),
                                             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -6660,7 +6858,7 @@ function BookingPage() {
                                                         children: "Next"
                                                     }, void 0, false, {
                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                        lineNumber: 778,
+                                                        lineNumber: 850,
                                                         columnNumber: 19
                                                     }, this),
                                                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
@@ -6668,41 +6866,41 @@ function BookingPage() {
                                                         children: "chevron_right"
                                                     }, void 0, false, {
                                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                        lineNumber: 779,
+                                                        lineNumber: 851,
                                                         columnNumber: 19
                                                     }, this)
                                                 ]
                                             }, void 0, true, {
                                                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                                lineNumber: 771,
+                                                lineNumber: 843,
                                                 columnNumber: 17
                                             }, this)
                                         ]
                                     }, void 0, true, {
                                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                        lineNumber: 748,
+                                        lineNumber: 820,
                                         columnNumber: 15
                                     }, this)
                                 }, void 0, false, {
                                     fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                                    lineNumber: 747,
+                                    lineNumber: 819,
                                     columnNumber: 13
                                 }, this)
                             ]
                         }, void 0, true, {
                             fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                            lineNumber: 715,
+                            lineNumber: 787,
                             columnNumber: 11
                         }, this)
                     }, void 0, false, {
                         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                        lineNumber: 714,
+                        lineNumber: 786,
                         columnNumber: 9
                     }, this)
                 ]
             }, void 0, true, {
                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                lineNumber: 399,
+                lineNumber: 471,
                 columnNumber: 7
             }, this),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])(__TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$src$2f$app$2f$dashboard$2f$booking$2f$BookingModal$2e$tsx__$5b$app$2d$client$5d$__$28$ecmascript$29$__["default"], {
@@ -6715,13 +6913,13 @@ function BookingPage() {
                 isReadOnly: isViewOnly
             }, void 0, false, {
                 fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-                lineNumber: 789,
+                lineNumber: 861,
                 columnNumber: 7
             }, this)
         ]
     }, void 0, true, {
         fileName: "[project]/skytrips-admin/src/app/dashboard/booking/page.tsx",
-        lineNumber: 304,
+        lineNumber: 376,
         columnNumber: 5
     }, this);
 }

@@ -244,14 +244,14 @@ export default function BookingPage() {
                 expiryDate: booking.passportExpiry || booking.travellers?.[0]?.passportExpiry || '',
                 issueCountry: booking.nationality || 'Nepalese'
             },
-            created_at: new Date().toISOString(),
+            // created_at: new Date().toISOString(), // Removed to let DB handle it or avoid error if column missing
             // socialProvider: 'email'
           };
 
           const { data: createdCustomer, error: createError } = await supabase
             .from('customers')
             .insert([newCustomer])
-            .select()
+            .select("id")
             .single();
 
           if (createError) {

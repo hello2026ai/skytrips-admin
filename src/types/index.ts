@@ -150,3 +150,12 @@ export interface Customer {
   preferredCurrency?: string;
   marketingConsent?: boolean;
 }
+
+export interface Reason {
+  id: string;
+  code: string;
+  title: string;
+  description: string;
+  created_at?: string;
+  updated_at?: string;
+}
