@@ -31,6 +31,12 @@ export default function DashboardLayout({
     } catch {}
   }, []);
 
+  useEffect(() => {
+    if (!isLoading && !isAuthenticated) {
+      router.replace("/");
+    }
+  }, [isLoading, isAuthenticated, router]);
+
   const toggleSidebar = () => {
     setSidebarCollapsed((prev) => {
       const next = !prev;
@@ -85,7 +91,11 @@ export default function DashboardLayout({
   }
 
   if (!isAuthenticated) {
-    return null;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-gray-600">Redirecting…</div>
+      </div>
+    );
   }
 
   return (
