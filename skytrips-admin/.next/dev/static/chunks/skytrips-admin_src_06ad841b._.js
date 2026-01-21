@@ -136,29 +136,21 @@ __turbopack_context__.s([
 ]);
 var __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/skytrips-admin/node_modules/next/dist/compiled/react/jsx-dev-runtime.js [app-client] (ecmascript)");
 var __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/skytrips-admin/node_modules/next/dist/compiled/react/index.js [app-client] (ecmascript)");
+var __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$src$2f$lib$2f$supabase$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__ = __turbopack_context__.i("[project]/skytrips-admin/src/lib/supabase.ts [app-client] (ecmascript)");
 ;
 var _s = __turbopack_context__.k.signature();
 "use client";
 ;
+;
 const AirportAutocomplete = ({ label, name, value, onChange, disabled, icon })=>{
     _s();
     const [isOpen, setIsOpen] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(false);
-    const [allAirports, setAllAirports] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
     const [filteredOptions, setFilteredOptions] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])([]);
     const [activeIndex, setActiveIndex] = (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useState"])(-1);
     const wrapperRef = (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useRef"])(null);
     const listboxId = `${name}-listbox`;
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "AirportAutocomplete.useEffect": ()=>{
-            __turbopack_context__.A("[project]/skytrips-admin/libs/shared-utils/constants/airport.js [app-client] (ecmascript, async loader)").then({
-                "AirportAutocomplete.useEffect": (mod)=>{
-                    setAllAirports(mod.airports);
-                }
-            }["AirportAutocomplete.useEffect"]).catch({
-                "AirportAutocomplete.useEffect": ()=>{
-                    setAllAirports([]);
-                }
-            }["AirportAutocomplete.useEffect"]);
             const handleClickOutside = {
                 "AirportAutocomplete.useEffect.handleClickOutside": (event)=>{
                     if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
@@ -174,22 +166,52 @@ const AirportAutocomplete = ({ label, name, value, onChange, disabled, icon })=>
     }["AirportAutocomplete.useEffect"], []);
     (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$index$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["useEffect"])({
         "AirportAutocomplete.useEffect": ()=>{
-            if (isOpen && allAirports.length > 0) {
-                if (!value) {
-                    setFilteredOptions(allAirports.slice(0, 50));
-                } else {
-                    const lower = value.toLowerCase();
-                    const filtered = allAirports.filter({
-                        "AirportAutocomplete.useEffect.filtered": (a)=>a.name && a.name.toLowerCase().includes(lower) || a.IATA && a.IATA.toLowerCase().includes(lower) || a.city && a.city.toLowerCase().includes(lower)
-                    }["AirportAutocomplete.useEffect.filtered"]);
-                    setFilteredOptions(filtered.slice(0, 50));
+            if (!isOpen) return;
+            const runSearch = {
+                "AirportAutocomplete.useEffect.runSearch": async ()=>{
+                    try {
+                        if (!value || value.trim().length < 1) {
+                            const { data, error } = await __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$src$2f$lib$2f$supabase$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["supabase"].from("airports").select("id,name,municipality,iata_code,iso_country,popularity").eq("published_status", true).not("iata_code", "is", null).order("popularity", {
+                                ascending: false
+                            }).limit(50);
+                            if (error) throw error;
+                            const options = (data || []).map({
+                                "AirportAutocomplete.useEffect.runSearch.options": (row)=>({
+                                        name: row.name || "",
+                                        city: row.municipality || "",
+                                        country: row.iso_country || undefined,
+                                        IATA: row.iata_code || ""
+                                    })
+                            }["AirportAutocomplete.useEffect.runSearch.options"]);
+                            setFilteredOptions(options);
+                        } else {
+                            const q = value.trim();
+                            const { data, error } = await __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$src$2f$lib$2f$supabase$2e$ts__$5b$app$2d$client$5d$__$28$ecmascript$29$__["supabase"].from("airports").select("id,name,municipality,iata_code,iso_country,popularity").or(`municipality.ilike.%${q}%,name.ilike.%${q}%,iata_code.ilike.%${q}%`).eq("published_status", true).limit(50);
+                            if (error) throw error;
+                            const options = (data || []).map({
+                                "AirportAutocomplete.useEffect.runSearch.options": (row)=>({
+                                        name: row.name || "",
+                                        city: row.municipality || "",
+                                        country: row.iso_country || undefined,
+                                        IATA: row.iata_code || ""
+                                    })
+                            }["AirportAutocomplete.useEffect.runSearch.options"]);
+                            setFilteredOptions(options);
+                        }
+                    } catch (e) {
+                        console.error("Airport search failed:", e);
+                        setFilteredOptions([]);
+                    }
                 }
-            }
+            }["AirportAutocomplete.useEffect.runSearch"];
+            const timer = setTimeout(runSearch, 200);
+            return ({
+                "AirportAutocomplete.useEffect": ()=>clearTimeout(timer)
+            })["AirportAutocomplete.useEffect"];
         }
     }["AirportAutocomplete.useEffect"], [
         value,
-        isOpen,
-        allAirports
+        isOpen
     ]);
     const highlight = (text, query)=>{
         const idx = text.toLowerCase().indexOf(query.toLowerCase());
@@ -202,7 +224,7 @@ const AirportAutocomplete = ({ label, name, value, onChange, disabled, icon })=>
                     children: text.slice(idx, idx + query.length)
                 }, void 0, false, {
                     fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-                    lineNumber: 74,
+                    lineNumber: 102,
                     columnNumber: 9
                 }, ("TURBOPACK compile-time value", void 0)),
                 text.slice(idx + query.length)
@@ -244,7 +266,7 @@ const AirportAutocomplete = ({ label, name, value, onChange, disabled, icon })=>
                 children: label
             }, void 0, false, {
                 fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-                lineNumber: 109,
+                lineNumber: 137,
                 columnNumber: 7
             }, ("TURBOPACK compile-time value", void 0)),
             /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
@@ -260,19 +282,19 @@ const AirportAutocomplete = ({ label, name, value, onChange, disabled, icon })=>
                             children: icon
                         }, void 0, false, {
                             fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-                            lineNumber: 114,
+                            lineNumber: 142,
                             columnNumber: 11
                         }, ("TURBOPACK compile-time value", void 0))
                     }, void 0, false, {
                         fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-                        lineNumber: 113,
+                        lineNumber: 141,
                         columnNumber: 9
                     }, ("TURBOPACK compile-time value", void 0)),
                     /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("input", {
                         role: "combobox",
                         "aria-expanded": isOpen,
                         "aria-controls": listboxId,
-                        className: "block w-full h-12 pl-12 rounded-lg border-slate-200 shadow-sm focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium",
+                        className: "block w-full h-12 pl-12 pr-10 rounded-lg border border-slate-200 bg-white text-slate-900 placeholder:text-slate-400 shadow-sm focus:border-primary focus:ring focus:ring-primary/10 transition-all sm:text-sm font-medium",
                         name: name,
                         placeholder: "City or Airport",
                         type: "text",
@@ -288,7 +310,7 @@ const AirportAutocomplete = ({ label, name, value, onChange, disabled, icon })=>
                         autoComplete: "off"
                     }, void 0, false, {
                         fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-                        lineNumber: 118,
+                        lineNumber: 146,
                         columnNumber: 9
                     }, ("TURBOPACK compile-time value", void 0)),
                     value && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("button", {
@@ -303,24 +325,26 @@ const AirportAutocomplete = ({ label, name, value, onChange, disabled, icon })=>
                                 }
                             });
                             setActiveIndex(-1);
+                            setIsOpen(false);
+                            setFilteredOptions([]);
                         },
                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("span", {
                             className: "material-symbols-outlined text-[18px]",
                             children: "close"
                         }, void 0, false, {
                             fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-                            lineNumber: 147,
+                            lineNumber: 177,
                             columnNumber: 13
                         }, ("TURBOPACK compile-time value", void 0))
                     }, void 0, false, {
                         fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-                        lineNumber: 138,
+                        lineNumber: 166,
                         columnNumber: 11
                     }, ("TURBOPACK compile-time value", void 0))
                 ]
             }, void 0, true, {
                 fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-                lineNumber: 112,
+                lineNumber: 140,
                 columnNumber: 7
             }, ("TURBOPACK compile-time value", void 0)),
             isOpen && filteredOptions.length > 0 && /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("ul", {
@@ -342,64 +366,65 @@ const AirportAutocomplete = ({ label, name, value, onChange, disabled, icon })=>
                             setActiveIndex(-1);
                         },
                         children: /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                            className: "flex justify-between items-center",
+                            className: "flex justify-between items-start",
                             children: [
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
+                                    className: "min-w-0 pr-3",
                                     children: [
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                            className: "font-bold text-slate-700 text-sm group-hover:text-primary transition-colors",
-                                            children: highlight(option.city, value)
+                                            className: "font-bold text-slate-700 text-sm group-hover:text-primary transition-colors break-words whitespace-normal",
+                                            children: highlight(option.city || option.name, value)
                                         }, void 0, false, {
                                             fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-                                            lineNumber: 176,
+                                            lineNumber: 206,
                                             columnNumber: 19
                                         }, ("TURBOPACK compile-time value", void 0)),
                                         /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                            className: "text-xs text-slate-500 mt-0.5",
+                                            className: "text-xs text-slate-500 mt-0.5 break-words whitespace-normal",
                                             children: highlight(option.name, value)
                                         }, void 0, false, {
                                             fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-                                            lineNumber: 179,
+                                            lineNumber: 209,
                                             columnNumber: 19
                                         }, ("TURBOPACK compile-time value", void 0))
                                     ]
                                 }, void 0, true, {
                                     fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-                                    lineNumber: 175,
+                                    lineNumber: 205,
                                     columnNumber: 17
                                 }, ("TURBOPACK compile-time value", void 0)),
                                 /*#__PURE__*/ (0, __TURBOPACK__imported__module__$5b$project$5d2f$skytrips$2d$admin$2f$node_modules$2f$next$2f$dist$2f$compiled$2f$react$2f$jsx$2d$dev$2d$runtime$2e$js__$5b$app$2d$client$5d$__$28$ecmascript$29$__["jsxDEV"])("div", {
-                                    className: "bg-slate-100 px-2 py-1 rounded text-xs font-black text-slate-600 group-hover:bg-blue-100 group-hover:text-blue-700 transition-colors",
+                                    className: "bg-slate-100 px-2 py-1 rounded text-xs font-black text-slate-600 group-hover:bg-blue-100 group-hover:text-blue-700 transition-colors shrink-0",
                                     children: highlight(option.IATA, value)
                                 }, void 0, false, {
                                     fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-                                    lineNumber: 183,
+                                    lineNumber: 213,
                                     columnNumber: 17
                                 }, ("TURBOPACK compile-time value", void 0))
                             ]
                         }, void 0, true, {
                             fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-                            lineNumber: 174,
+                            lineNumber: 204,
                             columnNumber: 15
                         }, ("TURBOPACK compile-time value", void 0))
-                    }, index, false, {
+                    }, `${option.IATA}-${index}`, false, {
                         fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-                        lineNumber: 158,
+                        lineNumber: 188,
                         columnNumber: 13
                     }, ("TURBOPACK compile-time value", void 0)))
             }, void 0, false, {
                 fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-                lineNumber: 152,
+                lineNumber: 182,
                 columnNumber: 9
             }, ("TURBOPACK compile-time value", void 0))
         ]
     }, void 0, true, {
         fileName: "[project]/skytrips-admin/src/components/AirportAutocomplete.tsx",
-        lineNumber: 108,
+        lineNumber: 136,
         columnNumber: 5
     }, ("TURBOPACK compile-time value", void 0));
 };
-_s(AirportAutocomplete, "8Be6vrNMZ9Sd4REjoDfy+h4ngfI=");
+_s(AirportAutocomplete, "GVmE1uCr3LEudSPQXRIexc934gk=");
 _c = AirportAutocomplete;
 const __TURBOPACK__default__export__ = AirportAutocomplete;
 var _c;
@@ -4676,7 +4701,7 @@ function BookingModal({ isOpen, onClose, onSave, onEdit, booking, isLoading, isR
         columnNumber: 5
     }, this);
 }
-_s(BookingModal, "vHQk106Qix4yVAxBXXnq3IzeuO8=");
+_s(BookingModal, "SB8ijb5ZxJsgyuIfBgufAJ+sxms=");
 _c = BookingModal;
 var _c;
 __turbopack_context__.k.register(_c, "BookingModal");
