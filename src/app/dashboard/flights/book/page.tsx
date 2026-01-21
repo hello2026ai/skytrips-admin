@@ -1,19 +1,47 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter } from "next/navigation";
 import PassengerForm from "@/components/dashboard/flights/booking/PassengerForm";
 import BookingSummary from "@/components/dashboard/flights/booking/BookingSummary";
 import { FlightOffer } from "@/types/flight-search";
 
 export default function FlightBookingPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const adults = Math.max(0, Number(searchParams.get("adults") || "1") || 0);
   const children = Math.max(0, Number(searchParams.get("children") || "0") || 0);
   const infants = Math.max(0, Number(searchParams.get("infants") || "0") || 0);
   const totalPassengers = adults + children + infants || 1;
   const [passengers, setPassengers] = useState(Array.from({ length: totalPassengers }, (_, i) => i + 1));
+  const [creating, setCreating] = useState(false);
+  const [success, setSuccess] = useState(false);
+  const [successData, setSuccessData] = useState<{
+    base: number;
+    total: number;
+    currency: string;
+    travelClass: string;
+    tripType: string;
+    passengers: Array<{
+      travelerId: string;
+      passengerType: string;
+      title: string;
+      firstName: string;
+      middleName?: string;
+      lastName: string;
+      dob?: string;
+      gender?: string;
+      documentType?: string;
+      passportCountry?: string;
+      passportNumber?: string;
+      passportExpiryDate?: string;
+      country?: string;
+      countryCallingCode?: string;
+      phone?: string;
+      phoneDeviceType?: string;
+    }>;
+  } | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   const offer: FlightOffer = useMemo(() => {
     const flightId = searchParams.get("flightId") || "1";
@@ -73,14 +101,188 @@ export default function FlightBookingPage() {
     setPassengers(prev => prev.filter((p) => p !== id));
   };
 
+  const handleCreateBooking = async () => {
+    if (creating) return;
+    setCreating(true);
+    try {
+      setError(null);
+      // const fareBrand = searchParams.get("fareBrand") || "";
+      let rawPayload: unknown = null;
+      try {
+        const cached = typeof window !== "undefined" ? sessionStorage.getItem(`selectedRawOffer:${offer.id}`) : null;
+        rawPayload = cached ? JSON.parse(cached) : null;
+      } catch {}
+      if (!rawPayload) {
+        if (typeof window !== "undefined") {
+          alert("Unable to continue booking: missing selected offer. Please go back and select a fare brand.");
+        }
+        setCreating(false);
+        return;
+      }
+      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://dev-api.skytrips.com.au/";
+      const clientRef = process.env.NEXT_PUBLIC_SKYTRIPS_CLIENT_REF || "1223";
+      const priceUrl = new URL("flight-price", baseUrl);
+      priceUrl.searchParams.set("page", "1");
+      priceUrl.searchParams.set("limit", "10");
+      const priceBody = rawPayload;
+      const priceRes = await fetch(priceUrl.toString(), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "ama-client-ref": clientRef,
+          accept: "application/json",
+        },
+        body: JSON.stringify(priceBody),
+      });
+      if (!priceRes.ok) {
+        let msg = "Price request failed";
+        try {
+          const j = await priceRes.json();
+          msg = j?.error || j?.message || msg;
+        } catch {}
+        setError(msg);
+        setCreating(false);
+        return;
+      }
+      const priceJson = await priceRes.json();
+      const first = Array.isArray(priceJson?.data) ? priceJson.data[0] : undefined;
+      const priceObj = first?.price || {};
+      const base = typeof priceObj?.base === "string" ? parseFloat(priceObj.base) : Number(priceObj?.base || 0);
+      const total = typeof priceObj?.grandTotal === "string" ? parseFloat(priceObj.grandTotal) : (typeof priceObj?.total === "string" ? parseFloat(priceObj.total) : Number(priceObj?.grandTotal ?? priceObj?.total ?? 0));
+      const currency = priceObj?.billingCurrency || priceObj?.currency || offer.currency;
+
+      const travelerIds: string[] = (() => {
+        if (!rawPayload || typeof rawPayload !== "object") return [];
+        const rp = rawPayload as { travelerPricings?: unknown };
+        const tpArr = rp.travelerPricings;
+        if (!Array.isArray(tpArr)) return [];
+        const out: string[] = [];
+        for (const item of tpArr) {
+          const tp = item as { travelerId?: unknown };
+          const tid = tp?.travelerId;
+          if (typeof tid === "string" || typeof tid === "number") {
+            out.push(String(tid));
+          }
+        }
+        return out;
+      })();
+
+      const passengerInput = passengers.map((id, idx) => {
+        const f = (typeof document !== "undefined" ? document.getElementById(`fname-${id}`) : null) as HTMLInputElement | null;
+        const l = (typeof document !== "undefined" ? document.getElementById(`lname-${id}`) : null) as HTMLInputElement | null;
+        const p = (typeof document !== "undefined" ? document.getElementById(`passport-${id}`) : null) as HTMLInputElement | null;
+        const genderEl = (typeof document !== "undefined" ? document.getElementById(`gender-${id}`) : null) as HTMLSelectElement | null;
+        const dobEl = (typeof document !== "undefined" ? document.getElementById(`dob-${id}`) : null) as HTMLInputElement | null;
+        const countryEl = (typeof document !== "undefined" ? document.getElementById(`country-${id}`) : null) as HTMLInputElement | null;
+        const passportCountryEl = (typeof document !== "undefined" ? document.getElementById(`passportCountry-${id}`) : null) as HTMLInputElement | null;
+        const passportExpiryEl = (typeof document !== "undefined" ? document.getElementById(`passportExpiry-${id}`) : null) as HTMLInputElement | null;
+        const firstName = (f?.value || "").trim() || "Unknown";
+        const lastName = (l?.value || "").trim() || "Unknown";
+        const passportNumber = (p?.value || "").trim();
+        const gender = (genderEl?.value || "UNSPECIFIED").trim() || "UNSPECIFIED";
+        const dob = (dobEl?.value || "").trim();
+        const country = (countryEl?.value || "").trim();
+        const passportCountry = (passportCountryEl?.value || "").trim();
+        const passportExpiryDate = (passportExpiryEl?.value || "").trim();
+        const passengerType =
+          idx < adults ? "ADULT" : idx < adults + children ? "CHILD" : "INFANT";
+        const title = gender === "MALE" ? "Mr" : gender === "FEMALE" ? "Ms" : "Mx";
+        const middleName = "";
+        const countryCallingCode = "977";
+        const phone = "9840000000";
+        const phoneDeviceType = "MOBILE";
+        const travelerId = travelerIds[idx] || String(idx + 1);
+        return {
+          travelerId,
+          passengerType,
+          title,
+          firstName,
+          middleName,
+          lastName,
+          passportNumber,
+          gender,
+          dob,
+          country,
+          passportCountry,
+          passportExpiryDate,
+          documentType: "PASSPORT",
+          countryCallingCode,
+          phone,
+          phoneDeviceType,
+        };
+      });
+      const travelClassParam = (searchParams.get("class") || "ECONOMY").toUpperCase().replace(/\s+/g, "_");
+      const typeParam = searchParams.get("type") || "One Way";
+      const tripTypeParam = typeParam === "One Way" ? "ONE_WAY" : typeParam === "Round Trip" ? "ROUND_TRIP" : "MULTI_CITY";
+
+      const bookingUrl = new URL("flight-booking", baseUrl);
+      const bookingPayload = {
+        priceParam: first,
+        userInput: { email: "info@skytrips.com.au" },
+        passengerInput,
+        travelClass: travelClassParam,
+        tripType: tripTypeParam,
+        bookingType: "ONLINE",
+        origin: offer.departure.code,
+        destination: offer.arrival.code,
+        bookingTicketRefundableStatus: "REFUNDABLE",
+      };
+      const bookingRes = await fetch(bookingUrl.toString(), {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "ama-client-ref": clientRef,
+          accept: "*/*",
+        },
+        body: JSON.stringify(bookingPayload),
+      }).catch(() => null);
+      const bookingJson = bookingRes ? await bookingRes.json().catch(() => null) : null;
+
+      if (bookingRes && bookingRes.ok) {
+        setSuccess(true);
+        setSuccessData({
+          base,
+          total,
+          currency,
+          travelClass: (searchParams.get("class") || "ECONOMY").toUpperCase().replace(/\s+/g, "_"),
+          tripType: (searchParams.get("type") || "One Way") === "One Way" ? "ONE_WAY" : (searchParams.get("type") || "One Way") === "Round Trip" ? "ROUND_TRIP" : "MULTI_CITY",
+          passengers: passengerInput,
+        });
+      } else {
+        let msg = "Booking request failed";
+        if (bookingJson && typeof bookingJson === "object") {
+          const bj = bookingJson as { error?: string; message?: string };
+          msg = bj.error || bj.message || msg;
+        }
+        setError(msg);
+      }
+
+      // Skipping url replace to keep success state and show summary UI
+    } catch {
+    } finally {
+      setCreating(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50/50 pb-20 font-display">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
-        
-        <h1 className="text-2xl md:text-3xl font-black text-slate-900 mb-8 tracking-tight">
-          Passenger Info & Agency Commission
-        </h1>
+        {!success && (
+          <h1 className="text-2xl md:text-3xl font-black text-slate-900 mb-8 tracking-tight">
+            Passenger Info & Agency Commission
+          </h1>
+        )}
 
+        {!success && error && (
+          <div className="mb-6 p-4 bg-red-50 text-red-700 border border-red-200 rounded-xl">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined">error</span>
+              <p className="font-bold"> {error} </p>
+            </div>
+          </div>
+        )}
+
+        {!success && (
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
           {/* Main Content - Passenger Forms */}
@@ -104,7 +306,7 @@ export default function FlightBookingPage() {
             })}
 
             <div className="flex justify-between items-center pt-8">   
-              <button className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-emerald-600/20 flex items-center gap-2 transition-all active:scale-95">
+              <button onClick={handleCreateBooking} disabled={creating} className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-xl shadow-lg shadow-emerald-600/20 flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50">
                 Create a booking
                 <span className="material-symbols-outlined text-[20px] fill-current">check_circle</span>
               </button>
@@ -124,6 +326,80 @@ export default function FlightBookingPage() {
           </div>
 
         </div>
+        )}
+
+        {success && successData && (
+          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 md:p-8">
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <span className="material-symbols-outlined text-emerald-600 text-[28px]">check_circle</span>
+                <h2 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">Booking Created Successfully</h2>
+              </div>
+              <div className="text-right">
+                <p className="text-sm font-bold text-slate-500 uppercase">Total</p>
+                <p className="text-2xl font-black text-primary">{successData.currency} {successData.total.toFixed(2)}</p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                <p className="text-xs font-bold text-slate-400 uppercase">Route</p>
+                <p className="text-sm font-bold text-slate-900">{offer.departure.code} → {offer.arrival.code}</p>
+                <p className="text-xs text-slate-500">{offer.airline.name} • {offer.flightNumber}</p>
+              </div>
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                <p className="text-xs font-bold text-slate-400 uppercase">Class & Trip</p>
+                <p className="text-sm font-bold text-slate-900">{successData.travelClass.replace(/_/g, " ")} • {successData.tripType.replace(/_/g, " ")}</p>
+                <p className="text-xs text-slate-500">Base: {successData.currency} {successData.base.toFixed(2)}</p>
+              </div>
+              <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
+                <p className="text-xs font-bold text-slate-400 uppercase">Passengers</p>
+                <p className="text-sm font-bold text-slate-900">{successData.passengers.length}</p>
+                <p className="text-xs text-slate-500">Adults {adults}, Children {children}, Infants {infants}</p>
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <p className="text-xs font-bold text-slate-400 uppercase mb-3">Traveller Details</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {successData.passengers.map((pax, i) => (
+                  <div key={`${pax.travelerId}-${i}`} className="p-4 border border-slate-100 rounded-xl bg-white">
+                    <div className="flex items-center justify-between">
+                      <p className="font-bold text-slate-900">{pax.title} {pax.firstName} {pax.middleName ? `${pax.middleName} ` : ""}{pax.lastName}</p>
+                      <span className="text-xs px-2 py-0.5 rounded-full bg-blue-50 text-blue-600 font-bold">{pax.passengerType}</span>
+                    </div>
+                    <div className="mt-2 grid grid-cols-2 gap-2 text-xs text-slate-600">
+                      {pax.dob && <p><span className="font-bold text-slate-500">DOB:</span> {pax.dob}</p>}
+                      {pax.gender && <p><span className="font-bold text-slate-500">Gender:</span> {pax.gender}</p>}
+                      {pax.passportCountry && <p><span className="font-bold text-slate-500">Passport Country:</span> {pax.passportCountry}</p>}
+                      {pax.passportNumber && <p><span className="font-bold text-slate-500">Passport No:</span> {pax.passportNumber}</p>}
+                      {pax.passportExpiryDate && <p><span className="font-bold text-slate-500">Expiry:</span> {pax.passportExpiryDate}</p>}
+                      {pax.country && <p><span className="font-bold text-slate-500">Country:</span> {pax.country}</p>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3">
+              <button
+                className="h-10 px-4 rounded-lg border border-slate-200 bg-white text-slate-700 font-bold text-sm hover:bg-slate-50 transition-colors"
+                onClick={() => {
+                  setSuccess(false);
+                  setSuccessData(null);
+                }}
+              >
+                Back
+              </button>
+              <button
+                className="h-10 px-4 rounded-lg bg-primary text-white font-bold text-sm hover:bg-blue-600 shadow-sm transition-colors"
+                onClick={() => router.push("/dashboard/booking")}
+              >
+                View All Bookings
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

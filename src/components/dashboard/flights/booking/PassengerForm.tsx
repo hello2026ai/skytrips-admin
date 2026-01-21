@@ -57,6 +57,117 @@ export default function PassengerForm({ id, label, onRemove, canRemove }: Passen
             className="w-full h-12 px-4 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all placeholder:text-slate-300"
           />
         </div>
+
+        {/* Gender */}
+        <div className="space-y-2">
+          <label htmlFor={`gender-${id}`} className="text-xs font-bold text-slate-400 uppercase tracking-wider pl-1">Gender</label>
+          <select
+            id={`gender-${id}`}
+            className="w-full h-12 px-4 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all"
+            defaultValue="MALE"
+          >
+            <option value="MALE">Male</option>
+            <option value="FEMALE">Female</option>
+            <option value="UNSPECIFIED">Unspecified</option>
+          </select>
+        </div>
+
+        {/* Date of Birth */}
+        <div className="space-y-2">
+          <label htmlFor={`dob-${id}`} className="text-xs font-bold text-slate-400 uppercase tracking-wider pl-1">Date of Birth</label>
+          <div className="relative">
+            <input 
+              type="date" 
+              id={`dob-${id}`}
+              className="w-full h-12 pr-10 px-4 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all placeholder:text-slate-300"
+            />
+            <button
+              type="button"
+              className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+              onClick={() => {
+                const el = typeof document !== "undefined" ? (document.getElementById(`dob-${id}`) as HTMLInputElement | null) : null;
+                if (el) {
+                  const anyEl = el as HTMLInputElement & { showPicker?: () => void };
+                  if (typeof anyEl.showPicker === "function") {
+                    anyEl.showPicker();
+                  } else {
+                    el.focus();
+                    el.click();
+                  }
+                }
+              }}
+              aria-label="Open calendar"
+            >
+              calendar_month
+            </button>
+          </div>
+        </div>
+
+        
+
+        {/* Country */}
+        <div className="space-y-2">
+          <label htmlFor={`country-${id}`} className="text-xs font-bold text-slate-400 uppercase tracking-wider pl-1">Country</label>
+          <input 
+            type="text" 
+            id={`country-${id}`}
+            placeholder="Australia"
+            className="w-full h-12 px-4 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all placeholder:text-slate-300"
+          />
+        </div>
+
+        {/* Passport Number */}
+        <div className="space-y-2 md:col-span-2">
+          <label htmlFor={`passport-${id}`} className="text-xs font-bold text-slate-400 uppercase tracking-wider pl-1">Passport Number</label>
+          <input 
+            type="text" 
+            id={`passport-${id}`}
+            placeholder="E12345678"
+            className="w-full h-12 px-4 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all placeholder:text-slate-300"
+          />
+        </div>
+
+        {/* Passport Country */}
+        <div className="space-y-2">
+          <label htmlFor={`passportCountry-${id}`} className="text-xs font-bold text-slate-400 uppercase tracking-wider pl-1">Passport Country</label>
+          <input 
+            type="text" 
+            id={`passportCountry-${id}`}
+            placeholder="Australia"
+            className="w-full h-12 px-4 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all placeholder:text-slate-300"
+          />
+        </div>
+
+        {/* Passport Expiry Date */}
+        <div className="space-y-2">
+          <label htmlFor={`passportExpiry-${id}`} className="text-xs font-bold text-slate-400 uppercase tracking-wider pl-1">Passport Expiry Date</label>
+          <div className="relative">
+            <input 
+              type="date" 
+              id={`passportExpiry-${id}`}
+              className="w-full h-12 pr-10 px-4 bg-white border border-slate-200 rounded-xl text-sm font-medium text-slate-900 focus:ring-2 focus:ring-primary/10 focus:border-primary outline-none transition-all"
+            />
+            <button
+              type="button"
+              className="material-symbols-outlined absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+              onClick={() => {
+                const el = typeof document !== "undefined" ? (document.getElementById(`passportExpiry-${id}`) as HTMLInputElement | null) : null;
+                if (el) {
+                  const anyEl = el as HTMLInputElement & { showPicker?: () => void };
+                  if (typeof anyEl.showPicker === "function") {
+                    anyEl.showPicker();
+                  } else {
+                    el.focus();
+                    el.click();
+                  }
+                }
+              }}
+              aria-label="Open calendar"
+            >
+              calendar_month
+            </button>
+          </div>
+        </div>
       </div>
 
       {id === 2 && (
