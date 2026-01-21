@@ -382,6 +382,18 @@ export default function FlightResultCard({ offer, getRawOffer }: FlightResultCar
       total: computedTotal,
     });
 
+    try {
+      if (getRawOffer) {
+        const raw = getRawOffer(offer.id);
+        if (raw && typeof window !== "undefined") {
+          sessionStorage.setItem(
+            `selectedRawOffer:${offer.id}`,
+            JSON.stringify({ ...raw, selectedFareBrandId: brandId })
+          );
+        }
+      }
+    } catch {}
+
     router.push(`/dashboard/flights/book?${params.toString()}`);
   };
 
