@@ -81,11 +81,25 @@ export interface FlightItinerary {
   segments: FlightSegment[];
 }
 
+export type BookingStatus = "PENDING" | "SEND" | "REFUNDED";
+
 export interface ManageBooking {
   uid: string;
   booking_id: string | number;
   created_at: string;
   selected_travellers?: string[];
+  reason?: string;
+  reason_detail?: string;
+  refund_status?: string;
+  status?: BookingStatus;
+  financial_breakdown?: {
+    airline_penalty: number;
+    agency_fees: number;
+    skytrips_fee: number;
+    manual_adjustment: number;
+    total_refund_amount: number;
+    adjustment_reason?: string;
+  };
   [key: string]: any;
 }
 

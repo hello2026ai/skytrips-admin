@@ -115,9 +115,9 @@ export default function ManageBookingEditPage() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
-    // const formData = new FormData(e.currentTarget);
-    // const reason = formData.get("reason") as string;
-    // const notes = formData.get("notes") as string;
+    const formData = new FormData(e.currentTarget);
+    const reason = formData.get("reason") as string;
+    const notes = formData.get("notes") as string;
 
     try {
       if (!id) {
@@ -127,6 +127,32 @@ export default function ManageBookingEditPage() {
         return;
       }
 
+      // Save reason and notes to Supabase via API (to bypass RLS)
+      const response = await fetch(`/api/manage-booking/${id}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          reason: reason,
+          reason_detail: notes,
+          refund_status:
+            record?.refund_status === "Pending"
+              ? "Initiated"
+              : record?.refund_status || "Initiated",
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        const errorMsg = result.error || "Failed to update record";
+        console.error("Error updating record:", errorMsg);
+        throw new Error(errorMsg);
+      }
+
+      console.log("Update successful, returned data:", result.data);
+
       console.log(
         "Navigating to:",
         `/dashboard/manage-booking/edit/${id}/flight-details`,
@@ -134,7 +160,8 @@ export default function ManageBookingEditPage() {
       // Navigate to the next step: Flight Booking Details
       router.push(`/dashboard/manage-booking/edit/${id}/flight-details`);
     } catch (err) {
-      console.error("Error navigating:", err);
+      console.error("Error processing request:", err);
+      alert("Failed to save details. Please try again.");
       setLoading(false);
     }
   };
@@ -221,12 +248,14 @@ export default function ManageBookingEditPage() {
             </div>
             <span
               className={`inline-flex items-center rounded-md px-3 py-1 text-sm font-medium ring-1 ring-inset ${
-                record.status === "Completed"
+                record.status === "REFUNDED"
                   ? "bg-green-50 text-green-700 ring-green-600/20"
-                  : "bg-yellow-50 text-yellow-700 ring-yellow-600/20"
+                  : record.status === "SEND"
+                    ? "bg-blue-50 text-blue-700 ring-blue-600/20"
+                    : "bg-yellow-50 text-yellow-700 ring-yellow-600/20"
               }`}
             >
-              {record.status || "Pending"}
+              {record.status || "PENDING"}
             </span>
           </div>
         </div>
@@ -415,7 +444,11 @@ export default function ManageBookingEditPage() {
                     className="block w-full rounded-md border-0 py-2.5 px-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6"
                     id="reason"
                     name="reason"
-                    defaultValue={record.reason || ""}
+                    defaultValue={
+                      record.reason === "Requested via Admin Dashboard"
+                        ? ""
+                        : record.reason || ""
+                    }
                   >
                     <option value="">Select a reason...</option>
                     {reasons.length > 0 ? (
@@ -449,6 +482,7 @@ export default function ManageBookingEditPage() {
                     className="block w-full rounded-md border-0 py-1.5 px-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6"
                     id="notes"
                     name="notes"
+                    defaultValue={record.reason_detail || ""}
                     placeholder="Add any additional details about this request..."
                     rows={3}
                   ></textarea>

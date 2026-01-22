@@ -152,6 +152,7 @@ export default function FlightDetailsPage() {
     template: string;
   }) => {
     try {
+      // 1. Send the email
       const res = await fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -165,6 +166,22 @@ export default function FlightDetailsPage() {
       if (!res.ok) {
         throw new Error("Failed to send email");
       }
+
+      // 2. Update refund status to Processing
+      const { error } = await supabase
+        .from("manage_booking")
+        .update({ refund_status: "Processing" })
+        .eq("uid", id);
+
+      if (error) {
+        console.error("Error updating status:", error);
+        // We don't throw here to avoid blocking the UI since email was sent
+      }
+      
+      // Update local state if needed or show success message
+      alert("Email sent successfully and status updated to Processing.");
+      setIsEmailModalOpen(false);
+      
     } catch (err) {
       console.error("Error sending email:", err);
       throw err;
