@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { Customer, Booking } from "@/types";
 
@@ -189,7 +188,7 @@ export default function CustomerDetailsPage() {
                 const origin = booking.origin || b.origin || "N/A";
                 const destination =
                   booking.destination || b.destination || "N/A";
-                const pnr = booking.PNR || b.pnr || b.PNR || "N/A";
+                const pnr = booking.PNR || booking.travellers?.[0]?.eticketNumber ||b.PNR ||booking.PNR || b.pnr || b.PNR || "N/A";
                 const travelDate =
                   booking.travelDate || b.traveldate || b.created_at;
                 const price =

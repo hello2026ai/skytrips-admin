@@ -168,6 +168,15 @@ export default function InvoicePage({
         year: "numeric",
       }); // Same day due for flights usually
 
+  const primaryTravellerName = booking.travellers?.[0]
+    ? `${booking.travellers[0].firstName} ${booking.travellers[0].lastName}`.trim()
+    : booking.customer
+    ? `${booking.customer.firstName} ${booking.customer.lastName}`.trim()
+    : "";
+
+  const displayTravellerName =
+    primaryTravellerName || "Valued Customer";
+
   const handlePrint = () => {
     window.print();
   };
@@ -238,10 +247,7 @@ export default function InvoicePage({
           to: booking.email,
           subject: data.subject.replace("{PNR}", booking.PNR || ""),
           message: data.message
-            .replace(
-              "{NAME}",
-              `${booking.travellerFirstName} ${booking.travellerLastName}`
-            )
+            .replace("{NAME}", displayTravellerName)
             .replace("{PNR}", booking.PNR || "")
             .replace("{ORIGIN}", booking.origin)
             .replace("{DESTINATION}", booking.destination)
@@ -272,7 +278,7 @@ export default function InvoicePage({
           isOpen={isEmailModalOpen}
           onClose={() => setIsEmailModalOpen(false)}
           recipient={{
-            name: `${booking.travellerFirstName} ${booking.travellerLastName}`,
+            name: displayTravellerName,
             email: booking.email || "",
             phone: booking.phone,
             organization: (booking as any).companyName || "Individual",
@@ -452,7 +458,7 @@ export default function InvoicePage({
               </h3>
               <div className="bg-white p-6 rounded-xl border border-slate-100 shadow-sm">
                 <h4 className="text-xl font-bold text-slate-900 mb-3">
-                  {booking.travellerFirstName} {booking.travellerLastName}
+                  {displayTravellerName}
                 </h4>
                 <div className="space-y-2 text-sm text-slate-600">
                   <p className="flex items-center gap-2">
