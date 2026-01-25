@@ -21,7 +21,7 @@ export default function SettingsPage() {
 
   // Settings State
   const [settings, setSettings] = useState({
-    companyName: "Curent",
+    companyName: "",
     companyEmail: "",
     companyPhone: "",
     currency: "USD",
@@ -50,7 +50,7 @@ export default function SettingsPage() {
       if (res.ok) {
         const data = await res.json();
         setSettings({
-          companyName: data.company_name || "Curent",
+          companyName: data.company_name || "",
           companyEmail: data.company_email || "",
           companyPhone: data.company_phone || "",
           currency: data.currency || "USD",
