@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter, notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { Booking } from "@/types";
+import { getCustomerName, getCustomerEmail, getCustomerPhone } from "@/lib/booking-helpers";
 import { CompanyProfile } from "@/types/company";
 import SendEmailModal from "@/components/booking-management/SendEmailModal";
 import html2canvas from "html2canvas-pro";
@@ -464,16 +465,16 @@ export default function InvoicePage({
                     <span className="material-symbols-outlined text-[18px] text-slate-400">
                       email
                     </span>
-                    {booking.customer?.email || booking.email || "N/A"}
+                    {(typeof booking.customer === "object" &&
+                      booking.customer?.email) ||
+                      booking.email ||
+                      "N/A"}
                   </p>
                   <p className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-[18px] text-slate-400">
                       phone
                     </span>
-                    {(typeof booking.customer === "object" &&
-                      booking.customer?.phone) ||
-                      booking.phone ||
-                      "N/A"}
+                    {getCustomerPhone(booking) || "N/A"}
                   </p>
                   <p className="flex items-center gap-2">
                     <span className="material-symbols-outlined text-[18px] text-slate-400">
