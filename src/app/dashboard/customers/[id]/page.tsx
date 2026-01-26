@@ -34,6 +34,22 @@ export default function CustomerDetailsPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [bookingsLoading, setBookingsLoading] = useState(false);
 
+  // Parse JSON fields safely
+  const safeJsonParse = (value: any, fallback: any = {}) => {
+    if (typeof value === "string") {
+      try {
+        return JSON.parse(value);
+      } catch (e) {
+        console.error("JSON Parse Error:", e);
+        return fallback;
+      }
+    }
+    return value || fallback;
+  };
+
+  const address = customer ? safeJsonParse(customer.address) : {};
+  const passport = customer ? safeJsonParse(customer.passport) : {};
+
   useEffect(() => {
     fetchCustomerDetails();
   }, [customerId]);
@@ -121,7 +137,16 @@ export default function CustomerDetailsPage() {
       // 2. New: Check JSON field 'id' in 'customer' column
       // Use ->> to extract field as text (works for json/jsonb)
       conditions.push(`customer->>id.eq.${JSON.stringify(idStr)}`);
+<<<<<<< HEAD
       
+=======
+      // 3. Legacy JSON: Check 'customer_details' column (older migration) - REMOVED due to column missing
+      // conditions.push(`customer_details->>id.eq.${JSON.stringify(idStr)}`);
+
+      // Remove direct 'customer.eq' check as it causes 400 error on JSONB columns when comparing with string
+      // and 'customerid' covers the legacy case anyway.
+
+>>>>>>> 3117d61b6704ee6c0bc2cd401172d93be2f6915f
       // 3. Email match (Root column or inside JSON)
       if (customer?.email) {
         // Use ilike for case-insensitive matching with wildcards to handle whitespace
@@ -135,6 +160,12 @@ export default function CustomerDetailsPage() {
 
         // Check email inside customer JSON: {"email": "..."}
         conditions.push(`customer->>email.ilike.${emailStr}`);
+<<<<<<< HEAD
+=======
+
+        // Check email inside legacy customer_details JSON - REMOVED due to column missing
+        // conditions.push(`customer_details->>email.ilike.${emailStr}`);
+>>>>>>> 3117d61b6704ee6c0bc2cd401172d93be2f6915f
       }
 
       const queryFilter = conditions.join(",");
@@ -178,9 +209,11 @@ export default function CustomerDetailsPage() {
   };
 
   const renderTabContent = () => {
+    if (!customer) return null;
     switch (activeTab) {
       case "profile":
         return (
+<<<<<<< HEAD
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
               <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
@@ -390,6 +423,8 @@ export default function CustomerDetailsPage() {
         );
       case "booking-history":
         return (
+=======
+>>>>>>> 3117d61b6704ee6c0bc2cd401172d93be2f6915f
           <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex flex-col sm:flex-row gap-4 justify-between items-center mb-6">
               <div className="relative w-full sm:w-64">
@@ -436,6 +471,7 @@ export default function CustomerDetailsPage() {
               </div>
             ) : (
               bookings.map((booking, index) => {
+<<<<<<< HEAD
                 const b = booking as unknown as Record<string, unknown>;
                 const status =
                   booking.status || (b.status as string) || (b.bookingstatus as string) || "Pending";
@@ -450,6 +486,29 @@ export default function CustomerDetailsPage() {
                   (b.sellingprice as string) ||
                   booking.buyingPrice ||
                   (b.buyingPrice as string) ||
+=======
+                const b = booking as any;
+                const status =
+                  booking.status || b.status || b.bookingstatus || "Pending";
+                const origin = booking.origin || b.origin || "N/A";
+                const destination =
+                  booking.destination || b.destination || "N/A";
+                const pnr =
+                  booking.PNR ||
+                  booking.travellers?.[0]?.eticketNumber ||
+                  b.PNR ||
+                  booking.PNR ||
+                  b.pnr ||
+                  b.PNR ||
+                  "N/A";
+                const travelDate =
+                  booking.travelDate || b.traveldate || b.created_at;
+                const price =
+                  booking.sellingPrice ||
+                  b.sellingprice ||
+                  booking.buyingPrice ||
+                  b.buyingPrice ||
+>>>>>>> 3117d61b6704ee6c0bc2cd401172d93be2f6915f
                   "$0.00";
 
                 return (
@@ -577,6 +636,7 @@ export default function CustomerDetailsPage() {
         );
       case "linked-travellers":
         // Filter and deduplicate travellers
+<<<<<<< HEAD
         interface LinkedTraveller {
           firstName: string;
           lastName: string;
@@ -612,6 +672,66 @@ export default function CustomerDetailsPage() {
               bookingId: (b.id as string | number),
             });
           }
+=======
+        const uniqueTravellers = bookings.reduce((acc: any[], booking) => {
+          const b = booking as any;
+
+          // Get travellers from the JSONB column
+          let bookingTravellers = Array.isArray(b.travellers)
+            ? b.travellers
+            : [];
+
+          // Fallback for legacy data if array is empty
+          if (bookingTravellers.length === 0) {
+            const fName = b.travellerFirstName || b.travellerfirstname;
+            const lName = b.travellerLastName || b.travellerlastname;
+            if (fName || lName) {
+              bookingTravellers = [
+                {
+                  firstName: fName || "",
+                  lastName: lName || "",
+                },
+              ];
+            }
+          }
+
+          bookingTravellers.forEach((t: any) => {
+            const fName = t.firstName || "";
+            const lName = t.lastName || "";
+            const fullName = `${fName} ${lName}`.trim();
+
+            // Skip if empty name
+            if (!fullName) return;
+
+            // Skip if matches current customer
+            if (customer) {
+              const customerName =
+                `${customer.firstName} ${customer.lastName}`.trim();
+              if (fullName.toLowerCase() === customerName.toLowerCase()) return;
+            }
+
+            // Check if already in accumulator (case insensitive)
+            if (
+              !acc.some(
+                (existing) =>
+                  `${existing.firstName} ${existing.lastName}`
+                    .trim()
+                    .toLowerCase() === fullName.toLowerCase(),
+              )
+            ) {
+              acc.push({
+                firstName: fName,
+                lastName: lName,
+                passportNumber: t.passportNumber,
+                nationality: t.nationality,
+                dob: t.dob,
+                linkedVia: b.PNR || b.ticketNumber || b.pnr || "N/A",
+                bookingId: b.id,
+              });
+            }
+          });
+
+>>>>>>> 3117d61b6704ee6c0bc2cd401172d93be2f6915f
           return acc;
         }, []);
 
@@ -652,9 +772,29 @@ export default function CustomerDetailsPage() {
                     <h4 className="font-bold text-slate-900 capitalize">
                       {traveller.firstName} {traveller.lastName}
                     </h4>
+<<<<<<< HEAD
                     <p className="text-xs text-slate-500">
                       Linked via Booking #{traveller.linkedVia}
                     </p>
+=======
+                    <div className="flex flex-col gap-0.5 mt-1">
+                      {traveller.passportNumber && (
+                        <p className="text-xs text-slate-600">
+                          <span className="font-medium">Passport:</span>{" "}
+                          {traveller.passportNumber}
+                        </p>
+                      )}
+                      {traveller.nationality && (
+                        <p className="text-xs text-slate-600">
+                          <span className="font-medium">Nationality:</span>{" "}
+                          {traveller.nationality}
+                        </p>
+                      )}
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Linked via Booking #{traveller.linkedVia}
+                      </p>
+                    </div>
+>>>>>>> 3117d61b6704ee6c0bc2cd401172d93be2f6915f
                   </div>
                   <button
                     onClick={() =>
@@ -681,6 +821,223 @@ export default function CustomerDetailsPage() {
             </button>
           </div>
         );
+<<<<<<< HEAD
+=======
+      case "customer-profile":
+        return (
+          <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+            {/* Personal Information */}
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 className="text-slate-900 text-base font-bold flex items-center gap-2">
+                  <span className="material-symbols-outlined text-primary text-[20px]">
+                    person
+                  </span>
+                  Personal Information
+                </h3>
+              </div>
+              <div className="p-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8">
+                  <div className="flex flex-col gap-1">
+                    <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">
+                      First Name
+                    </p>
+                    <p className="text-slate-900 font-medium">
+                      {customer?.firstName}
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">
+                      Last Name
+                    </p>
+                    <p className="text-slate-900 font-medium">
+                      {customer?.lastName}
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">
+                      Date of Birth
+                    </p>
+                    <p className="text-slate-900 font-medium">
+                      {customer?.dateOfBirth || "N/A"}
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">
+                      Gender
+                    </p>
+                    <p className="text-slate-900 font-medium">
+                      {customer?.gender || "N/A"}
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">
+                      Phone Country Code
+                    </p>
+                    <p className="text-slate-900 font-medium flex items-center gap-2">
+                      {customer?.phoneCountryCode} ({customer?.country})
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">
+                      Nationality
+                    </p>
+                    <p className="text-slate-900 font-medium">
+                      {customer?.country}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Address Details */}
+            {/* <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 className="text-slate-900 text-base font-bold flex items-center gap-2">
+                  <span className="material-symbols-outlined text-primary text-[20px]">
+                    home_pin
+                  </span>
+                  Address Details
+                </h3>
+                <a
+                  className="text-xs font-medium text-primary hover:text-blue-600 flex items-center gap-1"
+                  href="#"
+                >
+                  Open Map{" "}
+                  <span className="material-symbols-outlined text-[14px]">
+                    open_in_new
+                  </span>
+                </a>
+              </div>
+              <div className="p-0">
+                <div className="flex flex-col md:flex-row">
+                  <div className="w-full md:w-1/3 h-40 md:h-auto bg-slate-100 relative overflow-hidden border-b md:border-b-0 md:border-r border-slate-100">
+                    <div
+                      className="absolute inset-0 bg-cover bg-center opacity-80"
+                      style={{
+                        backgroundImage:
+                          "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCKcaqUPfNzFUXIasZ9PxpmvmrnRmOaRp7wcxwTfHbBDGcQMoIa8AQXrOXZWfXd2O_PgoZ6HLTOvIVU4yeKQKaU3k9BwEpR36jIIcGrPzpcQDG8K_f5_ZoAdOTXi5O5xKski2M4r6LpEN04XlUjY6WVqkZzNvPmEsYP-etxNeH1nhKHxcRV5t_LXlqYTuHVFb0flVoeXI1GSORmwpXR3TCot2fP0IYXcqBXCd5j1YIQhQemb-nQBdG3R0l3PaapHtNK7GRs_y_X5-5K')",
+                      }}
+                    ></div>
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="bg-primary text-white p-2 rounded-full shadow-lg">
+                        <span className="material-symbols-outlined text-[20px] block">
+                          location_on
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="w-full md:w-2/3 p-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8">
+                      <div className="sm:col-span-2 flex flex-col gap-1">
+                        <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">
+                          Street Address
+                        </p>
+                        <p className="text-slate-900 font-medium">
+                          {address.street || "N/A"}
+                        </p>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">
+                          City
+                        </p>
+                        <p className="text-slate-900 font-medium">
+                          {address.city || "N/A"}
+                        </p>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">
+                          State / Province
+                        </p>
+                        <p className="text-slate-900 font-medium">
+                          {address.state || "N/A"}
+                        </p>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">
+                          Postal Code
+                        </p>
+                        <p className="text-slate-900 font-medium">
+                          {address.postalCode || "N/A"}
+                        </p>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">
+                          Country
+                        </p>
+                        <p className="text-slate-900 font-medium">
+                          {customer?.country}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div> */}
+
+            {/* Passport Details */}
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 className="text-slate-900 text-base font-bold flex items-center gap-2">
+                  <span className="material-symbols-outlined text-primary text-[20px]">
+                    badge
+                  </span>
+                  Passport Details
+                </h3>
+                <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-600 border border-slate-300">
+                  CONFIDENTIAL
+                </span>
+              </div>
+              <div className="p-5">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-y-6 gap-x-8">
+                  <div className="flex flex-col gap-1">
+                    <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">
+                      Passport Number
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-slate-900 font-mono font-bold text-lg">
+                        {passport.number || "N/A"}
+                      </p>
+                      {customer?.isVerified === "true" && (
+                        <span
+                          className="material-symbols-outlined text-green-500 text-[18px]"
+                          title="Verified"
+                        >
+                          check_circle
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">
+                      Issue Country
+                    </p>
+                    <p className="text-slate-900 font-medium flex items-center gap-2">
+                      {passport.issueCountry || customer?.country}
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-1">
+                    <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">
+                      Expiry Date
+                    </p>
+                    <div className="flex items-center gap-2">
+                      <p className="text-slate-900 font-medium">
+                        {passport.expiryDate || "N/A"}
+                      </p>
+                      {passport.expiryDate &&
+                        new Date(passport.expiryDate) > new Date() && (
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-green-50 text-green-700 border border-green-200">
+                            VALID
+                          </span>
+                        )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+>>>>>>> 3117d61b6704ee6c0bc2cd401172d93be2f6915f
       default:
         return null;
     }
@@ -715,6 +1072,7 @@ export default function CustomerDetailsPage() {
     );
   }
 
+<<<<<<< HEAD
   // Parse JSON fields safely
   const safeJsonParse = <T,>(value: unknown, fallback: T): T => {
     if (typeof value === "string") {
@@ -731,6 +1089,8 @@ export default function CustomerDetailsPage() {
   const address = safeJsonParse<Partial<Address>>(customer.address, {});
   const passport = safeJsonParse<Partial<Passport>>(customer.passport, {});
 
+=======
+>>>>>>> 3117d61b6704ee6c0bc2cd401172d93be2f6915f
   return (
     <div className="flex flex-col w-full max-h-[90vh] bg-white rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
       <div className="flex flex-col border-b border-slate-200 bg-white shrink-0">
@@ -747,6 +1107,7 @@ export default function CustomerDetailsPage() {
           <div className="flex gap-2">
             <button
               aria-label="Edit"
+<<<<<<< HEAD
               onClick={() => {
                 setEditCountry(customer?.country || "");
                 const addr = safeJsonParse<Partial<Address>>(customer?.address, {});
@@ -754,6 +1115,8 @@ export default function CustomerDetailsPage() {
                 setEditCity(addr.city || "");
                 setShowEditModal(true);
               }}
+=======
+>>>>>>> 3117d61b6704ee6c0bc2cd401172d93be2f6915f
               className="flex items-center justify-center h-9 w-9 rounded-full hover:bg-slate-100 transition-colors text-slate-500"
             >
               <span className="material-symbols-outlined text-[20px]">
@@ -858,10 +1221,17 @@ export default function CustomerDetailsPage() {
           <div className="border-b border-slate-200">
             <nav className="-mb-px flex space-x-8" aria-label="Tabs">
               {[
+<<<<<<< HEAD
                 "profile",
                 "booking-history",
                 "payment-due",
                 "linked-travellers",
+=======
+                "booking-history",
+                "payment-due",
+                "linked-travellers",
+                "customer-profile",
+>>>>>>> 3117d61b6704ee6c0bc2cd401172d93be2f6915f
               ].map((tab) => (
                 <button
                   key={tab}
@@ -885,9 +1255,13 @@ export default function CustomerDetailsPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+<<<<<<< HEAD
             <div className="lg:col-span-2 space-y-6">
               {renderTabContent()}
             </div>
+=======
+            <div className="lg:col-span-2 space-y-6">{renderTabContent()}</div>
+>>>>>>> 3117d61b6704ee6c0bc2cd401172d93be2f6915f
             <div className="lg:col-span-1 space-y-6">
               <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="px-5 py-4 border-b border-slate-100 bg-slate-50">

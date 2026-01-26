@@ -1,13 +1,17 @@
 "use client";
 
 import { useState, useEffect, use } from "react";
+import Image from "next/image";
 import { useRouter, notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { Booking } from "@/types";
 import { getCustomerName } from "@/lib/booking-helpers";
+import { CompanyProfile } from "@/types/company";
 import SendEmailModal from "@/components/booking-management/SendEmailModal";
 import html2canvas from "html2canvas-pro";
 import jsPDF from "jspdf";
+
+type BookingWithAgency = Booking & { issuedthroughagency?: string };
 
 export default function ETicketPage({
   params,
@@ -22,6 +26,32 @@ export default function ETicketPage({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+  const [companyProfiles, setCompanyProfiles] = useState<CompanyProfile[]>([]);
+  const [selectedCompanyId, setSelectedCompanyId] = useState<string | null>(
+    null,
+  );
+  const [settingsCompanyName, setSettingsCompanyName] = useState<string>("");
+  const [settingsLogoUrl, setSettingsLogoUrl] = useState<string>("");
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await fetch("/api/settings");
+        if (!res.ok) return;
+        const data = await res.json();
+        setSettingsCompanyName(data.company_name || "");
+        setSettingsLogoUrl(data.logo_url || "");
+        const profiles = (data.company_profiles || []) as CompanyProfile[];
+        setCompanyProfiles(profiles);
+        if (!selectedCompanyId && profiles.length > 0) {
+          setSelectedCompanyId(profiles[0].id);
+        }
+      } catch (err) {
+        console.error("Error fetching settings:", err);
+      }
+    };
+    fetchSettings();
+  }, [selectedCompanyId]);
 
   useEffect(() => {
     if (!bookingId) return;
@@ -94,6 +124,9 @@ export default function ETicketPage({
   }
 
   if (!booking) return null;
+
+  const selectedCompany =
+    companyProfiles.find((c) => c.id === selectedCompanyId) || null;
 
   const handlePrint = () => {
     window.print();
@@ -170,9 +203,11 @@ export default function ETicketPage({
   const taxes = prices?.taxes ? Number(prices.taxes) : sellingPrice * 0.1;
   const fees = prices?.fees ? Number(prices.fees) : sellingPrice * 0.05;
 
-  const supportPhone = "+1 800 123 4567";
-  const supportEmail = "support@skyhigh.com";
-  const supportHours = "24/7 Support";
+  // Dynamic Support Info based on selected company
+  const supportPhone = selectedCompany?.phones[0]?.value || "+1 800 123 4567";
+  const supportEmail =
+    selectedCompany?.emails[0]?.value || "support@skyhigh.com";
+  const supportHours = "24/7 Support"; // Could be added to company profile later
 
   const handleSendEmail = async (data: {
     subject: string;
@@ -302,7 +337,32 @@ export default function ETicketPage({
           <span className="mx-2 text-slate-300">/</span>
           <span className="text-primary font-bold">E-Ticket</span>
         </nav>
-        <div className="flex gap-3">
+        <div className="flex gap-3 items-center">
+          {companyProfiles.length > 0 && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-bold text-slate-500">
+                Company profile
+              </span>
+              <select
+                value={selectedCompanyId || ""}
+                onChange={(e) => setSelectedCompanyId(e.target.value || null)}
+                className="px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              >
+                {companyProfiles.map((profile) => (
+                  <option key={profile.id} value={profile.id}>
+                    {profile.name}
+                    {profile.address.city
+                      ? ` (${profile.address.city}${
+                          profile.address.country
+                            ? `, ${profile.address.country}`
+                            : ""
+                        })`
+                      : ""}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
           <button
             onClick={handlePrint}
             className="inline-flex items-center px-4 py-2 bg-white border border-slate-200 text-slate-700 text-sm font-bold rounded-lg shadow-sm hover:bg-slate-50 transition-all active:scale-95"
@@ -334,18 +394,27 @@ export default function ETicketPage({
         <div className="p-8 md:p-10 border-b border-slate-100 bg-slate-50/50">
           <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-8">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center text-white font-black text-2xl">
-                S
+              <div className="w-12 h-12 bg-primary rounded-lg flex items-center justify-center text-white font-black text-2xl overflow-hidden">
+                {settingsLogoUrl ? (
+                  <Image
+                    src={settingsLogoUrl}
+                    alt={settingsCompanyName || "Company Logo"}
+                    width={48}
+                    height={48}
+                    className="w-12 h-12 object-cover"
+                  />
+                ) : (
+                  "S"
+                )}
               </div>
               <div>
-                <h1 className="text-xl font-black text-slate-900 tracking-tight">
-                  {(booking as any).issuedthroughagency ||
+                <h1 className="text-xl font-black text-slate-900 tracking-tight mb-1">
+                  {settingsCompanyName ||
+                    (selectedCompany && selectedCompany.name) ||
+                    (booking as BookingWithAgency).issuedthroughagency ||
                     booking.agency ||
                     "SkyHigh Agency"}
                 </h1>
-                <p className="text-sm text-slate-500 font-medium">
-                  Electronic Ticket Receipt
-                </p>
               </div>
             </div>
             <div className="text-left md:text-right">
@@ -357,6 +426,56 @@ export default function ETicketPage({
                 <span className="text-primary">{booking.PNR || "UNKNOWN"}</span>
               </p>
             </div>
+          </div>
+
+          <div className="mt-8 pt-8 border-t border-slate-200/60">
+            <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">
+              Company Information
+            </h3>
+            <address className="not-italic text-sm text-slate-600 space-y-1">
+              <p className="font-bold text-slate-900">
+                {selectedCompany?.name ||
+                  (booking as BookingWithAgency).issuedthroughagency ||
+                  booking.agency ||
+                  "Sktrips"}
+              </p>
+              {selectedCompany ? (
+                <>
+                  {selectedCompany.address.street && (
+                    <p>{selectedCompany.address.street}</p>
+                  )}
+                  {(selectedCompany.address.city ||
+                    selectedCompany.address.state ||
+                    selectedCompany.address.postalCode) && (
+                    <p>
+                      {[
+                        selectedCompany.address.city,
+                        selectedCompany.address.state,
+                        selectedCompany.address.postalCode,
+                      ]
+                        .filter(Boolean)
+                        .join(", ")}
+                    </p>
+                  )}
+                  {selectedCompany.address.country && (
+                    <p>{selectedCompany.address.country}</p>
+                  )}
+                  {selectedCompany.emails[0]?.value && (
+                    <p>{selectedCompany.emails[0].value}</p>
+                  )}
+                  {selectedCompany.phones[0]?.value && (
+                    <p>{selectedCompany.phones[0].value}</p>
+                  )}
+                </>
+              ) : (
+                <>
+                  <p>123 Sky Tower, Aviation Street</p>
+                  <p>Singapore, 018956</p>
+                  <p>Tax ID: SG-99887766</p>
+                  <p>support@skyhigh.com</p>
+                </>
+              )}
+            </address>
           </div>
         </div>
 
@@ -625,25 +744,6 @@ export default function ETicketPage({
                 </>
               )}
             </div>
-
-            <div className="mt-6 px-6 py-4 border border-slate-200 rounded-xl bg-slate-50/30 flex justify-between items-center text-sm hidden">
-              <div className="flex gap-8">
-                <div>
-                  <span className="text-slate-400 text-xs font-bold uppercase mr-2">
-                    Baggage Allowance
-                  </span>
-                  <span className="font-bold text-slate-700">
-                    30KG Check-in + 7KG Cabin
-                  </span>
-                </div>
-                <div>
-                  <span className="text-slate-400 text-xs font-bold uppercase mr-2">
-                    Booking Status
-                  </span>
-                  <span className="font-bold text-emerald-600">Confirmed</span>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* Pricing Breakdown */}
@@ -740,20 +840,7 @@ export default function ETicketPage({
                       </tr>
                     ))
                   ) : (
-                    <tr>
-                      {/* <td className="px-6 py-4 font-bold text-slate-900">
-                        {booking.travellerFirstName} {booking.travellerLastName}
-                      </td>
-                      <td className="px-6 py-4 font-mono text-slate-600">
-                        {ticketNumber}
-                      </td>
-                      <td className="px-6 py-4 text-slate-600">
-                        {booking.passportNumber || "N/A"}
-                      </td>
-                      <td className="px-6 py-4 text-emerald-600 font-bold">
-                        Confirmed
-                      </td> */}
-                    </tr>
+                    <tr>{/* Empty row handling */}</tr>
                   )}
                 </tbody>
               </table>
@@ -819,8 +906,8 @@ export default function ETicketPage({
             </ul>
           </div>
           {/* Support Information */}
-          <div className="bg-slate-900 rounded-xl p-8 text-white mt-8">
-            <h4 className="text-sm font-bold text-white uppercase tracking-widest mb-6 flex items-center gap-2">
+          <div className="bg-white border border-slate-200 rounded-xl p-8 text-white mt-8">
+            <h4 className="text-sm font-bold text-black uppercase tracking-widest mb-6 flex items-center gap-2">
               <span className="material-symbols-outlined text-[18px]">
                 support_agent
               </span>
@@ -832,8 +919,10 @@ export default function ETicketPage({
                   24/7 Support Line
                 </div>
                 <a
-                  href={`tel:${supportPhone}`}
-                  className="text-lg font-bold hover:text-primary transition-colors"
+                  href={`https://wa.me/${supportPhone.replace(/[^0-9]/g, "")}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm font-bold hover:text-primary transition-colors text-slate-400"
                 >
                   {supportPhone}
                 </a>
@@ -844,7 +933,7 @@ export default function ETicketPage({
                 </div>
                 <a
                   href={`mailto:${supportEmail}`}
-                  className="text-lg font-bold hover:text-primary transition-colors"
+                  className="text-sm font-bold hover:text-primary transition-colors text-slate-400"
                 >
                   {supportEmail}
                 </a>
@@ -853,7 +942,7 @@ export default function ETicketPage({
                 <div className="text-xs font-bold text-slate-400 uppercase mb-1">
                   Operating Hours
                 </div>
-                <div className="text-lg font-bold flex items-center gap-2">
+                <div className="text-sm font-bold flex items-center gap-2 text-slate-400">
                   {supportHours}
                   <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase tracking-wide">
                     Online
@@ -875,9 +964,10 @@ export default function ETicketPage({
         <div className="p-6 bg-slate-50 border-t border-slate-100 text-center text-xs text-slate-400">
           <p>
             © {new Date().getFullYear()}{" "}
-            {(booking as any).issuedthroughagency ||
+            {selectedCompany?.name ||
+              (booking as BookingWithAgency).issuedthroughagency ||
               booking.agency ||
-              "SkyHigh Agency"}
+              "Sktrips"}
             . All rights reserved.
           </p>
           <p className="mt-1">Issued Date: {issueDate}</p>
