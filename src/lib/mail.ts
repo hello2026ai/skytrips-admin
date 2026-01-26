@@ -1,5 +1,4 @@
-import Mailgun from "mailgun.js";
-import formData from "form-data";
+import nodemailer from "nodemailer";
 
 type SendEmailInput = {
   to: string | string[];
@@ -18,28 +17,33 @@ type SendEmailInput = {
   }>;
 };
 
-const client = () => {
-  const key = process.env.NEXT_PUBLIC_MAILGUN_API_KEY || "";
-  const username = process.env.NEXT_PUBLIC_MAILGUN_USERNAME || "Skytrips";
-  const mg = new Mailgun(formData);
-  return mg.client({ username: username, key });
-};
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || "smtp.mailgun.org",
+  port: Number(process.env.SMTP_PORT) || 587,
+  secure: false, // true for 465, false for other ports
+  auth: {
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
+  },
+});
 
 export async function sendEmail(input: SendEmailInput) {
-  const domain = process.env.NEXT_PUBLIC_MAILGUN_DOMAIN || "";
   const defaultFrom =
+    process.env.SMTP_FROM ||
     process.env.NEXT_PUBLIC_MAIL_SENDER ||
-    "SkyTrips Admin <no-reply@skytrips.com>";
-  const c = client();
-  const res = await c.messages.create(domain, {
+    '"SkyTrips Admin" <no-reply@skytrips.com>';
+
+  const info = await transporter.sendMail({
     from: input.from || defaultFrom,
-    to: input.to,
+    to: Array.isArray(input.to) ? input.to.join(",") : input.to,
     subject: input.subject,
-    html: input.html,
     text: input.text,
-    attachment: input.attachment,
+    html: input.html,
+    attachments: input.attachment ? (Array.isArray(input.attachment) ? input.attachment : [input.attachment]) : undefined,
   });
-  return res;
+
+  console.log("Message sent: %s", info.messageId);
+  return info;
 }
 
 export async function sendWelcomeUser(data: { email: string; fullName?: string; role?: string; readablePassword?: string }) {
