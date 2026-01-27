@@ -336,6 +336,16 @@ export default function AirlinesPage() {
               Selected {selectedIds.length} airlines
             </p>
             <div className="flex items-center gap-2">
+              {selectedIds.length === 1 && (
+                <button
+                  onClick={() =>
+                    router.push(`/dashboard/airlines/${selectedIds[0]}`)
+                  }
+                  className="px-3 py-1.5 text-xs rounded-md border border-border bg-background hover:bg-muted text-foreground"
+                >
+                  Edit
+                </button>
+              )}
               <button
                 onClick={() => handleBulkStatusUpdate("Active")}
                 disabled={bulkActionLoading}
