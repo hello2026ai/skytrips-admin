@@ -1,71 +1,156 @@
-
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import AddCommissionModal from "@/components/agency/AddCommissionModal";
+import { useState, useEffect, useCallback } from "react";
+import { useParams } from "next/navigation";
+import { supabase } from "@/lib/supabase";
+import AddCommissionModal, { CommissionData } from "@/components/agency/AddCommissionModal";
 import DeleteConfirmationModal from "@/components/DeleteConfirmationModal";
 
 export default function AgencyCommissionsPage() {
+  const params = useParams();
+  const uid = params?.uid as string;
+
   const [searchTerm, setSearchTerm] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedCommission, setSelectedCommission] = useState<Record<string, unknown> | null>(null);
-  const [commissionToDelete, setCommissionToDelete] = useState<Record<string, unknown> | null>(null);
+  const [selectedCommission, setSelectedCommission] = useState<Partial<CommissionData> | null>(null);
+  const [commissionToDelete, setCommissionToDelete] = useState<Partial<CommissionData> | null>(null);
+  
+  const [commissions, setCommissions] = useState<CommissionData[]>([]);
+  const [agencyName, setAgencyName] = useState("Agency");
+  const [loading, setLoading] = useState(true);
 
-  // Mock data matching the design image
-  const commissions = [
-    {
-      id: 1,
-      airline: "Emirates",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/d/d0/Emirates_logo.svg",
-      type: "PERCENTAGE",
-      value: "5.00%",
-      status: "ACTIVE",
-    },
-    {
-      id: 2,
-      airline: "Qatar Airways",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/c/c2/Qatar_Airways_Logo.svg", // Using a placeholder if needed, or SVG logic
-      type: "FIXED",
-      value: "$25.00",
-      status: "ACTIVE",
-    },
-    {
-      id: 3,
-      airline: "Lufthansa",
-      logo: "https://upload.wikimedia.org/wikipedia/commons/b/b8/Lufthansa_Logo_2018.svg",
-      type: "PERCENTAGE",
-      value: "3.50%",
-      status: "INACTIVE",
-    },
-  ];
+  // Fetch Agency Name
+  useEffect(() => {
+    if (!uid) return;
+    const fetchAgency = async () => {
+      const { data, error } = await supabase
+        .from("agencies")
+        .select("agency_name")
+        .eq("uid", uid)
+        .single();
+      
+      if (data) {
+        setAgencyName(data.agency_name);
+      } else if (error) {
+        console.error("Error fetching agency:", error);
+      }
+    };
+    fetchAgency();
+  }, [uid]);
 
-  const filteredCommissions = commissions.filter((c) =>
-    c.airline.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Fetch Commissions
+  const fetchCommissions = useCallback(async () => {
+    if (!uid) return;
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("airline_commissions")
+      .select("*")
+      .eq("agency_uid", uid)
+      .order("created_at", { ascending: false });
+
+    if (error) {
+      console.error("Error fetching commissions:", error);
+    } else {
+      // Map DB to CommissionData
+      const mapped: CommissionData[] = (data || []).map((item: any) => ({
+        id: item.id,
+        airline: item.airline_name,
+        airline_iata: item.airline_iata,
+        airline_logo: item.airline_logo,
+        type: item.commission_type as "PERCENTAGE" | "FIXED",
+        value: item.commission_type === "PERCENTAGE" ? `${item.value}%` : `$${item.value}`,
+        rawValue: item.value,
+        status: item.status as "ACTIVE" | "INACTIVE",
+        classType: item.class_type,
+        origin: item.origin || "",
+        destination: item.destination || "",
+      }));
+      setCommissions(mapped);
+    }
+    setLoading(false);
+  }, [uid]);
+
+  useEffect(() => {
+    fetchCommissions();
+  }, [fetchCommissions]);
 
   const handleOpenAdd = () => {
     setSelectedCommission(null);
     setIsModalOpen(true);
   };
 
-  const handleOpenEdit = (commission: Record<string, unknown>) => {
+  const handleOpenEdit = (commission: CommissionData) => {
     setSelectedCommission(commission);
     setIsModalOpen(true);
   };
 
-  const handleOpenDelete = (commission: Record<string, unknown>) => {
+  const handleOpenDelete = (commission: CommissionData) => {
     setCommissionToDelete(commission);
     setIsDeleteModalOpen(true);
   };
 
-  const handleDelete = () => {
-    console.log("Deleting commission:", commissionToDelete);
-    setIsDeleteModalOpen(false);
-    setCommissionToDelete(null);
-    // Add logic to refresh data
+  const handleSave = async (data: CommissionData) => {
+    try {
+      const payload = {
+        agency_uid: uid,
+        airline_name: data.airline,
+        airline_iata: data.airline_iata,
+        airline_logo: data.airline_logo,
+        commission_type: data.type,
+        value: data.rawValue ?? parseFloat(data.value.replace(/[^0-9.]/g, "")),
+        status: data.status,
+        class_type: data.classType,
+        origin: data.origin,
+        destination: data.destination,
+      };
+
+      if (selectedCommission?.id) {
+        // Update
+        const { error } = await supabase
+          .from("airline_commissions")
+          .update(payload)
+          .eq("id", selectedCommission.id);
+        if (error) throw error;
+      } else {
+        // Create
+        const { error } = await supabase
+          .from("airline_commissions")
+          .insert([payload]);
+        if (error) throw error;
+      }
+
+      setIsModalOpen(false);
+      fetchCommissions();
+    } catch (error) {
+      console.error("Error saving commission:", error);
+      alert("Failed to save commission");
+    }
   };
+
+  const handleDelete = async () => {
+    if (!commissionToDelete?.id) return;
+    try {
+      const { error } = await supabase
+        .from("airline_commissions")
+        .delete()
+        .eq("id", commissionToDelete.id);
+      
+      if (error) throw error;
+      
+      setIsDeleteModalOpen(false);
+      setCommissionToDelete(null);
+      fetchCommissions();
+    } catch (error) {
+      console.error("Error deleting commission:", error);
+      alert("Failed to delete commission");
+    }
+  };
+
+  const filteredCommissions = commissions.filter((c) =>
+    c.airline.toLowerCase().includes(searchTerm.toLowerCase())
+  );
 
   return (
     <div className="max-w-[1600px] mx-auto w-full font-display pb-12 space-y-6">
@@ -79,8 +164,8 @@ export default function AgencyCommissionsPage() {
           </li>
           <li className="text-slate-300">/</li>
           <li>
-            <Link href="/dashboard/agencies/uid" className="hover:text-primary transition-colors">
-              Global Travels Co.
+            <Link href={`/dashboard/agencies/${uid}`} className="hover:text-primary transition-colors">
+              {agencyName}
             </Link>
           </li>
           <li className="text-slate-300">/</li>
@@ -96,7 +181,7 @@ export default function AgencyCommissionsPage() {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-slate-900">Airline Commissions</h1>
-            <p className="text-slate-500 font-medium">Manage custom commission rates for Global Travels Co.</p>
+            <p className="text-slate-500 font-medium">Manage custom commission rates for {agencyName}.</p>
           </div>
         </div>
         <button 
@@ -111,12 +196,8 @@ export default function AgencyCommissionsPage() {
       <AddCommissionModal 
         isOpen={isModalOpen} 
         onClose={() => setIsModalOpen(false)} 
-        onSave={(data) => {
-          console.log("Saved commission:", data, "Updating ID:", selectedCommission?.id);
-          setIsModalOpen(false);
-          // Here you would typically refresh data or update state
-        }}
-        initialData={selectedCommission}
+        onSave={handleSave}
+        initialData={selectedCommission || undefined}
       />
 
       <DeleteConfirmationModal
@@ -164,17 +245,33 @@ export default function AgencyCommissionsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-50">
-              {filteredCommissions.length > 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={5} className="px-6 py-12 text-center text-slate-500">
+                    <div className="flex items-center justify-center gap-2">
+                      <div className="w-4 h-4 border-2 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+                      Loading commissions...
+                    </div>
+                  </td>
+                </tr>
+              ) : filteredCommissions.length > 0 ? (
                 filteredCommissions.map((commission) => (
                   <tr key={commission.id} className="hover:bg-slate-50/50 transition-colors group">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
-                        <div className="size-8 rounded-md bg-white border border-slate-200 p-1 flex items-center justify-center overflow-hidden">
-                           {/* Using a placeholder text if image fails or for simplicity */}
-                           <span className="text-[10px] font-bold text-slate-400">LOGO</span>
-                           {/* In real app, use next/image with fallback */}
+                        <div className="size-8 rounded-md bg-white border border-slate-200 p-1 flex items-center justify-center overflow-hidden shrink-0">
+                           {commission.airline_logo ? (
+                             <img src={commission.airline_logo} alt={commission.airline} className="w-full h-full object-contain" />
+                           ) : (
+                             <span className="text-[10px] font-bold text-slate-400">LOGO</span>
+                           )}
                         </div>
-                        <span className="font-bold text-slate-900">{commission.airline}</span>
+                        <div className="flex flex-col">
+                          <span className="font-bold text-slate-900">{commission.airline}</span>
+                          {commission.airline_iata && (
+                            <span className="text-xs text-slate-500 font-medium">{commission.airline_iata}</span>
+                          )}
+                        </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
@@ -232,17 +329,7 @@ export default function AgencyCommissionsPage() {
           <p className="text-sm text-slate-400 font-medium">
             Showing {filteredCommissions.length} airlines with custom commissions
           </p>
-          <div className="flex items-center gap-2">
-            <button className="size-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-colors">
-              <span className="material-symbols-outlined text-[18px]">chevron_left</span>
-            </button>
-            <button className="size-8 flex items-center justify-center rounded-lg bg-[#00A76F] text-white text-sm font-bold shadow-sm">
-              1
-            </button>
-            <button className="size-8 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-colors">
-              <span className="material-symbols-outlined text-[18px]">chevron_right</span>
-            </button>
-          </div>
+          {/* Pagination controls can be added here if needed */}
         </div>
       </div>
     </div>
