@@ -130,6 +130,17 @@ export async function GET(request: NextRequest) {
       gallery_urls: row.gallery_urls,
       faqs: row.faqs,
       map_embed_code: row.map_embed_code,
+      seo_title: row.seo_title || undefined,
+      meta_description: row.meta_description || undefined,
+      seo_image_url: row.seo_image_url || undefined,
+      slug: row.slug || undefined,
+      canonical_url: row.canonical_url || undefined,
+      schema_markup: row.schema_markup || undefined,
+      no_index: row.no_index ?? undefined,
+      no_follow: row.no_follow ?? undefined,
+      no_archive: row.no_archive ?? undefined,
+      no_image_index: row.no_image_index ?? undefined,
+      no_snippet: row.no_snippet ?? undefined,
     }));
 
     return NextResponse.json({
@@ -200,7 +211,9 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { 
       iata_code, name, city, country, latitude, longitude, timezone, active,
-      featured_image_url, description, fast_facts, top_airlines, gallery_urls, faqs, map_embed_code
+      featured_image_url, description, fast_facts, top_airlines, gallery_urls, faqs, map_embed_code,
+      seo_title, meta_description, seo_image_url, slug, canonical_url, schema_markup,
+      no_index, no_follow, no_archive, no_image_index, no_snippet
     } = body as CreateAirportDTO;
 
     // Validation
@@ -251,6 +264,17 @@ export async function POST(request: NextRequest) {
         gallery_urls,
         faqs,
         map_embed_code,
+        seo_title,
+        meta_description,
+        seo_image_url,
+        slug,
+        canonical_url,
+        schema_markup,
+        no_index,
+        no_follow,
+        no_archive,
+        no_image_index,
+        no_snippet,
       })
       .select()
       .single();
@@ -280,6 +304,17 @@ export async function POST(request: NextRequest) {
       gallery_urls: data.gallery_urls,
       faqs: data.faqs,
       map_embed_code: data.map_embed_code,
+      seo_title: data.seo_title || undefined,
+      meta_description: data.meta_description || undefined,
+      seo_image_url: data.seo_image_url || undefined,
+      slug: data.slug || undefined,
+      canonical_url: data.canonical_url || undefined,
+      schema_markup: data.schema_markup || undefined,
+      no_index: data.no_index ?? undefined,
+      no_follow: data.no_follow ?? undefined,
+      no_archive: data.no_archive ?? undefined,
+      no_image_index: data.no_image_index ?? undefined,
+      no_snippet: data.no_snippet ?? undefined,
     };
 
     return NextResponse.json({ data: newAirport }, { status: 201 });
