@@ -158,3 +158,36 @@ export async function sendWelcomeUser(data: { email: string; fullName?: string; 
     html,
   });
 }
+
+export async function sendCustomerInvite(data: { email: string; firstName: string; lastName: string }) {
+  const name = `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Customer";
+  const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_PUBLIC_APP_URL || "";
+  const html = `
+    <div style="background:#f1f5f9; padding:24px;">
+      <div class="container" style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; color:#0f172a; max-width:600px; margin:0 auto; background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; overflow:hidden;">
+        <div style="height:6px; background:linear-gradient(90deg,#0ea5e9,#2563eb);"></div>
+        <div style="padding:24px;">
+          <h2 style="margin:0 0 4px; font-size:22px;">Invitation</h2>
+          <p style="margin:0 0 12px;">Hello ${name}, you are invited to use SkyTrips services.</p>
+          ${appUrl ? `
+          <div style="margin-top:12px;">
+            <a href="${appUrl}" class="btn" style="display:inline-block; background:#2563eb; color:#ffffff; text-decoration:none; font-weight:700; padding:10px 16px; border-radius:10px;">Open SkyTrips</a>
+          </div>
+          ` : ``}
+          <p style="margin:16px 0 0; font-size:14px; color:#64748b;">If this wasn't expected, you can ignore this email.</p>
+        </div>
+      </div>
+      <style>
+      .btn:hover { opacity: 0.9; }
+      @media (max-width: 600px) {
+        .container { border-radius: 0; border: none; }
+      }
+      </style>
+    </div>
+  `;
+  await sendEmail({
+    to: data.email,
+    subject: "You're invited to SkyTrips",
+    html,
+  });
+}
