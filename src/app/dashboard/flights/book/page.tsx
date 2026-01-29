@@ -111,7 +111,7 @@ export default function FlightBookingPage() {
       try {
         const cached = typeof window !== "undefined" ? sessionStorage.getItem(`selectedRawOffer:${offer.id}`) : null;
         rawPayload = cached ? JSON.parse(cached) : null;
-      } catch {}
+      } catch { }
       if (!rawPayload) {
         if (typeof window !== "undefined") {
           alert("Unable to continue booking: missing selected offer. Please go back and select a fare brand.");
@@ -119,18 +119,12 @@ export default function FlightBookingPage() {
         setCreating(false);
         return;
       }
-      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://dev-api.skytrips.com.au/";
-      const clientRef = process.env.NEXT_PUBLIC_SKYTRIPS_CLIENT_REF || "1223";
-      const priceUrl = new URL("flight-price", baseUrl);
-      priceUrl.searchParams.set("page", "1");
-      priceUrl.searchParams.set("limit", "10");
-      const priceBody = rawPayload;
-      const priceRes = await fetch(priceUrl.toString(), {
+      const priceUrl = "/api/amadeus/price";
+      const priceBody = { flightOffer: rawPayload };
+      const priceRes = await fetch(priceUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "ama-client-ref": clientRef,
-          accept: "application/json",
         },
         body: JSON.stringify(priceBody),
       });
@@ -138,105 +132,87 @@ export default function FlightBookingPage() {
         let msg = "Price request failed";
         try {
           const j = await priceRes.json();
-          msg = j?.error || j?.message || msg;
-        } catch {}
+          msg = j?.errors?.[0]?.detail || j?.error || j?.message || msg;
+        } catch { }
         setError(msg);
         setCreating(false);
         return;
       }
       const priceJson = await priceRes.json();
-      const first = Array.isArray(priceJson?.data) ? priceJson.data[0] : undefined;
-      const priceObj = first?.price || {};
+
+      // Amadeus SDK returns data directly or wrapped in data
+      const pricedOffer = priceJson.flightOffers?.[0] || priceJson.data?.[0]?.flightOffers?.[0] || priceJson.data?.flightOffers?.[0] || (Array.isArray(priceJson.data) ? priceJson.data[0] : priceJson.data);
+
+      if (!pricedOffer) {
+        setError("Invalid price response from Amadeus");
+        setCreating(false);
+        return;
+      }
+
+      const priceObj = pricedOffer.price || {};
       const base = typeof priceObj?.base === "string" ? parseFloat(priceObj.base) : Number(priceObj?.base || 0);
       const total = typeof priceObj?.grandTotal === "string" ? parseFloat(priceObj.grandTotal) : (typeof priceObj?.total === "string" ? parseFloat(priceObj.total) : Number(priceObj?.grandTotal ?? priceObj?.total ?? 0));
-      const currency = priceObj?.billingCurrency || priceObj?.currency || offer.currency;
+      const currency = priceObj?.currency || offer.currency;
 
       const travelerIds: string[] = (() => {
-        if (!rawPayload || typeof rawPayload !== "object") return [];
-        const rp = rawPayload as { travelerPricings?: unknown };
-        const tpArr = rp.travelerPricings;
+        const tpArr = pricedOffer.travelerPricings;
         if (!Array.isArray(tpArr)) return [];
-        const out: string[] = [];
-        for (const item of tpArr) {
-          const tp = item as { travelerId?: unknown };
-          const tid = tp?.travelerId;
-          if (typeof tid === "string" || typeof tid === "number") {
-            out.push(String(tid));
-          }
-        }
-        return out;
+        return tpArr.map((item: any) => String(item.travelerId));
       })();
 
-      const passengerInput = passengers.map((id, idx) => {
+      const amadeusTravelers = passengers.map((id, idx) => {
         const f = (typeof document !== "undefined" ? document.getElementById(`fname-${id}`) : null) as HTMLInputElement | null;
         const l = (typeof document !== "undefined" ? document.getElementById(`lname-${id}`) : null) as HTMLInputElement | null;
         const p = (typeof document !== "undefined" ? document.getElementById(`passport-${id}`) : null) as HTMLInputElement | null;
         const genderEl = (typeof document !== "undefined" ? document.getElementById(`gender-${id}`) : null) as HTMLSelectElement | null;
         const dobEl = (typeof document !== "undefined" ? document.getElementById(`dob-${id}`) : null) as HTMLInputElement | null;
-        const countryEl = (typeof document !== "undefined" ? document.getElementById(`country-${id}`) : null) as HTMLSelectElement | null;
-        const passportCountryEl = (typeof document !== "undefined" ? document.getElementById(`passportCountry-${id}`) : null) as HTMLSelectElement | null;
-        const passportExpiryEl = (typeof document !== "undefined" ? document.getElementById(`passportExpiry-${id}`) : null) as HTMLInputElement | null;
+        // const countryEl = (typeof document !== "undefined" ? document.getElementById(`country-${id}`) : null) as HTMLSelectElement | null;
+        // const passportCountryEl = (typeof document !== "undefined" ? document.getElementById(`passportCountry-${id}`) : null) as HTMLSelectElement | null;
+        // const passportExpiryEl = (typeof document !== "undefined" ? document.getElementById(`passportExpiry-${id}`) : null) as HTMLInputElement | null;
+
         const firstName = (f?.value || "").trim() || "Unknown";
         const lastName = (l?.value || "").trim() || "Unknown";
-        const passportNumber = (p?.value || "").trim();
-        const gender = (genderEl?.value || "UNSPECIFIED").trim() || "UNSPECIFIED";
-        const dob = (dobEl?.value || "").trim();
-        const country = (countryEl?.value || "").trim();
-        const passportCountry = (passportCountryEl?.value || "").trim();
-        const passportExpiryDate = (passportExpiryEl?.value || "").trim();
-        const passengerType =
-          idx < adults ? "ADULT" : idx < adults + children ? "CHILD" : "INFANT";
-        const title = gender === "MALE" ? "Mr" : gender === "FEMALE" ? "Ms" : "Mx";
-        const middleName = "";
-        const countryCallingCode = "977";
-        const phone = "9840000000";
-        const phoneDeviceType = "MOBILE";
-        const travelerId = travelerIds[idx] || String(idx + 1);
+        const gender = (genderEl?.value || "MALE").trim() as "MALE" | "FEMALE";
+        const dob = (dobEl?.value || "1990-01-01").trim(); // Default for testing if empty
+
         return {
-          travelerId,
-          passengerType,
-          title,
-          firstName,
-          middleName,
-          lastName,
-          passportNumber,
-          gender,
-          dob,
-          country,
-          passportCountry,
-          passportExpiryDate,
-          documentType: "PASSPORT",
-          countryCallingCode,
-          phone,
-          phoneDeviceType,
+          id: travelerIds[idx] || String(idx + 1),
+          dateOfBirth: dob,
+          name: {
+            firstName: firstName.toUpperCase(),
+            lastName: lastName.toUpperCase(),
+          },
+          gender: gender === "MALE" ? "MALE" : "FEMALE",
+          contact: {
+            emailAddress: "info@skytrips.com.au",
+            phones: [{
+              deviceType: "MOBILE",
+              countryCallingCode: "977",
+              number: "9840000000"
+            }]
+          }
         };
       });
-      const travelClassParam = (searchParams.get("class") || "ECONOMY").toUpperCase().replace(/\s+/g, "_");
-      const typeParam = searchParams.get("type") || "One Way";
-      const tripTypeParam = typeParam === "One Way" ? "ONE_WAY" : typeParam === "Round Trip" ? "ROUND_TRIP" : "MULTI_CITY";
 
-      const bookingUrl = new URL("flight-booking", baseUrl);
+      const bookingUrl = "/api/amadeus/order";
       const bookingPayload = {
-        priceParam: first,
-        userInput: { email: "info@skytrips.com.au" },
-        passengerInput,
-        travelClass: travelClassParam,
-        tripType: tripTypeParam,
-        bookingType: "ONLINE",
-        origin: offer.departure.code,
-        destination: offer.arrival.code,
-        bookingTicketRefundableStatus: "REFUNDABLE",
+        flightOffer: pricedOffer,
+        travelers: amadeusTravelers,
+        customerData: {
+          email: "info@skytrips.com.au",
+          phone: "9840000000",
+          name: "SkyTrips Admin"
+        }
       };
-      const bookingRes = await fetch(bookingUrl.toString(), {
+
+      const bookingRes = await fetch(bookingUrl, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "ama-client-ref": clientRef,
-          accept: "*/*",
         },
         body: JSON.stringify(bookingPayload),
-      }).catch(() => null);
-      const bookingJson = bookingRes ? await bookingRes.json().catch(() => null) : null;
+      });
+      const bookingJson = await bookingRes.json().catch(() => null);
 
       if (bookingRes && bookingRes.ok) {
         setSuccess(true);
@@ -246,7 +222,15 @@ export default function FlightBookingPage() {
           currency,
           travelClass: (searchParams.get("class") || "ECONOMY").toUpperCase().replace(/\s+/g, "_"),
           tripType: (searchParams.get("type") || "One Way") === "One Way" ? "ONE_WAY" : (searchParams.get("type") || "One Way") === "Round Trip" ? "ROUND_TRIP" : "MULTI_CITY",
-          passengers: passengerInput,
+          passengers: amadeusTravelers.map((t: any) => ({
+            travelerId: t.id,
+            passengerType: "ADULT", // Defaulting for simplicity in mapping back to UI
+            title: t.name.firstName.length > 2 ? "Mr" : "Ms",
+            firstName: t.name.firstName,
+            lastName: t.name.lastName,
+            dob: t.dateOfBirth,
+            gender: t.gender
+          })),
         });
       } else {
         let msg = "Booking request failed";
@@ -290,64 +274,64 @@ export default function FlightBookingPage() {
         )}
 
         {!success && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-          
-          {/* Main Content - Passenger Forms */}
-          <div className="lg:col-span-8 space-y-6">
-            
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-sm">
-              {passengers.map((id, index) => {
-                const isLead = index === 0;
-                let typeLabel = "Adult";
-                if (index >= adults && index < adults + children) typeLabel = "Child";
-                if (index >= adults + children) typeLabel = "Infant";
-                const label = isLead ? "Lead Passenger" : `Passenger ${index + 1} (${typeLabel})`;
-                return (
-                  <div key={id} className={index > 0 ? "mt-8 pt-8 border-t border-slate-100" : ""}>
-                    <PassengerForm
-                      id={id}
-                      label={label}
-                      onRemove={() => removePassenger(id)}
-                      canRemove={index > 0}
-                    />
-                  </div>
-                );
-              })}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
 
-              <p className="text-xs font-medium text-[#0EA5E9] mt-6 italic">
-                * Please ensure names match the passenger&apos;s valid government-issued ID.
-              </p>
+            {/* Main Content - Passenger Forms */}
+            <div className="lg:col-span-8 space-y-6">
+
+              <div className="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-sm">
+                {passengers.map((id, index) => {
+                  const isLead = index === 0;
+                  let typeLabel = "Adult";
+                  if (index >= adults && index < adults + children) typeLabel = "Child";
+                  if (index >= adults + children) typeLabel = "Infant";
+                  const label = isLead ? "Lead Passenger" : `Passenger ${index + 1} (${typeLabel})`;
+                  return (
+                    <div key={id} className={index > 0 ? "mt-8 pt-8 border-t border-slate-100" : ""}>
+                      <PassengerForm
+                        id={id}
+                        label={label}
+                        onRemove={() => removePassenger(id)}
+                        canRemove={index > 0}
+                      />
+                    </div>
+                  );
+                })}
+
+                <p className="text-xs font-medium text-[#0EA5E9] mt-6 italic">
+                  * Please ensure names match the passenger&apos;s valid government-issued ID.
+                </p>
+              </div>
+
+              <div className="flex justify-between items-center pt-2">
+                <button
+                  onClick={() => router.back()}
+                  className="flex items-center gap-2 text-sm font-bold text-[#0F766E] hover:text-[#0D655E] transition-colors"
+                >
+                  <span className="material-symbols-outlined text-[18px]">arrow_back</span>
+                  Back to Flight Selection
+                </button>
+
+                <button onClick={handleCreateBooking} disabled={creating} className="bg-[#0F766E] hover:bg-[#0D655E] text-white font-bold py-3 px-6 rounded-lg shadow-lg shadow-[#0F766E]/20 flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50">
+                  Create a booking
+                  <span className="material-symbols-outlined text-[20px] fill-current">check_circle</span>
+                </button>
+              </div>
+
             </div>
 
-            <div className="flex justify-between items-center pt-2">   
-              <button 
-                onClick={() => router.back()}
-                className="flex items-center gap-2 text-sm font-bold text-[#0F766E] hover:text-[#0D655E] transition-colors"
-              >
-                <span className="material-symbols-outlined text-[18px]">arrow_back</span>
-                Back to Flight Selection
-              </button>
-
-              <button onClick={handleCreateBooking} disabled={creating} className="bg-[#0F766E] hover:bg-[#0D655E] text-white font-bold py-3 px-6 rounded-lg shadow-lg shadow-[#0F766E]/20 flex items-center gap-2 transition-all active:scale-95 disabled:opacity-50">
-                Create a booking
-                <span className="material-symbols-outlined text-[20px] fill-current">check_circle</span>
-              </button>
+            {/* Sidebar - Summary */}
+            <div className="lg:col-span-4">
+              <BookingSummary
+                offer={offer}
+                passengers={{ adults, children, infants }}
+                netFare={Number(searchParams.get("netFare") || "") || undefined}
+                taxes={Number(searchParams.get("taxes") || "") || undefined}
+                total={Number(searchParams.get("total") || "") || undefined}
+              />
             </div>
 
           </div>
-
-          {/* Sidebar - Summary */}
-          <div className="lg:col-span-4">
-             <BookingSummary
-               offer={offer}
-               passengers={{ adults, children, infants }}
-               netFare={Number(searchParams.get("netFare") || "") || undefined}
-               taxes={Number(searchParams.get("taxes") || "") || undefined}
-               total={Number(searchParams.get("total") || "") || undefined}
-             />
-          </div>
-
-        </div>
         )}
 
         {success && successData && (
