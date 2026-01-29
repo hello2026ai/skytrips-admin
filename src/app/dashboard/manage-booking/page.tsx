@@ -236,15 +236,23 @@ export default function ManageBookingPage() {
                   </td>
                   <td className="px-6 py-3">
                     <span
-                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset ${
                         row.status === "REFUNDED"
-                          ? "bg-green-100 text-green-800"
+                          ? "bg-green-50 text-green-700 ring-green-600/20"
                           : row.status === "SEND"
-                            ? "bg-blue-100 text-blue-800"
-                            : "bg-yellow-100 text-yellow-800"
+                            ? "bg-blue-50 text-blue-700 ring-blue-600/20"
+                            : row.refund_status === "Processing"
+                              ? "bg-purple-50 text-purple-700 ring-purple-600/20"
+                              : "bg-yellow-50 text-yellow-700 ring-yellow-600/20"
                       }`}
                     >
-                      {row.status || "PENDING"}
+                      {row.status === "REFUNDED"
+                        ? "Refunded"
+                        : row.status === "SEND"
+                          ? "Requesting"
+                          : row.refund_status === "Processing"
+                            ? "Processing"
+                            : "Request"}
                     </span>
                   </td>
                   <td className="px-6 py-3">
