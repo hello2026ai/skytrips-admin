@@ -23,6 +23,14 @@ type SendEmailInput = {
 const mailgunApiKey = process.env.MAILGUN_API_KEY || process.env.NEXT_PUBLIC_MAILGUN_API_KEY;
 const mailgunDomain = process.env.MAILGUN_DOMAIN || process.env.NEXT_PUBLIC_MAILGUN_DOMAIN;
 
+console.log("Mail Config Debug:", {
+  hasMailgunKey: !!mailgunApiKey,
+  hasMailgunDomain: !!mailgunDomain,
+  mailgunKeyPrefix: mailgunApiKey ? mailgunApiKey.substring(0, 5) + "..." : "N/A",
+  smtpHost: process.env.SMTP_HOST || process.env.SUPABASE_SMTP_HOST,
+  smtpUser: process.env.SMTP_USER || process.env.SUPABASE_SMTP_USER,
+});
+
 const mailgun = new Mailgun(FormData);
 const mgClient = mailgunApiKey
   ? mailgun.client({
@@ -50,6 +58,7 @@ export async function sendEmail(input: SendEmailInput) {
   // Try Mailgun API first if available
   if (mgClient && mailgunDomain) {
     try {
+      console.log(`Attempting to send email via Mailgun to ${Array.isArray(input.to) ? input.to.join(", ") : input.to}`);
       const mgData: {
         from: string;
         to: string[];
@@ -87,8 +96,14 @@ export async function sendEmail(input: SendEmailInput) {
       return { messageId: msg.id };
     } catch (error) {
       console.error("Mailgun API failed, falling back to SMTP:", error);
+      if (error && typeof error === 'object' && 'details' in error) {
+         // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         console.error("Mailgun Error Details:", (error as any).details);
+      }
       // Fallback to SMTP below
     }
+  } else {
+     console.log("Mailgun client not configured or domain missing. Skipping Mailgun.");
   }
 
   console.log("Sending email via SMTP...");
