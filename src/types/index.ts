@@ -101,12 +101,14 @@ export interface ManageBooking {
     manual_adjustment: number;
     total_refund_amount: number;
     adjustment_reason?: string;
+    agency_refunded_cp?: number;
   };
   [key: string]: any;
 }
 
 export interface Traveller {
   id?: string; // unique temp id for frontend list management
+  title?: string;
   firstName: string;
   lastName: string;
   passportNumber?: string;

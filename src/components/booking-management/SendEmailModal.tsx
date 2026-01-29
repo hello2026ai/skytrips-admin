@@ -29,6 +29,7 @@ interface SendEmailModalProps {
   mode?: "send" | "edit";
   templates?: EmailTemplate[];
   initialTemplateId?: string;
+  additionalReplacements?: Record<string, string>;
 }
 
 export default function SendEmailModal({
@@ -41,6 +42,7 @@ export default function SendEmailModal({
   mode = "send",
   templates,
   initialTemplateId,
+  additionalReplacements,
 }: SendEmailModalProps) {
   const activeTemplates = templates || DEFAULT_EMAIL_TEMPLATES;
   const [selectedTemplate, setSelectedTemplate] = useState(
@@ -78,10 +80,11 @@ export default function SendEmailModal({
         let newContent = template.content;
 
         const replacements: Record<string, string> = {
-          "{NAME}": recipient.name,
-          "{EMAIL}": recipient.email,
-          "{COMPANY}": recipient.organization || "",
-          "{PNR}": recipient.pnr || "",
+          "{NAME}": recipient?.name || "",
+          "{EMAIL}": recipient?.email || "",
+          "{COMPANY}": recipient?.organization || "",
+          "{PNR}": recipient?.pnr || "",
+          ...additionalReplacements,
         };
 
         Object.entries(replacements).forEach(([key, value]) => {
