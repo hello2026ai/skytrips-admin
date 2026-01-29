@@ -1,5 +1,6 @@
+import nodemailer from "nodemailer";
+import FormData from "form-data";
 import Mailgun from "mailgun.js";
-import formData from "form-data";
 
 type SendEmailInput = {
   to: string | string[];
@@ -9,37 +10,84 @@ type SendEmailInput = {
   from?: string;
   attachment?: {
     filename: string;
-    data: Buffer | string;
+    content: Buffer | string;
     contentType?: string;
   } | Array<{
     filename: string;
-    data: Buffer | string;
+    content: Buffer | string;
     contentType?: string;
   }>;
 };
 
-const client = () => {
-  const key = process.env.NEXT_PUBLIC_MAILGUN_API_KEY || "";
-  const username = process.env.NEXT_PUBLIC_MAILGUN_USERNAME || "Skytrips";
-  const mg = new Mailgun(formData);
-  return mg.client({ username: username, key });
-};
+// Configure Mailgun Client
+const mailgun = new Mailgun(FormData);
+const mgClient = process.env.MAILGUN_API_KEY
+  ? mailgun.client({
+      username: "api",
+      key: process.env.MAILGUN_API_KEY,
+    })
+  : null;
+
+const transporter = nodemailer.createTransport({
+  host: process.env.SMTP_HOST || process.env.SUPABASE_SMTP_HOST || "smtp.mailgun.org",
+  port: Number(process.env.SMTP_PORT || process.env.SUPABASE_SMTP_PORT) || 587,
+  secure: false, // true for 465, false for other ports
+  auth: {
+    user: process.env.SMTP_USER || process.env.SUPABASE_SMTP_USER,
+    pass: process.env.SMTP_PASS || process.env.SUPABASE_SMTP_PASS || process.env.MAILGUN_API_KEY,
+  },
+});
 
 export async function sendEmail(input: SendEmailInput) {
-  const domain = process.env.NEXT_PUBLIC_MAILGUN_DOMAIN || "";
   const defaultFrom =
+    process.env.SMTP_FROM ||
     process.env.NEXT_PUBLIC_MAIL_SENDER ||
-    "SkyTrips Admin <no-reply@skytrips.com>";
-  const c = client();
-  const res = await c.messages.create(domain, {
+    '"SkyTrips Admin" <no-reply@skytrips.com>';
+
+  // Try Mailgun API first if available
+  if (mgClient && process.env.MAILGUN_DOMAIN) {
+    try {
+      const mgData: any = {
+        from: input.from || defaultFrom,
+        to: Array.isArray(input.to) ? input.to : [input.to],
+        subject: input.subject,
+        text: input.text,
+        html: input.html,
+      };
+
+      if (input.attachment) {
+        const attachments = Array.isArray(input.attachment) ? input.attachment : [input.attachment];
+        mgData.attachment = attachments.map((att) => {
+          return {
+            filename: att.filename,
+            data: att.content, // mailgun.js handles Buffer
+            contentType: att.contentType,
+          };
+        });
+      }
+
+      console.log("Sending email via Mailgun API...");
+      const msg = await mgClient.messages.create(process.env.MAILGUN_DOMAIN, mgData);
+      console.log("Mailgun API Message sent: %s", msg.id);
+      return { messageId: msg.id };
+    } catch (error) {
+      console.error("Mailgun API failed, falling back to SMTP:", error);
+      // Fallback to SMTP below
+    }
+  }
+
+  console.log("Sending email via SMTP...");
+  const info = await transporter.sendMail({
     from: input.from || defaultFrom,
-    to: input.to,
+    to: Array.isArray(input.to) ? input.to.join(",") : input.to,
     subject: input.subject,
-    html: input.html,
     text: input.text,
-    attachment: input.attachment,
+    html: input.html,
+    attachments: input.attachment ? (Array.isArray(input.attachment) ? input.attachment : [input.attachment]) : undefined,
   });
-  return res;
+
+  console.log("SMTP Message sent: %s", info.messageId);
+  return info;
 }
 
 export async function sendWelcomeUser(data: { email: string; fullName?: string; role?: string; readablePassword?: string }) {
@@ -94,18 +142,17 @@ export async function sendWelcomeUser(data: { email: string; fullName?: string; 
         </div>
       </div>
       <style>
-        @media (max-width: 480px) {
-          .container { width:100% !important }
-          .card { padding:14px !important }
-          .grid td { display:block !important; width:100% !important; padding:4px 0 !important }
-          .grid .label { margin-bottom:2px !important; font-size:13px !important }
-          .grid .value span { display:block !important; width:100% !important }
-          .btn { display:block !important; width:100% !important; text-align:center !important }
-        }
+      .btn:hover { opacity: 0.9; }
+      @media (max-width: 600px) {
+        .container { border-radius: 0; border: none; }
+        .grid td { display: block; width: 100%; }
+        .label { padding-bottom: 2px; }
+      }
       </style>
     </div>
   `;
-  return sendEmail({
+
+  await sendEmail({
     to: data.email,
     subject: "Welcome to SkyTrips Admin",
     html,

@@ -7,12 +7,20 @@ import { Customer, Booking, Address, Passport } from "@/types";
 import locationsData from "@/data/locations.json";
 import countriesData from "@/data/countries.json";
 
+type Identity = {
+  provider: string;
+  created_at: string;
+  last_sign_in_at: string;
+  email?: string;
+};
+
 export default function CustomerDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const customerId = params.id as string;
 
   const [customer, setCustomer] = useState<Customer | null>(null);
+  const [identities, setIdentities] = useState<Identity[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -33,6 +41,30 @@ export default function CustomerDetailsPage() {
   // Booking History State
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [bookingsLoading, setBookingsLoading] = useState(false);
+  const [inviting, setInviting] = useState(false);
+
+  const handleInvite = async () => {
+    if (!customer) return;
+    setInviting(true);
+    try {
+      const res = await fetch("/api/customers/invite", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: customer.email,
+          firstName: customer.firstName,
+          lastName: customer.lastName,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error || "Failed to send invite");
+      alert("Invitation sent successfully!");
+    } catch (err) {
+      alert(err instanceof Error ? err.message : "Failed to send invite");
+    } finally {
+      setInviting(false);
+    }
+  };
 
   // Parse JSON fields safely
   const safeJsonParse = <T,>(value: unknown, fallback: T): T => {
@@ -103,6 +135,19 @@ export default function CustomerDetailsPage() {
 
       setCustomer(data);
       console.log("Customer data:", data);
+
+      // Fetch identities
+      const { data: identitiesData, error: identitiesError } = await supabase.rpc(
+        "get_customer_identities",
+        { p_customer_id: customerId },
+      );
+
+      if (identitiesError) {
+        console.error("Error fetching identities:", identitiesError);
+      } else {
+        console.log("Identities fetched:", identitiesData);
+        setIdentities((identitiesData as Identity[]) || []);
+      }
     } catch (err: unknown) {
       console.error("Error fetching customer:", err);
       const errorMessage =
@@ -279,15 +324,6 @@ export default function CustomerDetailsPage() {
                   </span>
                   Address Details
                 </h3>
-                <a
-                  className="text-xs font-medium text-primary hover:text-blue-600 flex items-center gap-1"
-                  href="#"
-                >
-                  Open Map{" "}
-                  <span className="material-symbols-outlined text-[14px]">
-                    open_in_new
-                  </span>
-                </a>
               </div>
               <div className="p-0">
                 <div className="flex flex-col md:flex-row">
@@ -299,13 +335,6 @@ export default function CustomerDetailsPage() {
                           "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCKcaqUPfNzFUXIasZ9PxpmvmrnRmOaRp7wcxwTfHbBDGcQMoIa8AQXrOXZWfXd2O_PgoZ6HLTOvIVU4yeKQKaU3k9BwEpR36jIIcGrPzpcQDG8K_f5_ZoAdOTXi5O5xKski2M4r6LpEN04XlUjY6WVqkZzNvPmEsYP-etxNeH1nhKHxcRV5t_LXlqYTuHVFb0flVoeXI1GSORmwpXR3TCot2fP0IYXcqBXCd5j1YIQhQemb-nQBdG3R0l3PaapHtNK7GRs_y_X5-5K')",
                       }}
                     ></div>
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <div className="bg-primary text-white p-2 rounded-full shadow-lg">
-                        <span className="material-symbols-outlined text-[20px] block">
-                          location_on
-                        </span>
-                      </div>
-                    </div>
                   </div>
                   <div className="w-full md:w-2/3 p-5">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8">
@@ -918,9 +947,6 @@ export default function CustomerDetailsPage() {
                   </div>
                   <span className="hidden sm:block text-slate-300">•</span>
                   <div className="flex items-center gap-1">
-                    <span className="material-symbols-outlined text-[16px]">
-                      call
-                    </span>
                     <span>
                       {customer.phoneCountryCode} {customer.phone}
                     </span>
@@ -1042,6 +1068,60 @@ export default function CustomerDetailsPage() {
                   </div>
                   <div className="flex flex-col gap-1 pb-4 border-b border-slate-100">
                     <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">
+                      Registration Status
+                    </p>
+                    <div className="flex items-center justify-between gap-2">
+                      {customer.auth_user_id ? (
+                        <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-sm font-medium flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[16px]">
+                            how_to_reg
+                          </span>
+                          Registered
+                        </span>
+                      ) : (
+                        <>
+                          <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-sm font-medium flex items-center gap-1">
+                            <span className="material-symbols-outlined text-[16px]">
+                              person_off
+                            </span>
+                            Not Registered
+                          </span>
+                          <button
+                            onClick={handleInvite}
+                            disabled={inviting}
+                            className="text-xs font-bold text-primary hover:underline disabled:opacity-50"
+                          >
+                            {inviting ? "Sending..." : "Send Signup Link"}
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1 pb-4 border-b border-slate-100">
+                    <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">
+                      Verification Status
+                    </p>
+                    <div className="flex items-center gap-2">
+                      {String(customer.isVerified) === "true" ||
+                      customer.isVerified === true ? (
+                        <span className="bg-green-100 text-green-700 px-2 py-0.5 rounded text-sm font-medium flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[16px]">
+                            verified
+                          </span>
+                          Verified
+                        </span>
+                      ) : (
+                        <span className="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded text-sm font-medium flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[16px]">
+                            warning
+                          </span>
+                          Unverified
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1 pb-4 border-b border-slate-100">
+                    <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">
                       Referral Code
                     </p>
                     <div className="flex items-center gap-2">
@@ -1052,17 +1132,62 @@ export default function CustomerDetailsPage() {
                   </div>
                   <div className="flex flex-col gap-1">
                     <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">
-                      Social Provider
+                      Linked Auth Providers
                     </p>
-                    <div className="flex items-center gap-2 mt-1">
-                      <p className="text-slate-900 text-sm font-medium capitalize">
-                        {customer.socialProvider || "Email"}
-                      </p>
-                    </div>
-                    {customer.socialId && (
-                      <p className="text-slate-400 text-xs font-mono mt-1 break-all">
-                        {customer.socialId}
-                      </p>
+                    {identities.length > 0 ? (
+                      <div className="flex flex-col gap-2 mt-1">
+                        {identities.map((identity, idx) => (
+                          <div key={idx} className="flex flex-col gap-0.5">
+                            <div className="flex items-center gap-2">
+                              <span
+                                className={`px-2 py-0.5 rounded text-xs font-bold capitalize flex items-center gap-1 ${
+                                  identity.provider === "google"
+                                    ? "bg-red-50 text-red-600 border border-red-100"
+                                    : identity.provider === "facebook"
+                                      ? "bg-blue-50 text-blue-600 border border-blue-100"
+                                      : "bg-slate-50 text-slate-600 border border-slate-100"
+                                }`}
+                              >
+                                {identity.provider === "google" && (
+                                  <span className="text-[14px]">G</span>
+                                )}
+                                {identity.provider === "facebook" && (
+                                  <span className="text-[14px]">f</span>
+                                )}
+                                {identity.provider === "email" && (
+                                  <span className="material-symbols-outlined text-[14px]">
+                                    mail
+                                  </span>
+                                )}
+                                {identity.provider}
+                              </span>
+                              <span className="text-[10px] text-slate-400">
+                                {new Date(
+                                  identity.last_sign_in_at,
+                                ).toLocaleDateString()}
+                              </span>
+                            </div>
+                            {identity.email && (
+                              <p className="text-xs text-slate-500 font-mono ml-1">
+                                {identity.email}
+                              </p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <>
+                        <div className="flex items-center gap-2 mt-1">
+                          <p className="text-slate-900 text-sm font-medium capitalize">
+                            {customer.socialProvider || "Email"}
+                          </p>
+                        </div>
+                        {customer.socialId && (
+                          <p className="text-slate-400 text-xs font-mono mt-1 break-all">
+                            {customer.socialId}
+                          </p>
+                        )}
+                      </>
                     )}
                   </div>
                 </div>
@@ -1112,20 +1237,6 @@ export default function CustomerDetailsPage() {
           >
             Close
           </button>
-          <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-            <button className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-red-50 text-red-600 font-bold text-sm hover:bg-red-100 transition-colors">
-              <span className="material-symbols-outlined text-[18px]">
-                block
-              </span>
-              Disable Account
-            </button>
-            <button className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-white font-bold text-sm hover:bg-blue-600 shadow-lg shadow-blue-500/20 transition-all">
-              <span className="material-symbols-outlined text-[18px]">
-                lock_reset
-              </span>
-              Reset Password
-            </button>
-          </div>
         </div>
       </div>
 
@@ -1200,34 +1311,34 @@ export default function CustomerDetailsPage() {
                     </div>
 
                     {/* Row 3: Contact */}
-                    <div>
-                      <label className="block text-xs font-bold text-slate-500 uppercase mb-1">
-                        Email
-                      </label>
-                      <input
-                        type="email"
-                        defaultValue={customer?.email}
-                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-xs font-bold text-slate-500 uppercase mb-1">
-                        Phone
-                      </label>
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          defaultValue={customer?.phoneCountryCode}
-                          placeholder="+1"
-                          className="w-20 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                        />
-                        <input
-                          type="tel"
-                          defaultValue={customer?.phone || ""}
-                          className="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                        />
-                      </div>
-                    </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    defaultValue={customer?.email}
+                    className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">
+                    Phone
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      defaultValue={customer?.phoneCountryCode}
+                      placeholder="+1"
+                      className="w-20 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                    />
+                    <input
+                      type="tel"
+                      defaultValue={customer?.phone || ""}
+                      className="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                    />
+                  </div>
+                </div>
                   </div>
                 </div>
 
