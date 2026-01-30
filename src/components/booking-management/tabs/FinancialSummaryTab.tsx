@@ -53,9 +53,10 @@ export default function FinancialSummaryTab({
     subject: string;
     message: string;
     template: string;
+    sms?: { enabled: boolean; message: string };
   }) => {
     try {
-      const response = await fetch("/api/send-email", {
+      const emailPromise = fetch("/api/send-email", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -67,8 +68,31 @@ export default function FinancialSummaryTab({
         }),
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
+      const promises: Promise<unknown>[] = [emailPromise];
+
+      if (data.sms?.enabled && booking.phone) {
+        const smsPromise = fetch("/api/send-sms", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            to: booking.phone,
+            message: data.sms.message,
+          }),
+        }).then(async (res) => {
+          if (!res.ok) {
+            const error = await res.json();
+            console.error("Failed to send SMS:", error);
+          }
+        });
+        promises.push(smsPromise);
+      }
+
+      const [emailResponse] = (await Promise.all(promises)) as [Response, ...unknown[]];
+
+      if (!emailResponse.ok) {
+        const errorData = await emailResponse.json();
         throw new Error(errorData.error || "Failed to send email");
       }
     } catch (error) {
@@ -280,11 +304,15 @@ export default function FinancialSummaryTab({
             ? `${booking.travellers[0].firstName} ${booking.travellers[0].lastName}`
             : "Customer",
           email: booking.email || "",
+          phone: booking.phone,
           pnr: booking.PNR,
         }}
         additionalReplacements={{
           "{REFUND_AMOUNT}": formatCurrency(netRefund),
         }}
+        enableSmsOption={!!booking.phone}
+        defaultSmsEnabled={true}
+        defaultSmsMessage={`Your refund breakdown for booking ${booking.PNR} has been sent. Amount: ${formatCurrency(netRefund)}`}
       />
 
       <SendEmailModal
@@ -292,7 +320,7 @@ export default function FinancialSummaryTab({
         onClose={() => setIsProposalModalOpen(false)}
         onSend={async (data) => {
           try {
-            const response = await fetch("/api/send-email", {
+            const emailPromise = fetch("/api/send-email", {
               method: "POST",
               headers: {
                 "Content-Type": "application/json",
@@ -304,8 +332,34 @@ export default function FinancialSummaryTab({
               }),
             });
 
-            if (!response.ok) {
-              const errorData = await response.json();
+            const promises: Promise<unknown>[] = [emailPromise];
+
+            if (data.sms?.enabled && booking.phone) {
+              const smsPromise = fetch("/api/send-sms", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  phone: booking.phone,
+                  message: data.sms.message,
+                }),
+              }).then(async (res) => {
+                if (!res.ok) {
+                  const error = await res.json();
+                  console.error("Failed to send SMS:", error);
+                }
+              });
+              promises.push(smsPromise);
+            }
+
+            const [emailResponse] = (await Promise.all(promises)) as [
+              Response,
+              ...unknown[]
+            ];
+
+            if (!emailResponse.ok) {
+              const errorData = await emailResponse.json();
               throw new Error(errorData.error || "Failed to send email");
             }
           } catch (error) {
@@ -329,11 +383,15 @@ export default function FinancialSummaryTab({
             ? `${booking.travellers[0].firstName} ${booking.travellers[0].lastName}`
             : "Customer",
           email: booking.email || "",
+          phone: booking.phone,
           pnr: booking.PNR,
         }}
         additionalReplacements={{
           "{REFUND_AMOUNT}": formatCurrency(netRefund),
         }}
+        enableSmsOption={!!booking.phone}
+        defaultSmsEnabled={true}
+        defaultSmsMessage={`Refund proposal for booking ${booking.PNR}: ${formatCurrency(netRefund)}. Check email for details.`}
       />
 
       <div className="lg:col-span-3 flex justify-end items-center gap-3 pt-4 border-t border-slate-200">
