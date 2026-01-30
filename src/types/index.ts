@@ -83,7 +83,7 @@ export interface FlightItinerary {
   segments: FlightSegment[];
 }
 
-export type BookingStatus = "PENDING" | "SEND" | "REFUNDED";
+export type BookingStatus = "PENDING" | "SEND" | "REFUNDED" | "DRAFT";
 
 export interface ManageBooking {
   uid: string;
@@ -101,12 +101,14 @@ export interface ManageBooking {
     manual_adjustment: number;
     total_refund_amount: number;
     adjustment_reason?: string;
+    agency_refunded_cp?: number;
   };
   [key: string]: any;
 }
 
 export interface Traveller {
   id?: string; // unique temp id for frontend list management
+  title?: string;
   firstName: string;
   lastName: string;
   passportNumber?: string;

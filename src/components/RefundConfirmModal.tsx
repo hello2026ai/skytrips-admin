@@ -180,7 +180,7 @@ export default function RefundConfirmModal({
             </div>
           )}
 
-          {!hideWarning && (
+          {!hideWarning && !isAuthenticated && (
             <p className="text-xs text-red-600 mt-2">
               This action cannot be undone. The booking will be marked for
               refund processing.
