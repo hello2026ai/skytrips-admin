@@ -44,6 +44,8 @@ export interface Booking {
   customerType?: string;
   contactType?: string;
   addons?: Addons;
+  last_invoice_sent_at?: string;
+  last_eticket_sent_at?: string;
   created_at?: string;
   updated_at?: string;
   itineraries?: FlightItinerary[];
@@ -176,6 +178,11 @@ export interface Reason {
   updated_at?: string;
 }
 
+export interface ServiceOption {
+  name: string;
+  price: number;
+}
+
 export interface Service {
   id?: string;
   name: string;
@@ -184,6 +191,7 @@ export interface Service {
   pricing_type: string;
   base_price: number;
   status: boolean;
+  options?: ServiceOption[];
   created_at?: string;
   updated_at?: string;
 }

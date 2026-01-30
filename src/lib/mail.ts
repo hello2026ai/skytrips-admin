@@ -1,4 +1,6 @@
 import nodemailer from "nodemailer";
+// Removed: import FormData from "form-data";
+// Removed: import Mailgun from "mailgun.js";
 
 type SendEmailInput = {
   to: string | string[];
@@ -8,22 +10,26 @@ type SendEmailInput = {
   from?: string;
   attachment?: {
     filename: string;
-    data: Buffer | string;
+    content: Buffer | string;
     contentType?: string;
   } | Array<{
     filename: string;
-    data: Buffer | string;
+    content: Buffer | string;
     contentType?: string;
   }>;
 };
 
+// Configure Mailgun
+const mailgunApiKey = process.env.MAILGUN_API_KEY || process.env.NEXT_PUBLIC_MAILGUN_API_KEY;
+const mailgunDomain = process.env.MAILGUN_DOMAIN || process.env.NEXT_PUBLIC_MAILGUN_DOMAIN;
+
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || "smtp.mailgun.org",
-  port: Number(process.env.SMTP_PORT) || 587,
+  host: process.env.SMTP_HOST || process.env.SUPABASE_SMTP_HOST || "smtp.mailgun.org",
+  port: Number(process.env.SMTP_PORT || process.env.SUPABASE_SMTP_PORT) || 587,
   secure: false, // true for 465, false for other ports
   auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
+    user: process.env.SMTP_USER || process.env.SUPABASE_SMTP_USER,
+    pass: process.env.SMTP_PASS || process.env.SUPABASE_SMTP_PASS || mailgunApiKey,
   },
 });
 
@@ -33,6 +39,66 @@ export async function sendEmail(input: SendEmailInput) {
     process.env.NEXT_PUBLIC_MAIL_SENDER ||
     '"SkyTrips Admin" <no-reply@skytrips.com>';
 
+  // Try Mailgun API (via native fetch) first if available
+  if (mailgunApiKey && mailgunDomain) {
+    try {
+      console.log(`Attempting to send email via Mailgun API (fetch) to ${Array.isArray(input.to) ? input.to.join(", ") : input.to}`);
+      
+      const formData = new FormData();
+      formData.append("from", input.from || defaultFrom);
+      
+      const recipients = Array.isArray(input.to) ? input.to : [input.to];
+      recipients.forEach(to => formData.append("to", to));
+      
+      formData.append("subject", input.subject);
+      if (input.text) formData.append("text", input.text);
+      if (input.html) formData.append("html", input.html);
+      
+      if (input.attachment) {
+        const attachments = Array.isArray(input.attachment) ? input.attachment : [input.attachment];
+        attachments.forEach(att => {
+          // Native FormData in Node/Edge can take Blob or File. 
+          // If content is Buffer (Node), we might need to wrap it.
+          // However, in Edge runtime, Buffer might not exist. 
+          // Assuming Node runtime as per route config.
+          const blob = new Blob([att.content as unknown as BlobPart], { type: att.contentType || 'application/octet-stream' });
+          formData.append("attachment", blob, att.filename);
+        });
+      }
+
+      const auth = Buffer.from(`api:${mailgunApiKey}`).toString('base64');
+      
+      const resp = await fetch(`https://api.mailgun.net/v3/${mailgunDomain}/messages`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Basic ${auth}`,
+          // Content-Type is set automatically by fetch with boundary for FormData
+        },
+        body: formData,
+      });
+
+      if (!resp.ok) {
+        const errText = await resp.text();
+        throw new Error(`Mailgun API Error: ${resp.status} ${resp.statusText} - ${errText}`);
+      }
+
+      const respData = await resp.json();
+      console.log("Mailgun API Message sent:", respData.id);
+      return { messageId: respData.id };
+
+    } catch (error) {
+      console.error("Mailgun API failed, falling back to SMTP:", error);
+      if (error && typeof error === 'object' && 'details' in error) {
+         // eslint-disable-next-line @typescript-eslint/no-explicit-any
+         console.error("Mailgun Error Details:", (error as any).details);
+      }
+      // Fallback to SMTP below
+    }
+  } else {
+     console.log("Mailgun configuration missing (Key or Domain). Skipping Mailgun API.");
+  }
+
+  console.log("Sending email via SMTP...");
   const info = await transporter.sendMail({
     from: input.from || defaultFrom,
     to: Array.isArray(input.to) ? input.to.join(",") : input.to,
@@ -42,7 +108,7 @@ export async function sendEmail(input: SendEmailInput) {
     attachments: input.attachment ? (Array.isArray(input.attachment) ? input.attachment : [input.attachment]) : undefined,
   });
 
-  console.log("Message sent: %s", info.messageId);
+  console.log("SMTP Message sent: %s", info.messageId);
   return info;
 }
 
@@ -98,18 +164,17 @@ export async function sendWelcomeUser(data: { email: string; fullName?: string; 
         </div>
       </div>
       <style>
-        @media (max-width: 480px) {
-          .container { width:100% !important }
-          .card { padding:14px !important }
-          .grid td { display:block !important; width:100% !important; padding:4px 0 !important }
-          .grid .label { margin-bottom:2px !important; font-size:13px !important }
-          .grid .value span { display:block !important; width:100% !important }
-          .btn { display:block !important; width:100% !important; text-align:center !important }
-        }
+      .btn:hover { opacity: 0.9; }
+      @media (max-width: 600px) {
+        .container { border-radius: 0; border: none; }
+        .grid td { display: block; width: 100%; }
+        .label { padding-bottom: 2px; }
+      }
       </style>
     </div>
   `;
-  return sendEmail({
+
+  await sendEmail({
     to: data.email,
     subject: "Welcome to SkyTrips Admin",
     html,
@@ -117,37 +182,34 @@ export async function sendWelcomeUser(data: { email: string; fullName?: string; 
 }
 
 export async function sendCustomerInvite(data: { email: string; firstName: string; lastName: string }) {
-  const name = `${data.firstName} ${data.lastName}`.trim();
+  const name = `${data.firstName || ""} ${data.lastName || ""}`.trim() || "Customer";
   const appUrl = process.env.NEXT_PUBLIC_APP_URL || process.env.NEXT_PUBLIC_PUBLIC_APP_URL || "";
-  const signupLink = `${appUrl}/portal/auth/signup?email=${encodeURIComponent(data.email)}`;
-  
   const html = `
     <div style="background:#f1f5f9; padding:24px;">
       <div class="container" style="font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; color:#0f172a; max-width:600px; margin:0 auto; background:#ffffff; border:1px solid #e2e8f0; border-radius:16px; overflow:hidden;">
         <div style="height:6px; background:linear-gradient(90deg,#0ea5e9,#2563eb);"></div>
         <div style="padding:24px;">
-          <h2 style="margin:0 0 4px; font-size:22px;">Welcome to SkyTrips!</h2>
-          <p style="margin:0 0 12px;">Hello ${name},</p>
-          <p style="margin:0 0 24px;">We've created a profile for you. Please complete your registration to access your customer portal where you can view your bookings and manage your profile.</p>
-          
-          <div style="text-align:center; margin-bottom:24px;">
-            <a href="${signupLink}" style="display:inline-block; background:#2563eb; color:#ffffff; text-decoration:none; font-weight:700; padding:12px 24px; border-radius:10px; font-size:16px;">Complete Registration</a>
+          <h2 style="margin:0 0 4px; font-size:22px;">Invitation</h2>
+          <p style="margin:0 0 12px;">Hello ${name}, you are invited to use SkyTrips services.</p>
+          ${appUrl ? `
+          <div style="margin-top:12px;">
+            <a href="${appUrl}" class="btn" style="display:inline-block; background:#2563eb; color:#ffffff; text-decoration:none; font-weight:700; padding:10px 16px; border-radius:10px;">Open SkyTrips</a>
           </div>
-          
-          <p style="margin:0 0 12px; font-size:14px; color:#64748b;">Or copy and paste this link into your browser:</p>
-          <p style="margin:0 0 24px; font-size:14px; color:#2563eb; word-break:break-all;">${signupLink}</p>
-          
-          <div style="border-top:1px solid #e2e8f0; padding-top:16px;">
-            <p style="margin:0; font-size:12px; color:#64748b;">If you didn't expect this invitation, please ignore this email.</p>
-          </div>
+          ` : ``}
+          <p style="margin:16px 0 0; font-size:14px; color:#64748b;">If this wasn't expected, you can ignore this email.</p>
         </div>
       </div>
+      <style>
+      .btn:hover { opacity: 0.9; }
+      @media (max-width: 600px) {
+        .container { border-radius: 0; border: none; }
+      }
+      </style>
     </div>
   `;
-
-  return sendEmail({
+  await sendEmail({
     to: data.email,
-    subject: "Invitation to SkyTrips Customer Portal",
+    subject: "You're invited to SkyTrips",
     html,
   });
 }

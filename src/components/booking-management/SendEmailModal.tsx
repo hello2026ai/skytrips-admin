@@ -14,6 +14,7 @@ interface SendEmailModalProps {
     avatar?: string;
     pnr?: string;
   };
+  lastEmailSent?: string | null;
   onSend?: (data: {
     subject: string;
     message: string;
@@ -34,6 +35,7 @@ export default function SendEmailModal({
   isOpen,
   onClose,
   recipient,
+  lastEmailSent,
   onSend,
   onSave,
   mode = "send",
@@ -98,6 +100,10 @@ export default function SendEmailModal({
   }, [selectedTemplate, activeTemplates, mode, recipient]);
 
   const handleAction = async () => {
+    if (!recipient.email || !recipient.email.trim()) {
+      setError("Recipient email is required.");
+      return;
+    }
     if (!message.trim()) {
       setError("Message content cannot be empty.");
       return;
@@ -210,7 +216,17 @@ export default function SendEmailModal({
               </h3>
               <p className="text-xs text-slate-500">
                 Last email sent:{" "}
-                <span className="font-bold text-slate-700">Never</span>
+                <span className="font-bold text-slate-700">
+                  {lastEmailSent
+                    ? new Date(lastEmailSent).toLocaleString("en-AU", {
+                        day: "numeric",
+                        month: "short",
+                        year: "numeric",
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })
+                    : "Never"}
+                </span>
               </p>
             </div>
           </div>

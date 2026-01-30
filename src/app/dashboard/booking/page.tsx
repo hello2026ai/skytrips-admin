@@ -137,14 +137,14 @@ export default function BookingPage() {
 
       if (customerFilter === "linked") {
         query = query.or(
-          "customer.neq.null,customerid.neq.00000000-0000-0000-0000-000000000000",
+          "customer.neq.{},customerid.neq.00000000-0000-0000-0000-000000000000",
         );
       } else if (customerFilter === "unlinked") {
         query = query
           .or(
             "customerid.is.null,customerid.eq.00000000-0000-0000-0000-000000000000",
           )
-          .is("customer", null);
+          .or("customer.is.null,customer.eq.{}");
       }
 
       const { data, count, error: fetchError } = await query;
@@ -1039,9 +1039,9 @@ export default function BookingPage() {
         )}
 
         {/* Pagination */}
-        <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between gap-4 bg-white">
-          <div className="flex-1 flex items-center justify-between">
-            <div className="flex items-center gap-4">
+        <div className="px-6 py-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white">
+          <div className="flex-1 flex flex-col sm:flex-row items-center justify-between gap-4 w-full">
+            <div className="flex items-center gap-4 w-full sm:w-auto justify-between sm:justify-start">
               <p className="text-sm text-slate-500 font-display">
                 Showing{" "}
                 <span className="font-medium text-slate-900">
