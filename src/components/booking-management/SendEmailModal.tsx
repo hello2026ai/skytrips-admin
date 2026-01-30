@@ -142,9 +142,11 @@ export default function SendEmailModal({
     } catch (err) {
       console.error(err);
       setError(
-        mode === "edit"
-          ? "Failed to save template."
-          : "Failed to send email. Please try again.",
+        err instanceof Error
+          ? err.message
+          : mode === "edit"
+            ? "Failed to save template."
+            : "Failed to send email. Please try again.",
       );
     } finally {
       setIsSending(false);
