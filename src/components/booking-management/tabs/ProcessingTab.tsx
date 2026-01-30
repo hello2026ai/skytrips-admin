@@ -56,8 +56,13 @@ export default function ProcessingTab({
     subject: string;
     message: string;
     template: string;
+    sms?: {
+      enabled: boolean;
+      message: string;
+    };
   }) => {
     try {
+      // 1. Send Email
       const response = await fetch("/api/send-email", {
         method: "POST",
         headers: {
@@ -74,11 +79,33 @@ export default function ProcessingTab({
         const errorData = await response.json();
         throw new Error(errorData.error || "Failed to send email");
       }
+
+      // 2. Send SMS if enabled and phone exists
+      const shouldSendSms = data.sms ? data.sms.enabled : processingForm.notifySMS;
+      const smsMessage = data.sms ? data.sms.message : (processingForm.messageContent || data.message);
+
+      if (shouldSendSms && booking.phone) {
+        try {
+          await fetch("/api/send-sms", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              to: booking.phone,
+              message: smsMessage,
+            }),
+          });
+        } catch (smsError) {
+          console.error("Error sending SMS notification:", smsError);
+          // Non-blocking: we continue even if SMS fails
+        }
+      }
       
       // Proceed after successful email
       onConfirm();
     } catch (error) {
-      console.error("Error sending refund notification email:", error);
+      console.error("Error sending refund notification:", error);
       throw error;
     }
     
@@ -192,7 +219,7 @@ export default function ProcessingTab({
                     Send SMS Notification
                   </div>
                   <div className="text-xs text-slate-500">
-                    Alert to +1 (555) 123-4567
+                    Alert to {booking.phone || "No phone number available"}
                   </div>
                 </div>
               </label>
@@ -277,11 +304,15 @@ export default function ProcessingTab({
         recipient={{
           name: requester?.name || booking.travellers?.[0]?.firstName || "Customer",
           email: requester?.email || booking.email || "",
+          phone: booking.phone,
           pnr: booking.PNR,
         }}
         additionalReplacements={{
           "{REASON}": processingForm.reason,
         }}
+        enableSmsOption={!!booking.phone}
+        defaultSmsEnabled={processingForm.notifySMS}
+        defaultSmsMessage={processingForm.messageContent}
       />
     </div>
   );
