@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { supabaseAdmin } from "@/lib/supabaseAdmin";
+import { User } from "@supabase/supabase-js";
 
 export async function POST(req: NextRequest) {
   try {
@@ -17,7 +18,7 @@ export async function POST(req: NextRequest) {
     const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
     if (listError) throw listError;
     
-    const user = users.find(u => u.email === email);
+    const user = (users as User[]).find(u => u.email === email);
     if (!user) throw new Error("User not found");
 
     // Update password
