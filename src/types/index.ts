@@ -41,6 +41,8 @@ export interface Booking {
   issuedthroughagency?: string;
   travellers?: Traveller[];
   customer?: Customer | number | string;
+  customerId?: string | number;
+  customerid?: string | number;
   customerType?: string;
   contactType?: string;
   addons?: Addons;
