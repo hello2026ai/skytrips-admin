@@ -52,7 +52,8 @@ export default function PaymentsTable({ viewMode, dateRange }: PaymentsTableProp
         const searchPattern = `%${searchTerm}%`;
         // Use a raw filter or simple OR if possible. 
         // Supabase JS .or() expects strict syntax.
-        query = query.or(`customer_name.ilike.${searchPattern},agency_name.ilike.${searchPattern},payment_id.ilike.${searchPattern},contact_person.ilike.${searchPattern}`);
+        // We cast payment_id to text to allow ilike search on UUID
+        query = query.or(`customer_name.ilike.${searchPattern},agency_name.ilike.${searchPattern},payment_id::text.ilike.${searchPattern},contact_person.ilike.${searchPattern}`);
       }
 
       // Apply Status Filter
