@@ -1,12 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, forwardRef, useImperativeHandle } from "react";
 import { FlightInquiry, InquiryStatus } from "@/types/inquiry";
 import InquiryColumn from "./InquiryColumn";
 import InquiryFilters from "./InquiryFilters";
 import InquiryStats from "./InquiryStats";
 
-export default function InquiryKanbanBoard() {
+export default forwardRef(function InquiryKanbanBoard(_props, ref) {
     const [inquiries, setInquiries] = useState<FlightInquiry[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [activeTab, setActiveTab] = useState("All Inquiries");
@@ -30,6 +30,10 @@ export default function InquiryKanbanBoard() {
             setIsLoading(false);
         }
     }, [activeTab, searchQuery]);
+
+    useImperativeHandle(ref, () => ({
+        fetchInquiries
+    }));
 
     useEffect(() => {
         fetchInquiries();
@@ -101,4 +105,4 @@ export default function InquiryKanbanBoard() {
             <InquiryStats />
         </div>
     );
-}
+});

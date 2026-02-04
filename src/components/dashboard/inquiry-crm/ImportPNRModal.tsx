@@ -7,6 +7,9 @@ interface ImportPNRModalProps {
     isOpen: boolean;
     onClose: () => void;
     onImport: (pnrText: string) => void;
+    isSaving?: boolean;
+    saveStatus?: 'idle' | 'success' | 'error';
+    saveError?: string | null;
 }
 
 interface ParsedData {
@@ -24,7 +27,14 @@ interface ParsedData {
     [key: string]: unknown;
 }
 
-export default function ImportPNRModal({ isOpen, onClose, onImport }: ImportPNRModalProps) {
+export default function ImportPNRModal({ 
+    isOpen, 
+    onClose, 
+    onImport, 
+    isSaving = false,
+    saveStatus = 'idle',
+    saveError = null
+}: ImportPNRModalProps) {
     const [pnrText, setPnrText] = useState("");
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -94,49 +104,33 @@ export default function ImportPNRModal({ isOpen, onClose, onImport }: ImportPNRM
     // Handle ESC key and click outside
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
-            if (e.key === "Escape" && isOpen) {
-                onClose();
-            }
-            // Simple focus trap
-            if (e.key === "Tab" && isOpen && modalRef.current) {
-                const focusableElements = modalRef.current.querySelectorAll(
-                    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-                );
-                const firstElement = focusableElements[0] as HTMLElement;
-                const lastElement = focusableElements[focusableElements.length - 1] as HTMLElement;
-
-                if (e.shiftKey) {
-                    if (document.activeElement === firstElement) {
-                        lastElement.focus();
-                        e.preventDefault();
+            if (e.key === "Escape" && isOpen && !isSaving) {
+                if (parsedData) {
+                    // Could add confirmation here if needed
+                    if (confirm("You have unsaved parsed data. Are you sure you want to close?")) {
+                        onClose();
                     }
                 } else {
-                    if (document.activeElement === lastElement) {
-                        firstElement.focus();
-                        e.preventDefault();
-                    }
+                    onClose();
                 }
             }
         };
 
-        const handleClickOutside = (e: MouseEvent) => {
-            if (modalRef.current && !modalRef.current.contains(e.target as Node)) {
+        window.addEventListener("keydown", handleKeyDown);
+        return () => window.removeEventListener("keydown", handleKeyDown);
+    }, [isOpen, onClose, isSaving, parsedData]);
+
+    const handleBackdropClick = (e: React.MouseEvent) => {
+        if (e.target === e.currentTarget && !isSaving) {
+            if (parsedData) {
+                if (confirm("You have unsaved parsed data. Are you sure you want to close?")) {
+                    onClose();
+                }
+            } else {
                 onClose();
             }
-        };
-
-        if (isOpen) {
-            document.addEventListener("keydown", handleKeyDown);
-            document.addEventListener("mousedown", handleClickOutside);
         }
-
-        return () => {
-            document.removeEventListener("keydown", handleKeyDown);
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [isOpen, onClose]);
-
-    if (!isOpen) return null;
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -175,6 +169,8 @@ export default function ImportPNRModal({ isOpen, onClose, onImport }: ImportPNRM
         if (parsedData) {
              const finalData = {
                  ...parsedData,
+                 pnrText,
+                 previewUrl,
                  customer: {
                      firstName,
                      lastName,
@@ -186,20 +182,42 @@ export default function ImportPNRModal({ isOpen, onClose, onImport }: ImportPNRM
                  }
              };
              onImport(JSON.stringify(finalData));
-             onClose();
+             // Don't close immediately, let parent handle it based on save status
         }
     };
 
+    // Prevent accidental navigation
+    useEffect(() => {
+        const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+            if (isOpen && parsedData) {
+                e.preventDefault();
+                e.returnValue = '';
+            }
+        };
+        
+        window.addEventListener('beforeunload', handleBeforeUnload);
+        return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    }, [isOpen, parsedData]);
+
     return (
         <div 
-            className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm animate-in fade-in duration-200"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="modal-title"
+            className={`fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6 transition-all duration-200 ${
+                isOpen ? "opacity-100 visible" : "opacity-0 invisible pointer-events-none"
+            }`}
         >
+            {/* Backdrop */}
+            <div 
+                className={`absolute inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity duration-300 ${
+                    isOpen ? "opacity-100" : "opacity-0"
+                }`}
+                onClick={handleBackdropClick}
+                aria-hidden="true"
+            />
+
+            {/* Modal */}
             <div 
                 ref={modalRef}
-                className="bg-white rounded-3xl shadow-2xl w-full max-w-xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh]"
+                className="bg-white rounded-3xl shadow-2xl w-full max-w-xl overflow-hidden animate-in zoom-in-95 duration-200 flex flex-col max-h-[90vh] relative z-10"
             >
                 {/* Header */}
                 <div className="px-8 py-6 border-b border-slate-50 flex items-center justify-between shrink-0">
@@ -308,6 +326,13 @@ export default function ImportPNRModal({ isOpen, onClose, onImport }: ImportPNRM
                     </div>
                   )}
 
+                  {saveError && (
+                    <div className="p-4 bg-red-50 text-red-600 rounded-xl text-sm font-medium flex items-center gap-2 animate-in slide-in-from-bottom-2">
+                        <span className="material-symbols-outlined text-[20px]">error</span>
+                        {saveError}
+                    </div>
+                  )}
+
                   {parsedData && (
                     <div className="mt-6 space-y-4">
                         <div className="flex items-center justify-between">
@@ -380,10 +405,29 @@ export default function ImportPNRModal({ isOpen, onClose, onImport }: ImportPNRM
                         <button
                         type="button"
                         onClick={handleConfirmImport}
-                        className="px-8 py-3 bg-emerald-500 text-white rounded-xl text-sm font-bold shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 hover:-translate-y-0.5 transition-all flex items-center gap-2 focus:outline-none focus:ring-4 focus:ring-emerald-500/20"
+                        disabled={isSaving || saveStatus === 'success'}
+                        className={`px-8 py-3 rounded-xl text-sm font-bold shadow-lg transition-all flex items-center gap-2 focus:outline-none focus:ring-4 ${
+                            saveStatus === 'success' 
+                                ? 'bg-emerald-500 text-white shadow-emerald-500/20 ring-emerald-500/20 cursor-default'
+                                : 'bg-emerald-500 text-white shadow-emerald-500/20 hover:bg-emerald-600 hover:-translate-y-0.5 ring-emerald-500/20'
+                        } disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0`}
                         >
-                            <span className="material-symbols-outlined text-[18px]">check_circle</span>
-                            Confirm Import
+                            {isSaving ? (
+                                <>
+                                    <span className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                                    Saving...
+                                </>
+                            ) : saveStatus === 'success' ? (
+                                <>
+                                    <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                                    Saved!
+                                </>
+                            ) : (
+                                <>
+                                    <span className="material-symbols-outlined text-[18px]">check_circle</span>
+                                    Confirm Import
+                                </>
+                            )}
                         </button>
                     )}
                   </div>

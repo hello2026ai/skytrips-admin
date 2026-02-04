@@ -4,6 +4,7 @@
 import React from "react";
 import { ParsedPNR } from "@/lib/services/pnr-parser";
 import { format, parseISO, differenceInMinutes } from "date-fns";
+import { getAirlineLogo } from "@/lib/constants/airline-logos";
 
 interface TicketPreviewProps {
   data: ParsedPNR;
@@ -66,6 +67,10 @@ export default function TicketPreview({ data, price, className = "" }: TicketPre
   // Let's assume for this specific design request, we split into two columns if possible.
   
   const segments = data.segments;
+  // Get logo URL based on the first segment's airline code
+  const airlineCode = segments[0]?.airline_code || "DEFAULT";
+  const logo_url = getAirlineLogo(airlineCode);
+
   let outboundSegments = segments;
   let returnSegments: typeof segments = [];
 
@@ -140,7 +145,7 @@ export default function TicketPreview({ data, price, className = "" }: TicketPre
       <div className="bg-white p-6 border-b border-gray-100 flex items-center gap-4">
         {/* Logo Placeholder */}
         <div className="w-12 h-12 relative shrink-0">
-           <img src="https://upload.wikimedia.org/wikipedia/en/thumb/5/58/Thai_Airways_Logo.svg/1200px-Thai_Airways_Logo.svg.png" alt="Airline Logo" className="w-full h-full object-contain" />
+           <img src={logo_url} alt={`${airlineCode} Logo`} className="w-full h-full object-contain" />
         </div>
         <h1 className="text-2xl font-bold text-[#1a237e] uppercase tracking-wide">
           {data.segments[0]?.airline_code === "TG" ? "THAI AIRWAYS" : `${data.segments[0]?.airline_code} AIRLINES`} ITINERARY
