@@ -7,6 +7,7 @@ import { Booking } from "@/types";
 import BookingModal from "./BookingModal";
 import BookingRowMenu from "@/components/BookingRowMenu";
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
+import NotificationConfirmModal from "@/components/NotificationConfirmModal";
 
 export default function BookingPage() {
   const router = useRouter();
@@ -16,12 +17,19 @@ export default function BookingPage() {
   const [counts, setCounts] = useState<{
     withCustomerCount: number;
     withoutCustomerCount: number;
+    confirmedCount: number;
+    issuedCount: number;
+    pendingCount: number;
+    draftCount: number;
+    cancelledCount: number;
   } | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBooking, setEditingBooking] = useState<Booking | null>(null);
   const [actionLoading, setActionLoading] = useState<number | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [bookingToDelete, setBookingToDelete] = useState<number | null>(null);
+  const [isNotificationModalOpen, setIsNotificationModalOpen] = useState(false);
+  const [notificationBooking, setNotificationBooking] = useState<Booking | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [totalCount, setTotalCount] = useState(0);
@@ -42,6 +50,7 @@ export default function BookingPage() {
     | "linked"
     | "unlinked"
   >("all");
+  const [statusFilter, setStatusFilter] = useState<string>("Confirmed");
   const [selectedBookingIds, setSelectedBookingIds] = useState<number[]>([]);
   const [isBulkDeleteModalOpen, setIsBulkDeleteModalOpen] = useState(false);
   const [bulkActionLoading, setBulkActionLoading] = useState(false);
@@ -135,16 +144,24 @@ export default function BookingPage() {
         if (endIso) query = query.lt("created_at", endIso);
       }
 
+      if (statusFilter) {
+        if (statusFilter === "Confirmed") {
+          query = query.in("status", ["Confirmed", "ON_HOLD"]);
+        } else {
+          query = query.eq("status", statusFilter);
+        }
+      }
+
       if (customerFilter === "linked") {
         query = query.or(
-          "customer.neq.null,customerid.neq.00000000-0000-0000-0000-000000000000",
+          "customer.neq.{},customerid.neq.00000000-0000-0000-0000-000000000000",
         );
       } else if (customerFilter === "unlinked") {
         query = query
           .or(
             "customerid.is.null,customerid.eq.00000000-0000-0000-0000-000000000000",
           )
-          .is("customer", null);
+          .or("customer.is.null,customer.eq.{}");
       }
 
       const { data, count, error: fetchError } = await query;
@@ -185,6 +202,7 @@ export default function BookingPage() {
     createdFrom,
     createdTo,
     customerFilter,
+    statusFilter,
   ]);
 
   const fetchCounts = useCallback(async () => {
@@ -198,6 +216,11 @@ export default function BookingPage() {
             ? (json as {
                 withCustomerCount?: unknown;
                 withoutCustomerCount?: unknown;
+                confirmedCount?: unknown;
+                issuedCount?: unknown;
+                pendingCount?: unknown;
+                draftCount?: unknown;
+                cancelledCount?: unknown;
               })
             : null;
 
@@ -210,6 +233,22 @@ export default function BookingPage() {
             withoutCustomerCount:
               typeof parsed.withoutCustomerCount === "number"
                 ? parsed.withoutCustomerCount
+                : 0,
+            confirmedCount:
+              typeof parsed.confirmedCount === "number"
+                ? parsed.confirmedCount
+                : 0,
+            issuedCount:
+              typeof parsed.issuedCount === "number" ? parsed.issuedCount : 0,
+            pendingCount:
+              typeof parsed.pendingCount === "number"
+                ? parsed.pendingCount
+                : 0,
+            draftCount:
+              typeof parsed.draftCount === "number" ? parsed.draftCount : 0,
+            cancelledCount:
+              typeof parsed.cancelledCount === "number"
+                ? parsed.cancelledCount
                 : 0,
           });
           return;
@@ -459,6 +498,11 @@ export default function BookingPage() {
           delete (bookingToSave as unknown as Record<string, unknown>)[field],
       );
 
+      // ADDED: Sync status and bookingstatus
+      if (bookingToSave.status) {
+        (bookingToSave as Record<string, unknown>).bookingstatus = bookingToSave.status;
+      }
+
       if (editingBooking?.id) {
         // Update
         const { error: updateError } = await supabase
@@ -476,7 +520,7 @@ export default function BookingPage() {
         if (createError) throw createError;
 
         // Send confirmation email
-        if (booking.email) {
+        if (booking.email && booking.status !== "Draft") {
           try {
             await fetch("/api/send-email", {
               method: "POST",
@@ -547,6 +591,39 @@ export default function BookingPage() {
       alert("Failed to delete booking");
     } finally {
       setActionLoading(null);
+    }
+  };
+
+  const handleIssueBooking = async (booking: Booking) => {
+    if (!booking.id) return;
+    setNotificationBooking(booking);
+    setIsNotificationModalOpen(true);
+  };
+
+  const confirmIssueBooking = async () => {
+    if (!notificationBooking?.id) return;
+
+    try {
+      const { error: updateError } = await supabase
+        .from("bookings")
+        .update({ 
+          status: "Issued",
+          bookingstatus: "Issued"
+        })
+        .eq("id", notificationBooking.id);
+
+      if (updateError) throw updateError;
+
+      // Optimistic update
+      setBookings((prev) =>
+        prev.map((b) => (b.id === notificationBooking.id ? { ...b, status: "Issued", bookingstatus: "Issued" } : b))
+      );
+
+      // Refresh counts
+      fetchCounts();
+    } catch (err: unknown) {
+      console.error("Issue booking error:", err);
+      throw err; // Re-throw so the modal can catch it
     }
   };
 
@@ -623,11 +700,20 @@ export default function BookingPage() {
           />
         </div>
         <div className="flex gap-4">
-          <select className="w-full sm:w-48 rounded-lg border border-slate-200 bg-white py-2.5 pl-3 pr-10 text-sm text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary">
+          <select
+            className="w-full sm:w-48 rounded-lg border border-slate-200 bg-white py-2.5 pl-3 pr-10 text-sm text-slate-900 focus:border-primary focus:ring-1 focus:ring-primary"
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
             <option value="">All Statuses</option>
-            <option value="confirmed">Confirmed</option>
-            <option value="pending">Pending</option>
-            <option value="cancelled">Cancelled</option>
+            <option value="Confirmed">Hold / On Hold</option>
+            <option value="Issued">Issued</option>
+            <option value="Pending">Pending</option>
+            <option value="Draft">Draft</option>
+            <option value="Cancelled">Cancelled</option>
           </select>
           <div className="relative">
             <button
@@ -738,7 +824,7 @@ export default function BookingPage() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
         <div
           onClick={() =>
             setCustomerFilter((prev) => (prev === "linked" ? "all" : "linked"))
@@ -787,6 +873,126 @@ export default function BookingPage() {
             </div>
             <div className="size-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-700">
               <span className="material-symbols-outlined">link_off</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Hold (was Confirmed) */}
+        <div
+          onClick={() =>
+            setStatusFilter((prev) => (prev === "Confirmed" ? "" : "Confirmed"))
+          }
+          className={`rounded-xl border bg-white shadow-sm p-5 cursor-pointer transition-all ${
+            statusFilter === "Confirmed"
+              ? "border-blue-600 ring-1 ring-blue-600"
+              : "border-slate-200 hover:border-blue-600/50"
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-slate-500 font-semibold">Hold</p>
+              <p className="mt-2 text-3xl font-bold text-slate-900">
+                {counts ? counts.confirmedCount.toLocaleString() : "—"}
+              </p>
+            </div>
+            <div className="size-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-600">
+              <span className="material-symbols-outlined">pause_circle</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Issued (New) */}
+        <div
+          onClick={() =>
+            setStatusFilter((prev) => (prev === "Issued" ? "" : "Issued"))
+          }
+          className={`rounded-xl border bg-white shadow-sm p-5 cursor-pointer transition-all ${
+            statusFilter === "Issued"
+              ? "border-emerald-600 ring-1 ring-emerald-600"
+              : "border-slate-200 hover:border-emerald-600/50"
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-slate-500 font-semibold">Issued</p>
+              <p className="mt-2 text-3xl font-bold text-slate-900">
+                {counts ? counts.issuedCount.toLocaleString() : "—"}
+              </p>
+            </div>
+            <div className="size-12 rounded-full bg-emerald-50 flex items-center justify-center text-emerald-600">
+              <span className="material-symbols-outlined">check_circle</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Pending */}
+        <div
+          onClick={() =>
+            setStatusFilter((prev) => (prev === "Pending" ? "" : "Pending"))
+          }
+          className={`rounded-xl border bg-white shadow-sm p-5 cursor-pointer transition-all ${
+            statusFilter === "Pending"
+              ? "border-amber-500 ring-1 ring-amber-500"
+              : "border-slate-200 hover:border-amber-500/50"
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-slate-500 font-semibold">Pending</p>
+              <p className="mt-2 text-3xl font-bold text-slate-900">
+                {counts ? counts.pendingCount.toLocaleString() : "—"}
+              </p>
+            </div>
+            <div className="size-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
+              <span className="material-symbols-outlined">hourglass_top</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Draft */}
+        <div
+          onClick={() =>
+            setStatusFilter((prev) => (prev === "Draft" ? "" : "Draft"))
+          }
+          className={`rounded-xl border bg-white shadow-sm p-5 cursor-pointer transition-all ${
+            statusFilter === "Draft"
+              ? "border-slate-500 ring-1 ring-slate-500"
+              : "border-slate-200 hover:border-slate-500/50"
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-slate-500 font-semibold">Drafts</p>
+              <p className="mt-2 text-3xl font-bold text-slate-900">
+                {counts ? counts.draftCount.toLocaleString() : "—"}
+              </p>
+            </div>
+            <div className="size-12 rounded-full bg-slate-100 flex items-center justify-center text-slate-600">
+              <span className="material-symbols-outlined">edit_note</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Cancelled */}
+        <div
+          onClick={() =>
+            setStatusFilter((prev) => (prev === "Cancelled" ? "" : "Cancelled"))
+          }
+          className={`rounded-xl border bg-white shadow-sm p-5 cursor-pointer transition-all ${
+            statusFilter === "Cancelled"
+              ? "border-red-500 ring-1 ring-red-500"
+              : "border-slate-200 hover:border-red-500/50"
+          }`}
+        >
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm text-slate-500 font-semibold">Cancelled</p>
+              <p className="mt-2 text-3xl font-bold text-slate-900">
+                {counts ? counts.cancelledCount.toLocaleString() : "—"}
+              </p>
+            </div>
+            <div className="size-12 rounded-full bg-red-50 flex items-center justify-center text-red-600">
+              <span className="material-symbols-outlined">cancel</span>
             </div>
           </div>
         </div>
@@ -844,6 +1050,23 @@ export default function BookingPage() {
                   <th
                     scope="col"
                     className="px-6 py-4 cursor-pointer group select-none hover:bg-slate-100 transition-colors"
+                    onClick={() => handleSort("created_at")}
+                    aria-sort={
+                      sortConfig.key === "created_at"
+                        ? sortConfig.direction === "asc"
+                          ? "ascending"
+                          : "descending"
+                        : "none"
+                    }
+                  >
+                    <div className="flex items-center gap-1">
+                      Created At
+                      {renderSortIcon("created_at")}
+                    </div>
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-4 cursor-pointer group select-none hover:bg-slate-100 transition-colors"
                     onClick={() => handleSort("travellerFirstName")}
                     aria-sort={
                       sortConfig.key === "travellerFirstName"
@@ -890,6 +1113,23 @@ export default function BookingPage() {
                     <div className="flex items-center gap-1">
                       Trip Type
                       {renderSortIcon("tripType")}
+                    </div>
+                  </th>
+                  <th
+                    scope="col"
+                    className="px-6 py-4 cursor-pointer group select-none hover:bg-slate-100 transition-colors"
+                    onClick={() => handleSort("status")}
+                    aria-sort={
+                      sortConfig.key === "status"
+                        ? sortConfig.direction === "asc"
+                          ? "ascending"
+                          : "descending"
+                        : "none"
+                    }
+                  >
+                    <div className="flex items-center gap-1">
+                      Status
+                      {renderSortIcon("status")}
                     </div>
                   </th>
                   <th
@@ -958,6 +1198,13 @@ export default function BookingPage() {
                       </button>
                     </td>
                     <td className="px-6 py-4">
+                      <span className="text-slate-600 text-sm">
+                        {(booking.created_at || booking.inserted_at || booking.createdAt)
+                          ? new Date(booking.created_at || booking.inserted_at || booking.createdAt!).toLocaleString()
+                          : "N/A"}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div
                           className="size-9 rounded-full bg-cover bg-center"
@@ -965,18 +1212,23 @@ export default function BookingPage() {
                             backgroundImage: `url("https://ui-avatars.com/api/?name=${encodeURIComponent(
                               `${
                                 booking.travellers?.[0]?.firstName ||
-                                // booking.travellerFirstName || // REMOVED
+                                booking.contact_details?.name?.firstName ||
+                                (booking as Record<string, any>).flight_data?.travelers?.[0]?.name?.firstName ||
                                 ""
                               } ${
                                 booking.travellers?.[0]?.lastName ||
-                                // booking.travellerLastName || // REMOVED
+                                booking.contact_details?.name?.lastName ||
+                                (booking as Record<string, any>).flight_data?.travelers?.[0]?.name?.lastName ||
                                 ""
                               }`,
                             )}&background=random")`,
                           }}
                         ></div>
                         <span className="text-slate-900 font-medium text-sm">
-                          {booking.travellers?.[0]?.firstName || "N/A"}
+                          {booking.travellers?.[0]?.firstName || 
+                           booking.contact_details?.name?.firstName ||
+                           (booking as Record<string, any>).flight_data?.travelers?.[0]?.name?.firstName || 
+                           "Unknown"}
                         </span>
                       </div>
                     </td>
@@ -989,8 +1241,38 @@ export default function BookingPage() {
                       <span className="text-slate-600">{booking.tripType}</span>
                     </td>
                     <td className="px-6 py-4">
+                      <button
+                        type="button"
+                        disabled={booking.status === "Issued" || actionLoading === booking.id}
+                        onClick={() => handleIssueBooking(booking)}
+                        className={`inline-flex items-center rounded-md px-2 py-1 text-xs font-medium ring-1 ring-inset transition-all ${
+                          booking.status === "Confirmed" || booking.status === "ON_HOLD"
+                            ? "bg-blue-50 text-blue-700 ring-blue-600/20 hover:bg-blue-100 cursor-pointer"
+                            : booking.status === "Issued"
+                            ? "bg-emerald-50 text-emerald-700 ring-emerald-600/20 cursor-default"
+                            : booking.status === "Pending"
+                            ? "bg-amber-50 text-amber-700 ring-amber-600/20 hover:bg-amber-100 cursor-pointer"
+                            : booking.status === "Draft"
+                            ? "bg-slate-50 text-slate-700 ring-slate-600/20 hover:bg-slate-100 cursor-pointer"
+                            : booking.status === "Cancelled"
+                            ? "bg-red-50 text-red-700 ring-red-600/20 cursor-default"
+                            : "bg-slate-50 text-slate-700 ring-slate-600/20 hover:bg-slate-100 cursor-pointer"
+                        } ${actionLoading === booking.id ? "opacity-50 cursor-wait" : ""}`}
+                        title={booking.status !== "Issued" && booking.status !== "Cancelled" ? "Click to Issue" : ""}
+                      >
+                        {actionLoading === booking.id ? (
+                          <span className="material-symbols-outlined text-[14px] animate-spin mr-1">
+                            sync
+                          </span>
+                        ) : null}
+                        {(booking.status === "Confirmed" || booking.status === "ON_HOLD"
+                          ? "Hold"
+                          : booking.status) || "Draft"}
+                      </button>
+                    </td>
+                    <td className="px-6 py-4">
                       <span className="bg-blue-50 text-primary px-2 py-1 rounded text-xs font-bold">
-                        {booking.PNR}
+                        {booking.PNR || booking.pnr || "N/A"}
                       </span>
                     </td>
                     <td className="px-6 py-4">
@@ -1142,6 +1424,15 @@ export default function BookingPage() {
           selectedBookingIds.length !== 1 ? "s" : ""
         }`}
       />
+
+      {isNotificationModalOpen && notificationBooking && (
+        <NotificationConfirmModal
+          isOpen={isNotificationModalOpen}
+          onClose={() => setIsNotificationModalOpen(false)}
+          onConfirm={confirmIssueBooking}
+          booking={notificationBooking}
+        />
+      )}
     </div>
   );
 }

@@ -4,7 +4,7 @@ import { useState, useEffect, use } from "react";
 import Image from "next/image";
 import { useRouter, notFound } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { Booking } from "@/types";
+import { Booking, Traveller } from "@/types";
 import { getCustomerName } from "@/lib/booking-helpers";
 import { CompanyProfile } from "@/types/company";
 import SendEmailModal from "@/components/booking-management/SendEmailModal";
@@ -51,7 +51,7 @@ export default function ETicketPage({
       }
     };
     fetchSettings();
-  }, [selectedCompanyId]);
+  }, []); // Run only on mount
 
   useEffect(() => {
     if (!bookingId) return;
@@ -196,7 +196,7 @@ export default function ETicketPage({
   // Pricing Breakdown
   const sellingPrice = Number(booking.sellingPrice) || 0;
   // Try to use stored prices or fall back to mock
-  const prices = booking.prices as Record<string, any> | undefined;
+  const prices = booking.prices as Record<string, string | number> | undefined;
   const baseFare = prices?.baseFare
     ? Number(prices.baseFare)
     : sellingPrice * 0.85;
@@ -207,14 +207,107 @@ export default function ETicketPage({
   const supportPhone = selectedCompany?.phones[0]?.value || "+1 800 123 4567";
   const supportEmail =
     selectedCompany?.emails[0]?.value || "support@skyhigh.com";
-  const supportHours = "24/7 Support"; // Could be added to company profile later
+  const supportHours = selectedCompany?.operatingHours || "24/7 Support";
+
+  // Support Information
+  const generateICSContent = (booking: Booking) => {
+    const events: string[] = [];
+    const pnr = booking.PNR || "Booking";
+    const customerName = getCustomerName(booking);
+
+    const formatToICSDate = (dateStr?: string) => {
+      if (!dateStr) return "";
+      try {
+        const date = new Date(dateStr);
+        if (isNaN(date.getTime())) return "";
+        return date.toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
+      } catch (e) {
+        return "";
+      }
+    };
+
+    booking.itineraries?.forEach((itinerary, itineraryIndex) => {
+      itinerary.segments.forEach((segment, segmentIndex) => {
+        const start = formatToICSDate(segment.departure.at);
+        const end = formatToICSDate(segment.arrival.at);
+        if (!start || !end) return;
+
+        const summary = `Flight ${segment.carrierCode}${segment.number}: ${segment.departure.iataCode} to ${segment.arrival.iataCode}`;
+        const description = `Flight: ${segment.carrierCode} ${segment.number}\\nPNR: ${pnr}\\nPassenger: ${customerName}\\nClass: ${booking.flightClass || "Economy"}`;
+        const location = `${segment.departure.iataCode}${
+          segment.departure.terminal ? ` Terminal ${segment.departure.terminal}` : ""
+        }`;
+        const uid = `${pnr}-${itineraryIndex}-${segmentIndex}@skytrips.com.au`;
+
+        events.push(`BEGIN:VEVENT
+UID:${uid}
+DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").split(".")[0]}Z
+DTSTART:${start}
+DTEND:${end}
+SUMMARY:${summary}
+DESCRIPTION:${description}
+LOCATION:${location}
+END:VEVENT`);
+      });
+    });
+
+    // Fallback for bookings without itineraries
+    if (events.length === 0) {
+      const depDate = booking.travelDate || booking.departureDate;
+      if (depDate) {
+        const start = formatToICSDate(depDate);
+        if (start) {
+          const arrDate = booking.arrivalDate;
+          let end = formatToICSDate(arrDate);
+          if (!end) {
+            // Assume 2 hour flight if arrival is missing
+            const startDate = new Date(depDate);
+            end = formatToICSDate(
+              new Date(startDate.getTime() + 2 * 60 * 60 * 1000).toISOString(),
+            );
+          }
+
+          const summary = `Flight ${booking.airlines} ${
+            booking.flightNumber || ""
+          }: ${booking.origin} to ${booking.destination}`;
+          const description = `PNR: ${pnr}\\nPassenger: ${customerName}\\nClass: ${
+            booking.flightClass || "Economy"
+          }`;
+          const uid = `${pnr}-legacy@skytrips.com.au`;
+
+          events.push(`BEGIN:VEVENT
+UID:${uid}
+DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").split(".")[0]}Z
+DTSTART:${start}
+DTEND:${end}
+SUMMARY:${summary}
+DESCRIPTION:${description}
+LOCATION:${booking.origin}
+END:VEVENT`);
+        }
+      }
+    }
+
+    return `BEGIN:VCALENDAR
+VERSION:2.0
+PRODID:-//SkyTrips//Flight Itinerary//EN
+${events.join("\n")}
+END:VCALENDAR`;
+  };
 
   const handleSendEmail = async (data: {
     subject: string;
     message: string;
     template: string;
+    sms?: {
+      enabled: boolean;
+      message: string;
+    };
   }) => {
     if (!booking) return;
+    if (!booking.email || !String(booking.email).trim()) {
+      throw new Error("Recipient email is missing");
+    }
     try {
       const element = document.getElementById("eticket-content");
       if (!element) throw new Error("Ticket content not found");
@@ -270,6 +363,10 @@ export default function ETicketPage({
 
       const pdfBase64 = pdf.output("datauristring");
 
+      // Generate ICS
+      const icsContent = generateICSContent(booking);
+      const icsBase64 = btoa(icsContent);
+
       const res = await fetch("/api/send-email", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -284,16 +381,61 @@ export default function ETicketPage({
             .replace("{DEPARTURE_DATE}", booking.travelDate || "")
             .replace("{FLIGHT_NUMBER}", booking.flightNumber || "")
             .replace("{AMOUNT}", booking.sellingPrice?.toString() || ""),
-          attachment: {
-            filename: `Eticket-${booking.PNR || "Booking"}.pdf`,
-            content: pdfBase64,
-          },
+          attachments: [
+            {
+              filename: `Eticket-${booking.PNR || "Booking"}.pdf`,
+              content: pdfBase64,
+              contentType: "application/pdf",
+            },
+            {
+              filename: `Flight-Itinerary-${booking.PNR || "Booking"}.ics`,
+              content: icsBase64,
+              contentType: "text/calendar",
+            },
+          ],
         }),
       });
 
       if (!res.ok) {
         const errData = await res.json();
-        throw new Error(errData.error || "Failed to send email");
+        const errorMessage = errData.details
+          ? `${errData.error}: ${errData.details}`
+          : errData.error || "Failed to send email";
+        throw new Error(errorMessage);
+      }
+
+      // Send SMS if enabled
+      if (data.sms?.enabled && booking.phone) {
+        try {
+          await fetch("/api/send-sms", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              to: booking.phone,
+              message: data.sms.message,
+            }),
+          });
+        } catch (smsError) {
+          console.error("Error sending SMS:", smsError);
+          // Continue even if SMS fails
+        }
+      }
+
+      // Update last_eticket_sent_at in database
+      const now = new Date().toISOString();
+      const { error: updateError } = await supabase
+        .from("bookings")
+        .update({ last_eticket_sent_at: now })
+        .eq("id", booking.id);
+
+      if (updateError) {
+        console.error("Error updating last_eticket_sent_at:", updateError);
+      } else {
+        setBooking((prev) =>
+          prev ? { ...prev, last_eticket_sent_at: now } : null
+        );
       }
     } catch (err) {
       console.error("Error sending ticket:", err);
@@ -302,11 +444,12 @@ export default function ETicketPage({
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 p-6 md:p-12 print:p-0 print:bg-white font-display">
+    <div className="min-h-screen bg-slate-100 p-2 md:p-4 print:p-0 print:bg-white font-display">
       {booking && (
         <SendEmailModal
           isOpen={isEmailModalOpen}
           onClose={() => setIsEmailModalOpen(false)}
+          lastEmailSent={booking.last_eticket_sent_at}
           recipient={{
             name:
               booking.customer && typeof booking.customer === "object"
@@ -316,23 +459,25 @@ export default function ETicketPage({
                   }`,
             email: booking.email || "",
             phone: booking.phone,
-            organization: (booking as any).companyName || "Individual",
+            organization: (booking as Booking & { companyName?: string }).companyName || "Individual",
             pnr: booking.PNR,
           }}
+          enableSmsOption={!!booking.phone}
+          defaultSmsMessage={`Here is your E-Ticket for ${booking.PNR}. Check your email for details.`}
           onSend={handleSendEmail}
         />
       )}
       {/* Navigation / Actions - Hidden in Print */}
-      <div className="max-w-6xl mx-auto mb-8 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 print:hidden">
+      <div className="max-w-6xl mx-auto mb-4 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 print:hidden">
         <nav className="flex text-sm text-slate-500">
           <button
             onClick={() => router.back()}
             className="hover:text-slate-800 transition-colors flex items-center gap-1"
+            title="Back to Booking"
           >
             <span className="material-symbols-outlined text-[18px]">
               arrow_back
             </span>
-            Back to Booking
           </button>
           <span className="mx-2 text-slate-300">/</span>
           <span className="text-primary font-bold">E-Ticket</span>
@@ -341,12 +486,12 @@ export default function ETicketPage({
           {companyProfiles.length > 0 && (
             <div className="flex items-center gap-2">
               <span className="text-xs font-bold text-slate-500">
-                Company profile
+                Profile
               </span>
               <select
                 value={selectedCompanyId || ""}
                 onChange={(e) => setSelectedCompanyId(e.target.value || null)}
-                className="px-3 py-2 text-sm border border-slate-200 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className="px-2 py-1 text-xs border border-slate-200 rounded-lg bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary max-w-[150px]"
               >
                 {companyProfiles.map((profile) => (
                   <option key={profile.id} value={profile.id}>
@@ -823,7 +968,7 @@ export default function ETicketPage({
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-sm">
                   {booking.travellers && booking.travellers.length > 0 ? (
-                    booking.travellers.map((traveller: any, index: number) => (
+                    booking.travellers.map((traveller: Traveller, index: number) => (
                       <tr key={index}>
                         <td className="px-6 py-4 font-bold text-slate-900">
                           {traveller.firstName} {traveller.lastName}
@@ -834,8 +979,16 @@ export default function ETicketPage({
                         <td className="px-6 py-4 text-slate-600">
                           {traveller.passportNumber || "N/A"}
                         </td>
-                        <td className="px-6 py-4 text-emerald-600 font-bold">
-                          Confirmed
+                        <td className={`px-6 py-4 font-bold ${
+                          booking.status === "Confirmed"
+                            ? "text-blue-600"
+                            : booking.status === "Issued"
+                            ? "text-emerald-600"
+                            : "text-slate-600"
+                        }`}>
+                          {booking.status === "Confirmed"
+                            ? "Hold"
+                            : booking.status || "Hold"}
                         </td>
                       </tr>
                     ))

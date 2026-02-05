@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import UserDomainSettings from "@/components/portal/settings/UserDomainSettings";
 
 export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
@@ -14,6 +15,9 @@ export default function ProfilePage() {
     phone: "",
     email: "", // Read only
     passport_number: "", // Assuming this field exists in customer schema or mapped
+    publicProfileEnabled: false,
+    companyName: "",
+    publicBio: "",
   });
 
   const [password, setPassword] = useState("");
@@ -38,6 +42,9 @@ export default function ProfilePage() {
                 phone: customer.phone || "",
                 email: customer.email || user.email || "",
                 passport_number: customer.passport?.number || "", // Handling JSONB structure if necessary
+                publicProfileEnabled: customer.public_profile_enabled || false,
+                companyName: customer.company_name || "",
+                publicBio: customer.public_bio || "",
             });
         }
       } catch (e) {
@@ -67,7 +74,10 @@ export default function ProfilePage() {
              phone: formData.phone,
              // Assuming passport is stored in a JSONB 'passport' column or top level
              // If schema has 'passport' column as JSONB:
-             passport: { number: formData.passport_number } 
+             passport: { number: formData.passport_number },
+             public_profile_enabled: formData.publicProfileEnabled,
+             company_name: formData.companyName,
+             public_bio: formData.publicBio,
           })
           .eq("auth_user_id", user.id);
 
@@ -87,8 +97,9 @@ export default function ProfilePage() {
         }
 
         setMessage({ type: 'success', text: "Profile updated successfully!" });
-    } catch (e: any) {
-        setMessage({ type: 'error', text: e.message || "Failed to update profile" });
+    } catch (e: unknown) {
+        const errMsg = e instanceof Error ? e.message : "Failed to update profile";
+        setMessage({ type: 'error', text: errMsg });
     } finally {
         setSaving(false);
     }
@@ -160,6 +171,56 @@ export default function ProfilePage() {
          </div>
 
          <div className="border-t border-gray-200 pt-6">
+            <h3 className="text-lg font-medium text-gray-900 mb-4">Public Profile Settings</h3>
+            <div className="space-y-4">
+               <div className="flex items-center justify-between">
+                  <div>
+                     <label className="block text-sm font-medium text-gray-700">Enable Public Profile</label>
+                     <p className="text-xs text-gray-500">Allow others to see your professional travel profile</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setFormData({...formData, publicProfileEnabled: !formData.publicProfileEnabled})}
+                    className={`${
+                      formData.publicProfileEnabled ? 'bg-blue-600' : 'bg-gray-200'
+                    } relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2`}
+                  >
+                    <span
+                      className={`${
+                        formData.publicProfileEnabled ? 'translate-x-5' : 'translate-x-0'
+                      } pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out`}
+                    />
+                  </button>
+               </div>
+
+               {formData.publicProfileEnabled && (
+                  <>
+                     <div>
+                        <label className="block text-sm font-medium text-gray-700">Company Name</label>
+                        <input
+                          type="text"
+                          value={formData.companyName}
+                          onChange={e => setFormData({...formData, companyName: e.target.value})}
+                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                          placeholder="e.g. Acme Corp"
+                        />
+                     </div>
+                     <div>
+                        <label className="block text-sm font-medium text-gray-700">Public Bio</label>
+                        <textarea
+                          rows={3}
+                          value={formData.publicBio}
+                          onChange={e => setFormData({...formData, publicBio: e.target.value})}
+                          className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm"
+                          placeholder="Share a bit about your travel preferences or professional background..."
+                        />
+                     </div>
+                  </>
+               )}
+            </div>
+         </div>
+
+         <div className="border-t border-gray-200 pt-6">
             <h3 className="text-lg font-medium text-gray-900 mb-4">Security</h3>
             <div className="space-y-4">
                <div>
@@ -196,6 +257,8 @@ export default function ProfilePage() {
             </button>
          </div>
       </form>
+
+      <UserDomainSettings />
     </div>
   );
 }
