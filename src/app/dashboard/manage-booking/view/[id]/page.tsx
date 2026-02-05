@@ -6,6 +6,7 @@ import { Booking, ManageBooking } from "@/types";
 import { getCustomerName } from "@/lib/booking-helpers";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
+import FlightDetailsCard from "@/components/booking-management/FlightDetailsCard";
 
 export default function ManageBookingViewPage() {
   const params = useParams();
@@ -61,7 +62,9 @@ export default function ManageBookingViewPage() {
           });
         }
       }
-    } catch (err) {
+    } catch (err: any) {
+      // Ignore record not found error as it is handled by the UI state (record will be null)
+      if (err?.code === 'PGRST116') return;
       console.error("Error fetching record:", err);
     } finally {
       setLoading(false);
@@ -94,8 +97,14 @@ export default function ManageBookingViewPage() {
   }
 
   // Calculate pricing logic safely
-  const sellingPrice = parseFloat(booking.sellingPrice || "0");
-  const costPrice = parseFloat(booking.buyingPrice || "0");
+  const parseCurrency = (val: string | number | undefined | null) => {
+    if (!val) return 0;
+    const str = val.toString().replace(/,/g, "");
+    return parseFloat(str) || 0;
+  };
+
+  const sellingPrice = parseCurrency(booking.sellingPrice);
+  const costPrice = parseCurrency(booking.buyingPrice);
   const profit = sellingPrice - costPrice;
   const profitPercent =
     costPrice > 0 ? ((profit / costPrice) * 100).toFixed(1) : "0";
@@ -121,7 +130,13 @@ export default function ManageBookingViewPage() {
               chevron_right
             </span>
             <span className="font-medium text-slate-900">
-              Management Details
+              {record.status === "REFUNDED"
+                ? "Refunded"
+                : record.status === "SEND"
+                  ? "Requesting"
+                  : record.refund_status === "Processing"
+                    ? "Processing"
+                    : "Request"}
             </span>
           </div>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mt-1">
@@ -133,111 +148,122 @@ export default function ManageBookingViewPage() {
                 Manage refund, reissue, or cancellation for selected booking.
               </p>
             </div>
-            <span
-              className={`inline-flex items-center rounded-md px-3 py-1 text-sm font-medium ring-1 ring-inset ${
-                record.status === "REFUNDED"
-                  ? "bg-green-50 text-green-700 ring-green-600/20"
+            <div className="flex items-center gap-3">
+              <span
+                className={`inline-flex items-center rounded-md px-3 py-1 text-sm font-medium ring-1 ring-inset ${
+                  record.status === "REFUNDED"
+                    ? "bg-green-50 text-green-700 ring-green-600/20"
+                    : record.status === "SEND"
+                      ? "bg-blue-50 text-blue-700 ring-blue-600/20"
+                      : record.refund_status === "Processing"
+                        ? "bg-purple-50 text-purple-700 ring-purple-600/20"
+                        : "bg-yellow-50 text-yellow-700 ring-yellow-600/20"
+                }`}
+              >
+                {record.status === "REFUNDED"
+                  ? "Refunded"
                   : record.status === "SEND"
-                    ? "bg-blue-50 text-blue-700 ring-blue-600/20"
-                    : "bg-yellow-50 text-yellow-700 ring-yellow-600/20"
-              }`}
-            >
-              {record.status || "PENDING"}
-            </span>
+                    ? "Requesting"
+                    : record.refund_status === "Processing"
+                      ? "Processing"
+                      : "Request"}
+              </span>
+              <Link
+                href={`/dashboard/manage-booking/edit/${id}`}
+                className="inline-flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+              >
+                Next
+                <span className="material-symbols-outlined text-[18px]">
+                  arrow_forward
+                </span>
+              </Link>
+            </div>
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
-          <div className="border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-            <h3 className="text-base font-semibold text-slate-900 flex items-center gap-2">
-              <span className="material-symbols-outlined text-slate-400">
-                flight
-              </span>
-              Flight Details
-            </h3>
-          </div>
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-6 gap-x-8">
-              <div>
-                <label className="block text-xs font-medium uppercase text-slate-500">
-                  Booking ID
-                </label>
-                <p className="mt-1 text-base font-medium text-slate-900 font-mono">
-                  #{record.booking_id}
-                </p>
-              </div>
-              <div>
-                <label className="block text-xs font-medium uppercase text-slate-500">
-                  PNR
-                </label>
-                <p className="mt-1 text-base font-medium text-slate-900 font-mono">
-                  {booking.PNR || "N/A"}
-                </p>
-              </div>
-              <div>
-                <label className="block text-xs font-medium uppercase text-slate-500">
-                  Ticket No.
-                </label>
-                <p className="mt-1 text-base font-medium text-slate-900 font-mono">
-                  {booking.travellers?.[0]?.eticketNumber || "N/A"}
-                </p>
-              </div>
-              <div>
-                <label className="block text-xs font-medium uppercase text-slate-500">
-                  Passenger Name
-                </label>
-                <p className="mt-1 text-base font-medium text-slate-900">
-                  {getCustomerName(booking)}
-                </p>
-              </div>
-              <div>
-                <label className="block text-xs font-medium uppercase text-slate-500">
-                  Route
-                </label>
-                <div className="mt-1 flex items-center gap-2 text-base font-medium text-slate-900">
-                  <span>{booking.origin}</span>
-                  <span className="material-symbols-outlined text-slate-400 text-[16px]">
-                    arrow_forward
-                  </span>
-                  <span>{booking.destination}</span>
-                </div>
-              </div>
-              <div>
-                <label className="block text-xs font-medium uppercase text-slate-500">
-                  Issued Date
-                </label>
-                <p className="mt-1 text-base font-medium text-slate-900">
-                  {booking.IssueDay} {booking.issueMonth}, {booking.issueYear}
-                </p>
-              </div>
-            </div>
-          </div>
-          <div className="bg-slate-50 border-t border-slate-200 px-6 py-4">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="flex flex-col">
-                <span className="text-xs text-slate-500">Selling Price</span>
-                <span className="text-lg font-bold text-slate-900">
-                  ${sellingPrice.toFixed(2)}
-                </span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs text-slate-500">Cost Price</span>
-                <span className="text-lg font-bold text-slate-700">
-                  ${costPrice.toFixed(2)}
-                </span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs text-slate-500">Profit Margin</span>
-                <span
-                  className={`text-lg font-bold flex items-center gap-1 ${profit >= 0 ? "text-emerald-600" : "text-red-600"}`}
-                >
-                  {profit >= 0 ? "+" : ""}${profit.toFixed(2)}
-                  <span className="text-xs font-normal text-slate-500">
-                    ({profitPercent}%)
-                  </span>
-                </span>
-              </div>
-            </div>
+        <FlightDetailsCard
+          booking={booking}
+          record={record}
+          title="Flight Details"
+          showRouteVisuals={true}
+          showFinancials={true}
+          financials={{
+            sellingPrice,
+            costPrice,
+            profit,
+            profitPercent,
+          }}
+        />
+
+        {/* Progress Steps */}
+        <div className="w-full px-4 sm:px-0">
+          <div className="relative">
+            <div className="absolute left-0 top-4 -mt-px w-full h-0.5 bg-slate-200" aria-hidden="true"></div>
+            <ul className="relative flex w-full justify-between">
+              {[
+                {
+                  id: "01",
+                  name: "Request",
+                  status:
+                    record.status === "PENDING" &&
+                    record.refund_status !== "Processing"
+                      ? "current"
+                      : "complete",
+                  href: `/dashboard/manage-booking/view/${record.uid}`,
+                },
+                {
+                  id: "02",
+                  name: "Processing",
+                  status:
+                    record.refund_status === "Processing" &&
+                    record.status !== "SEND" &&
+                    record.status !== "REFUNDED"
+                      ? "current"
+                      : record.status === "SEND" || record.status === "REFUNDED"
+                        ? "complete"
+                        : "upcoming",
+                  href: `/dashboard/manage-booking/edit/${record.uid}`,
+                },
+                {
+                  id: "03",
+                  name: "Requesting",
+                  status:
+                    record.status === "SEND"
+                      ? "current"
+                      : record.status === "REFUNDED"
+                        ? "complete"
+                        : "upcoming",
+                  href: `/dashboard/manage-booking/edit/${record.uid}?tab=financial-summary`,
+                },
+                {
+                  id: "04",
+                  name: "Refunded",
+                  status:
+                    record.status === "REFUNDED" ? "current" : "upcoming",
+                  href: `/dashboard/manage-booking/view/${record.uid}`,
+                },
+              ].map((step) => (
+                <li key={step.name} className="flex flex-col items-center relative bg-transparent z-10">
+                  <Link href={step.href} className="flex flex-col items-center group">
+                    <div className={`relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all ${
+                      step.status === 'current' ? 'border-primary bg-primary text-white group-hover:bg-primary-hover' :
+                      'border-slate-300 bg-white text-slate-500 group-hover:border-slate-400 group-hover:text-slate-600'
+                    }`}>
+                      {step.status === 'complete' ? (
+                        <span className="material-symbols-outlined text-[16px]">check</span>
+                      ) : (
+                        <span className="text-xs font-bold">{step.id}</span>
+                      )}
+                    </div>
+                    <span className={`mt-2 text-xs font-medium transition-colors ${
+                      step.status === 'current' ? 'text-primary group-hover:text-primary-hover' : 'text-slate-500 group-hover:text-slate-600'
+                    }`}>
+                      {step.name}
+                    </span>
+                  </Link>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 

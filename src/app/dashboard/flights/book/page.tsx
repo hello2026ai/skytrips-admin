@@ -2,8 +2,8 @@
 
 import { useState, useMemo } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import PassengerForm from "@/components/dashboard/flights/booking/PassengerForm";
-import BookingSummary from "@/components/dashboard/flights/booking/BookingSummary";
+import PassengerForm from "@/components/dashboard/routes/booking/PassengerForm";
+import BookingSummary from "@/components/dashboard/routes/booking/BookingSummary";
 import { FlightOffer } from "@/types/flight-search";
 
 export default function FlightBookingPage() {
@@ -119,21 +119,15 @@ export default function FlightBookingPage() {
         setCreating(false);
         return;
       }
-      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://dev-api.skytrips.com.au/";
-      const clientRef = process.env.NEXT_PUBLIC_SKYTRIPS_CLIENT_REF || "1223";
-      const priceUrl = new URL("flight-price", baseUrl);
-      priceUrl.searchParams.set("page", "1");
-      priceUrl.searchParams.set("limit", "10");
-      const priceBody = rawPayload;
-      const priceRes = await fetch(priceUrl.toString(), {
+      // Use local API for pricing
+      const priceRes = await fetch("/api/amadeus/price", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "ama-client-ref": clientRef,
-          accept: "application/json",
         },
-        body: JSON.stringify(priceBody),
+        body: JSON.stringify({ flightOffer: rawPayload }),
       });
+
       if (!priceRes.ok) {
         let msg = "Price request failed";
         try {
@@ -145,7 +139,14 @@ export default function FlightBookingPage() {
         return;
       }
       const priceJson = await priceRes.json();
-      const first = Array.isArray(priceJson?.data) ? priceJson.data[0] : undefined;
+      const rawData = priceJson.raw || {};
+      const first = Array.isArray(rawData.data) ? rawData.data[0] : (rawData.data?.flightOffers?.[0] || rawData.data);
+      if (!first) {
+         setError("Pricing returned no valid offer");
+         setCreating(false);
+         return;
+      }
+
       const priceObj = first?.price || {};
       const base = typeof priceObj?.base === "string" ? parseFloat(priceObj.base) : Number(priceObj?.base || 0);
       const total = typeof priceObj?.grandTotal === "string" ? parseFloat(priceObj.grandTotal) : (typeof priceObj?.total === "string" ? parseFloat(priceObj.total) : Number(priceObj?.grandTotal ?? priceObj?.total ?? 0));
@@ -167,23 +168,58 @@ export default function FlightBookingPage() {
         return out;
       })();
 
+      // Helper to map full country names to ISO 2-letter codes
+      // This is a minimal map; in production use a library or full list
+      const getIsoCountry = (name: string) => {
+        const map: Record<string, string> = {
+          "Nepal": "NP",
+          "India": "IN",
+          "Australia": "AU",
+          "United States": "US",
+          "United Kingdom": "GB",
+          "China": "CN",
+          "Japan": "JP",
+          "France": "FR",
+          "Germany": "DE",
+          "Canada": "CA"
+        };
+        // If it's already 2 chars, assume code
+        if (name.length === 2) return name.toUpperCase();
+        return map[name] || "NP"; // Default fallback
+      };
+
       const passengerInput = passengers.map((id, idx) => {
         const f = (typeof document !== "undefined" ? document.getElementById(`fname-${id}`) : null) as HTMLInputElement | null;
         const l = (typeof document !== "undefined" ? document.getElementById(`lname-${id}`) : null) as HTMLInputElement | null;
+        
+        // Optional fields
+        const g = (typeof document !== "undefined" ? document.getElementById(`gender-${id}`) : null) as HTMLSelectElement | null;
+        const d = (typeof document !== "undefined" ? document.getElementById(`dob-${id}`) : null) as HTMLInputElement | null;
+        const c = (typeof document !== "undefined" ? document.getElementById(`country-${id}`) : null) as HTMLSelectElement | null;
         const p = (typeof document !== "undefined" ? document.getElementById(`passport-${id}`) : null) as HTMLInputElement | null;
-        const genderEl = (typeof document !== "undefined" ? document.getElementById(`gender-${id}`) : null) as HTMLSelectElement | null;
-        const dobEl = (typeof document !== "undefined" ? document.getElementById(`dob-${id}`) : null) as HTMLInputElement | null;
-        const countryEl = (typeof document !== "undefined" ? document.getElementById(`country-${id}`) : null) as HTMLSelectElement | null;
-        const passportCountryEl = (typeof document !== "undefined" ? document.getElementById(`passportCountry-${id}`) : null) as HTMLSelectElement | null;
-        const passportExpiryEl = (typeof document !== "undefined" ? document.getElementById(`passportExpiry-${id}`) : null) as HTMLInputElement | null;
+        const pc = (typeof document !== "undefined" ? document.getElementById(`passportCountry-${id}`) : null) as HTMLSelectElement | null;
+        const pe = (typeof document !== "undefined" ? document.getElementById(`passportExpiry-${id}`) : null) as HTMLInputElement | null;
+
         const firstName = (f?.value || "").trim() || "Unknown";
         const lastName = (l?.value || "").trim() || "Unknown";
+        
+        // Use provided values or defaults
+        const genderRaw = (g?.value || "").trim();
+        const gender = genderRaw && genderRaw !== "Select Gender" ? genderRaw : "MALE"; 
+        
+        const dobRaw = (d?.value || "").trim();
+        const dob = dobRaw || "1990-01-01"; 
+
+        const countryRaw = (c?.value || "").trim();
+        const country = countryRaw && countryRaw !== "Select Country" ? getIsoCountry(countryRaw) : "NP";
+
         const passportNumber = (p?.value || "").trim();
-        const gender = (genderEl?.value || "UNSPECIFIED").trim() || "UNSPECIFIED";
-        const dob = (dobEl?.value || "").trim();
-        const country = (countryEl?.value || "").trim();
-        const passportCountry = (passportCountryEl?.value || "").trim();
-        const passportExpiryDate = (passportExpiryEl?.value || "").trim();
+        
+        const passportCountryRaw = (pc?.value || "").trim();
+        const passportCountry = passportCountryRaw && passportCountryRaw !== "Select Country" ? getIsoCountry(passportCountryRaw) : "NP";
+        
+        const passportExpiryDate = (pe?.value || "").trim();
+
         const passengerType =
           idx < adults ? "ADULT" : idx < adults + children ? "CHILD" : "INFANT";
         const title = gender === "MALE" ? "Mr" : gender === "FEMALE" ? "Ms" : "Mx";
@@ -211,34 +247,79 @@ export default function FlightBookingPage() {
           phoneDeviceType,
         };
       });
-      const travelClassParam = (searchParams.get("class") || "ECONOMY").toUpperCase().replace(/\s+/g, "_");
-      const typeParam = searchParams.get("type") || "One Way";
-      const tripTypeParam = typeParam === "One Way" ? "ONE_WAY" : typeParam === "Round Trip" ? "ROUND_TRIP" : "MULTI_CITY";
+      
+      // Transform to Amadeus Travelers
+      const travelers = passengerInput.map(p => {
+        const traveler: {
+          id: string;
+          dateOfBirth: string;
+          name: { firstName: string; lastName: string };
+          gender: string;
+          contact: { emailAddress: string; phones: Array<{ deviceType: string; countryCallingCode: string; number: string }> };
+          documents?: Array<{
+            documentType: string;
+            birthPlace: string;
+            issuanceLocation: string;
+            issuanceDate: string;
+            number: string;
+            expiryDate: string;
+            issuanceCountry: string;
+            validityCountry: string;
+            nationality: string;
+            holder: boolean;
+          }>;
+        } = {
+          id: p.travelerId,
+          dateOfBirth: p.dob,
+          name: {
+            firstName: p.firstName.toUpperCase(),
+            lastName: p.lastName.toUpperCase()
+          },
+          gender: p.gender,
+          contact: {
+            emailAddress: "info@skytrips.com.au",
+            phones: [{
+              deviceType: "MOBILE",
+              countryCallingCode: "61",
+              number: "400000000"
+            }]
+          }
+        };
 
-      const bookingUrl = new URL("flight-booking", baseUrl);
+        if (p.passportNumber && p.passportCountry && p.passportExpiryDate) {
+          traveler.documents = [{
+            documentType: "PASSPORT",
+            birthPlace: p.country || p.passportCountry,
+            issuanceLocation: p.passportCountry, 
+            issuanceDate: "2015-01-01", // Default to a safe past date
+            number: p.passportNumber,
+            expiryDate: p.passportExpiryDate,
+            issuanceCountry: p.passportCountry,
+            validityCountry: p.passportCountry,
+            nationality: p.passportCountry,
+            holder: true
+          }];
+        }
+
+        return traveler;
+      });
+
       const bookingPayload = {
-        priceParam: first,
-        userInput: { email: "info@skytrips.com.au" },
-        passengerInput,
-        travelClass: travelClassParam,
-        tripType: tripTypeParam,
-        bookingType: "ONLINE",
-        origin: offer.departure.code,
-        destination: offer.arrival.code,
-        bookingTicketRefundableStatus: "REFUNDABLE",
+        flightOffers: [first],
+        travelers
       };
-      const bookingRes = await fetch(bookingUrl.toString(), {
+      
+      const bookingRes = await fetch("/api/amadeus/book", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "ama-client-ref": clientRef,
-          accept: "*/*",
         },
         body: JSON.stringify(bookingPayload),
       }).catch(() => null);
       const bookingJson = bookingRes ? await bookingRes.json().catch(() => null) : null;
 
-      if (bookingRes && bookingRes.ok) {
+      if (bookingRes && bookingRes.ok && bookingJson?.ok) {
+
         setSuccess(true);
         setSuccessData({
           base,
@@ -266,16 +347,16 @@ export default function FlightBookingPage() {
 
   return (
     <div className="min-h-screen bg-slate-50/50 pb-20 font-display">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4">
         {!success && (
-          <div className="mb-8">
+          <div className="mb-6">
             <nav className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-2">
               <span>Search Results</span>
               <span className="material-symbols-outlined text-[12px]">chevron_right</span>
-              <span className="text-[#0EA5E9]">Passenger Information</span>
+              <span className="text-[#0EA5E9]">Traveller Information</span>
             </nav>
             <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
-              Passenger Info & Agency Commission
+              Traveller Info & Agency Commission
             </h1>
           </div>
         )}
@@ -290,18 +371,18 @@ export default function FlightBookingPage() {
         )}
 
         {!success && (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6">
           
           {/* Main Content - Passenger Forms */}
-          <div className="lg:col-span-8 space-y-6">
+          <div className="lg:col-span-8 space-y-4">
             
-            <div className="bg-white border border-slate-200 rounded-2xl p-6 md:p-8 shadow-sm">
+            <div className="bg-white border border-slate-200 rounded-2xl p-4 md:p-6 shadow-sm">
               {passengers.map((id, index) => {
                 const isLead = index === 0;
                 let typeLabel = "Adult";
                 if (index >= adults && index < adults + children) typeLabel = "Child";
                 if (index >= adults + children) typeLabel = "Infant";
-                const label = isLead ? "Lead Passenger" : `Passenger ${index + 1} (${typeLabel})`;
+                const label = isLead ? "Lead Traveller" : `Traveller ${index + 1} (${typeLabel})`;
                 return (
                   <div key={id} className={index > 0 ? "mt-8 pt-8 border-t border-slate-100" : ""}>
                     <PassengerForm
@@ -375,7 +456,7 @@ export default function FlightBookingPage() {
                 <p className="text-xs text-slate-500">Base: {successData.currency} {successData.base.toFixed(2)}</p>
               </div>
               <div className="p-4 bg-slate-50 rounded-xl border border-slate-100">
-                <p className="text-xs font-bold text-slate-400 uppercase">Passengers</p>
+                <p className="text-xs font-bold text-slate-400 uppercase">Travellers</p>
                 <p className="text-sm font-bold text-slate-900">{successData.passengers.length}</p>
                 <p className="text-xs text-slate-500">Adults {adults}, Children {children}, Infants {infants}</p>
               </div>

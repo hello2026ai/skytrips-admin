@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
-import { Customer, Booking, Address, Passport } from "@/types";
+import { Customer, Booking, Address, Passport, Traveller } from "@/types";
+import TravellerSearch from "@/components/TravellerSearch";
 import locationsData from "@/data/locations.json";
 import countriesData from "@/data/countries.json";
+import { getCountryCallingCode, CountryCode } from "libphonenumber-js";
 
 type Identity = {
   provider: string;
@@ -14,10 +16,43 @@ type Identity = {
   email?: string;
 };
 
+type NewTravellerFormData = {
+  firstName: string;
+  lastName: string;
+  email?: string;
+  phone?: string;
+  passportNumber?: string;
+  passportExpiry?: string;
+  dob?: string;
+  nationality?: string;
+  gender?: string;
+  title?: string;
+};
+
 export default function CustomerDetailsPage() {
   const params = useParams();
   const router = useRouter();
   const customerId = params.id as string;
+
+  // Generate country phone options
+  const countryPhoneOptions = useMemo(() => {
+    return countriesData
+      .map((c) => {
+        try {
+          const callingCode = getCountryCallingCode(c.code as CountryCode);
+          return {
+            iso: c.code,
+            name: c.name,
+            callingCode: `+${callingCode}`,
+            display: `${c.name} (+${callingCode})`,
+          };
+        } catch (error) {
+          return null;
+        }
+      })
+      .filter((c): c is NonNullable<typeof c> => c !== null)
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }, []);
 
   const [customer, setCustomer] = useState<Customer | null>(null);
   const [identities, setIdentities] = useState<Identity[]>([]);
@@ -37,11 +72,49 @@ export default function CustomerDetailsPage() {
   const [editCountry, setEditCountry] = useState("");
   const [editState, setEditState] = useState("");
   const [editCity, setEditCity] = useState("");
+  const [editPhoneCountryCode, setEditPhoneCountryCode] = useState("");
+  const [editPhoneIso, setEditPhoneIso] = useState("US");
+
+  // Editable Fields State
+  const [editFirstName, setEditFirstName] = useState("");
+  const [editLastName, setEditLastName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
+  const [editPhone, setEditPhone] = useState("");
+  const [editStreet, setEditStreet] = useState("");
+  const [editPostalCode, setEditPostalCode] = useState("");
+  const [editGender, setEditGender] = useState("");
+  const [editDob, setEditDob] = useState("");
 
   // Booking History State
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [bookingsLoading, setBookingsLoading] = useState(false);
   const [inviting, setInviting] = useState(false);
+
+  // Linked Travellers State
+  const [linkedTravellers, setLinkedTravellers] = useState<Traveller[]>([]);
+  const [linkedTravellersLoading, setLinkedTravellersLoading] = useState(false);
+
+  // New state for Link/Create Traveller Modal
+  const [showLinkTravellerModal, setShowLinkTravellerModal] = useState(false);
+  const [linkModalTab, setLinkModalTab] = useState<"existing" | "new">("existing");
+  const [newTravellerData, setNewTravellerData] = useState<NewTravellerFormData>({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    passportNumber: "",
+    passportExpiry: "",
+    dob: "",
+    nationality: "",
+    gender: "",
+    title: "",
+  });
+  const [createTravellerLoading, setCreateTravellerLoading] = useState(false);
+  const [createTravellerError, setCreateTravellerError] = useState<string | null>(
+    null,
+  );
+  const [showDisableModal, setShowDisableModal] = useState(false);
+  const [pendingDisable, setPendingDisable] = useState<boolean>(false);
 
   const handleInvite = async () => {
     if (!customer) return;
@@ -65,6 +138,55 @@ export default function CustomerDetailsPage() {
       setInviting(false);
     }
   };
+  const handleConfirmDisable = async () => {
+    try {
+      const { error } = await supabase
+        .from("customers")
+        .update({ isDisabled: pendingDisable ? "true" : "false" })
+        .eq("id", customerId);
+      if (error) throw error;
+      await fetchCustomerDetails();
+      setShowDisableModal(false);
+    } catch (e) {
+      alert(e instanceof Error ? e.message : "Failed to update status");
+    }
+  };
+
+  const handleUpdateCustomer = async () => {
+    try {
+      const updatedAddress = {
+        street: editStreet,
+        city: editCity,
+        state: editState,
+        postalCode: editPostalCode,
+        country: editCountry,
+      };
+
+      const { error } = await supabase
+        .from("customers")
+        .update({
+          firstName: editFirstName,
+          lastName: editLastName,
+          email: editEmail,
+          phone: editPhone,
+          phoneCountryCode: editPhoneCountryCode,
+          dateOfBirth: editDob,
+          gender: editGender,
+          country: editCountry,
+          address: JSON.stringify(updatedAddress),
+        })
+        .eq("id", customerId);
+
+      if (error) throw error;
+
+      await fetchCustomerDetails();
+      setShowEditModal(false);
+      alert("Customer updated successfully!");
+    } catch (err) {
+      console.error("Error updating customer:", err);
+      alert("Failed to update customer details");
+    }
+  };
 
   // Parse JSON fields safely
   const safeJsonParse = <T,>(value: unknown, fallback: T): T => {
@@ -85,17 +207,26 @@ export default function CustomerDetailsPage() {
   const passport = customer
     ? safeJsonParse<Partial<Passport>>(customer.passport, {})
     : {};
+  const creationSourceLabel = (() => {
+    const s = String(customer?.source || "").toLowerCase();
+    const adminSources = ["admin", "admin_import", "import", "imported", "manual"];
+    const isAdminSource = adminSources.includes(s);
+    const isSelfRegistered = Boolean(customer?.auth_user_id) || Boolean(customer?.socialProvider);
+    if (isAdminSource) return "Created by Admin";
+    if (isSelfRegistered) return "Self-Registered";
+    return "Created by Admin";
+  })();
 
   useEffect(() => {
     fetchCustomerDetails();
   }, [customerId]);
 
   useEffect(() => {
-    if (
-      (activeTab === "booking-history" || activeTab === "linked-travellers") &&
-      customerId
-    ) {
+    if (activeTab === "booking-history" && customerId) {
       fetchBookingHistory();
+    }
+    if (activeTab === "linked-travellers" && customerId) {
+      fetchLinkedTravellers();
     }
   }, [activeTab, customerId]);
 
@@ -243,6 +374,112 @@ export default function CustomerDetailsPage() {
     }
   };
 
+  const fetchLinkedTravellers = async () => {
+    setLinkedTravellersLoading(true);
+    try {
+      console.log("Fetching linked travellers for customer:", customerId);
+      const { data, error } = await supabase
+        .from("travellers")
+        .select("*")
+        .eq("customer_id", customerId);
+
+      if (error) throw error;
+
+      const mappedTravellers: Traveller[] = (data || []).map((t: unknown) => {
+        const traveller = t as Record<string, unknown>;
+        return {
+          id: (traveller.id as string) || "",
+          firstName: (traveller.first_name as string) || "",
+          lastName: (traveller.last_name as string) || "",
+          email: (traveller.email as string) || undefined,
+          phone: (traveller.phone as string) || undefined,
+          passportNumber: (traveller.passport_number as string) || undefined,
+          passportExpiry: (traveller.passport_expiry as string) || undefined,
+          dob: (traveller.dob as string) || undefined,
+          nationality: (traveller.nationality as string) || undefined,
+          customerId: (traveller.customer_id as string) || customerId,
+          title: (traveller.title as string) || undefined,
+        };
+      });
+
+      setLinkedTravellers(mappedTravellers);
+    } catch (err: unknown) {
+      console.error("Error fetching linked travellers:", err);
+    } finally {
+      setLinkedTravellersLoading(false);
+    }
+  };
+
+  const handleLinkExistingTraveller = async (traveller: unknown) => {
+    const t = traveller as { id: string };
+    try {
+      const { error } = await supabase
+        .from("travellers")
+        .update({ customer_id: customerId })
+        .eq("id", t.id);
+
+      if (error) throw error;
+
+      await fetchLinkedTravellers();
+      setShowLinkTravellerModal(false);
+    } catch (err) {
+      console.error("Error linking traveller:", err);
+      alert("Failed to link traveller. Please try again.");
+    }
+  };
+
+  const handleCreateNewTraveller = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setCreateTravellerLoading(true);
+    setCreateTravellerError(null);
+
+    try {
+      if (!newTravellerData.firstName || !newTravellerData.lastName) {
+        throw new Error("First Name and Last Name are required.");
+      }
+
+      const payload = {
+        first_name: newTravellerData.firstName,
+        last_name: newTravellerData.lastName,
+        email: newTravellerData.email || null,
+        phone: newTravellerData.phone || null,
+        passport_number: newTravellerData.passportNumber || null,
+        passport_expiry: newTravellerData.passportExpiry || null,
+        dob: newTravellerData.dob || null,
+        nationality: newTravellerData.nationality || null,
+        gender: newTravellerData.gender || null,
+        title: newTravellerData.title || null,
+        customer_id: customerId,
+      };
+
+      const { error } = await supabase.from("travellers").insert([payload]);
+
+      if (error) throw error;
+
+      await fetchLinkedTravellers();
+      setShowLinkTravellerModal(false);
+      setNewTravellerData({
+        firstName: "",
+        lastName: "",
+        email: "",
+        phone: "",
+        passportNumber: "",
+        passportExpiry: "",
+        dob: "",
+        nationality: "",
+        gender: "",
+        title: "",
+      });
+    } catch (err: unknown) {
+      console.error("Error creating traveller:", err);
+      const errorMessage =
+        err instanceof Error ? err.message : "Failed to create traveller.";
+      setCreateTravellerError(errorMessage);
+    } finally {
+      setCreateTravellerLoading(false);
+    }
+  };
+
   const handleInvoiceAction = (invoice: Record<string, string | number>) => {
     setSelectedInvoice(invoice);
     setShowInvoiceModal(true);
@@ -320,73 +557,6 @@ export default function CustomerDetailsPage() {
               <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
                 <h3 className="text-slate-900 text-base font-bold flex items-center gap-2">
                   <span className="material-symbols-outlined text-primary text-[20px]">
-                    home_pin
-                  </span>
-                  Address Details
-                </h3>
-              </div>
-              <div className="p-0">
-                <div className="flex flex-col md:flex-row">
-                  <div className="w-full md:w-1/3 h-40 md:h-auto bg-slate-100 relative overflow-hidden border-b md:border-b-0 md:border-r border-slate-100">
-                    <div
-                      className="absolute inset-0 bg-cover bg-center opacity-80"
-                      style={{
-                        backgroundImage:
-                          "url('https://lh3.googleusercontent.com/aida-public/AB6AXuCKcaqUPfNzFUXIasZ9PxpmvmrnRmOaRp7wcxwTfHbBDGcQMoIa8AQXrOXZWfXd2O_PgoZ6HLTOvIVU4yeKQKaU3k9BwEpR36jIIcGrPzpcQDG8K_f5_ZoAdOTXi5O5xKski2M4r6LpEN04XlUjY6WVqkZzNvPmEsYP-etxNeH1nhKHxcRV5t_LXlqYTuHVFb0flVoeXI1GSORmwpXR3TCot2fP0IYXcqBXCd5j1YIQhQemb-nQBdG3R0l3PaapHtNK7GRs_y_X5-5K')",
-                      }}
-                    ></div>
-                  </div>
-                  <div className="w-full md:w-2/3 p-5">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8">
-                      <div className="sm:col-span-2 flex flex-col gap-1">
-                        <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">
-                          Street Address
-                        </p>
-                        <p className="text-slate-900 font-medium">
-                          {address.street || "N/A"}
-                        </p>
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">
-                          City
-                        </p>
-                        <p className="text-slate-900 font-medium">
-                          {address.city || "N/A"}
-                        </p>
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">
-                          State / Province
-                        </p>
-                        <p className="text-slate-900 font-medium">
-                          {address.state || "N/A"}
-                        </p>
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">
-                          Postal Code
-                        </p>
-                        <p className="text-slate-900 font-medium">
-                          {address.postalCode || "N/A"}
-                        </p>
-                      </div>
-                      <div className="flex flex-col gap-1">
-                        <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">
-                          Country
-                        </p>
-                        <p className="text-slate-900 font-medium">
-                          {customer.country}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
-                <h3 className="text-slate-900 text-base font-bold flex items-center gap-2">
-                  <span className="material-symbols-outlined text-primary text-[20px]">
                     badge
                   </span>
                   Passport Details
@@ -442,6 +612,62 @@ export default function CustomerDetailsPage() {
                 </div>
               </div>
             </div>
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+              <div className="px-5 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+                <h3 className="text-slate-900 text-base font-bold flex items-center gap-2">
+                  <span className="material-symbols-outlined text-primary text-[20px]">
+                    home_pin
+                  </span>
+                  Address Details
+                </h3>
+              </div>
+              <div className="p-0">
+                <div className="w-full p-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-8">
+                    <div className="sm:col-span-2 flex flex-col gap-1">
+                      <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">
+                        Street Address
+                      </p>
+                      <p className="text-slate-900 font-medium">
+                        {address.street || "N/A"}
+                      </p>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">
+                        City
+                      </p>
+                      <p className="text-slate-900 font-medium">
+                        {address.city || "N/A"}
+                      </p>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">
+                        State / Province
+                      </p>
+                      <p className="text-slate-900 font-medium">
+                        {address.state || "N/A"}
+                      </p>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">
+                        Postal Code
+                      </p>
+                      <p className="text-slate-900 font-medium">
+                        {address.postalCode || "N/A"}
+                      </p>
+                    </div>
+                    <div className="flex flex-col gap-1">
+                      <p className="text-slate-500 text-xs font-medium uppercase tracking-wide">
+                        Country
+                      </p>
+                      <p className="text-slate-900 font-medium">
+                        {customer.country}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         );
       case "booking-history":
@@ -460,7 +686,8 @@ export default function CustomerDetailsPage() {
               <div className="flex gap-2 w-full sm:w-auto">
                 <select className="bg-white border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-primary/20">
                   <option>All Status</option>
-                  <option>Confirmed</option>
+                  <option>Hold</option>
+                  <option>Issued</option>
                   <option>Cancelled</option>
                   <option>Pending</option>
                 </select>
@@ -531,13 +758,15 @@ export default function CustomerDetailsPage() {
                           <span
                             className={`text-xs px-2 py-0.5 rounded-full font-bold ${
                               status === "Confirmed"
-                                ? "bg-green-100 text-green-700"
+                                ? "bg-blue-100 text-blue-700"
+                                : status === "Issued"
+                                ? "bg-emerald-100 text-emerald-700"
                                 : status === "Cancelled"
-                                  ? "bg-slate-100 text-slate-600"
-                                  : "bg-amber-100 text-amber-700"
+                                ? "bg-slate-100 text-slate-600"
+                                : "bg-amber-100 text-amber-700"
                             }`}
                           >
-                            {status}
+                            {status === "Confirmed" ? "Hold" : status}
                           </span>
                         </div>
                         <p className="text-xs text-slate-500">
@@ -558,7 +787,12 @@ export default function CustomerDetailsPage() {
                       </span>
                     </div>
                     <div className="flex justify-end gap-2 border-t border-slate-100 pt-3">
-                      <button className="text-xs font-bold text-slate-600 hover:text-primary px-3 py-1.5 rounded hover:bg-slate-50">
+                      <button
+                        className="text-xs font-bold text-slate-600 hover:text-primary px-3 py-1.5 rounded hover:bg-slate-50"
+                        onClick={() =>
+                          router.push(`/dashboard/booking/${booking.id}`)
+                        }
+                      >
                         View Details
                       </button>
                       {status !== "Cancelled" && booking.id && (
@@ -641,133 +875,16 @@ export default function CustomerDetailsPage() {
           </div>
         );
       case "linked-travellers":
-        // Filter and deduplicate travellers
-        interface LinkedTraveller {
-          firstName: string;
-          lastName: string;
-          linkedVia: string;
-          bookingId: string | number;
-          passportNumber?: string;
-          nationality?: string;
-        }
-
-        const uniqueTravellers = bookings.reduce<LinkedTraveller[]>(
-          (acc, booking) => {
-            const b = booking as unknown as Record<string, unknown>;
-            const bookingId = b.id as string | number;
-            const linkRef =
-              (b.PNR as string) ||
-              (b.ticketNumber as string) ||
-              (b.pnr as string) ||
-              "N/A";
-
-            // Helper to add unique traveller
-            const addTraveller = (
-              fName: string,
-              lName: string,
-              ppt?: string,
-              nat?: string,
-            ) => {
-              const cleanFName = fName?.trim() || "";
-              const cleanLName = lName?.trim() || "";
-              const fullName = `${cleanFName} ${cleanLName}`.trim();
-
-              if (!fullName) return;
-
-              // Skip if matches current customer
-              if (customer) {
-                const customerName =
-                  `${customer.firstName} ${customer.lastName}`.trim();
-                if (fullName.toLowerCase() === customerName.toLowerCase())
-                  return;
-              }
-
-              // Check if already in accumulator
-              if (
-                !acc.some(
-                  (t) => `${t.firstName} ${t.lastName}`.trim() === fullName,
-                )
-              ) {
-                acc.push({
-                  firstName: cleanFName,
-                  lastName: cleanLName,
-                  linkedVia: linkRef,
-                  bookingId: bookingId,
-                  passportNumber: ppt,
-                  nationality: nat,
-                });
-              }
-            };
-
-            // 1. Try to parse 'travellers' JSON column
-            if (b.travellers) {
-              try {
-                const travellersData = Array.isArray(b.travellers)
-                  ? b.travellers
-                  : typeof b.travellers === "string"
-                    ? JSON.parse(b.travellers)
-                    : [];
-
-                if (Array.isArray(travellersData)) {
-                  travellersData.forEach((t: any) => {
-                    // Handle various potential structures of traveller object
-                    const fName =
-                      t.firstName || t.first_name || t.given_name || "";
-                    const lName =
-                      t.lastName || t.last_name || t.family_name || "";
-                    const ppt =
-                      t.passportNumber ||
-                      t.passport_number ||
-                      t.passport ||
-                      undefined;
-                    const nat =
-                      t.nationality ||
-                      t.country ||
-                      t.issuing_country ||
-                      undefined;
-                    addTraveller(fName, lName, ppt, nat);
-                  });
-                }
-              } catch (e) {
-                console.error("Error parsing travellers JSON:", e);
-              }
-            }
-
-            // 2. Fallback to legacy flat fields if no travellers found yet (or always check for completeness)
-            // We check flat fields anyway to catch single-traveller bookings that don't use the JSON column
-            const legacyFName =
-              (b.travellerFirstName as string) ||
-              (b.travellerfirstname as string) ||
-              "";
-            const legacyLName =
-              (b.travellerLastName as string) ||
-              (b.travellerlastname as string) ||
-              "";
-            const legacyPpt =
-              (b.passportNumber as string) ||
-              (b.passportnumber as string) ||
-              undefined;
-            const legacyNat = (b.nationality as string) || undefined;
-
-            if (legacyFName || legacyLName) {
-              addTraveller(legacyFName, legacyLName, legacyPpt, legacyNat);
-            }
-
-            return acc;
-          },
-          [],
-        );
-
         return (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            {bookingsLoading ? (
+            {linkedTravellersLoading ? (
               <div className="col-span-full flex flex-col items-center justify-center py-12">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mb-3"></div>
                 <p className="text-slate-500 text-sm">
                   Loading linked travellers...
                 </p>
               </div>
-            ) : uniqueTravellers.length === 0 ? (
+            ) : linkedTravellers.length === 0 ? (
               <div className="col-span-full bg-white border border-slate-200 rounded-xl p-8 text-center">
                 <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-slate-100 mb-3">
                   <span className="material-symbols-outlined text-slate-400">
@@ -778,13 +895,13 @@ export default function CustomerDetailsPage() {
                   No linked travellers found
                 </h3>
                 <p className="text-slate-500 text-sm mt-1">
-                  No other travellers found in this customer&apos;s bookings.
+                  No travellers found in this customer&apos;s profile.
                 </p>
               </div>
             ) : (
-              uniqueTravellers.map((traveller, index) => (
+              linkedTravellers.map((traveller, index) => (
                 <div
-                  key={index}
+                  key={traveller.id || index}
                   className="bg-white border border-slate-200 rounded-xl p-4 flex items-center gap-4 hover:shadow-md transition-shadow"
                 >
                   <div className="size-12 rounded-full bg-slate-100 flex items-center justify-center text-xl font-bold text-slate-500 uppercase">
@@ -809,18 +926,13 @@ export default function CustomerDetailsPage() {
                         </p>
                       )}
                       <p className="text-xs text-slate-500 mt-0.5">
-                        Linked via Booking #{traveller.linkedVia}
+                        Saved Profile
                       </p>
                     </div>
                   </div>
                   <button
-                    onClick={() =>
-                      router.push(
-                        `/dashboard/booking/edit/${traveller.bookingId}`,
-                      )
-                    }
                     className="text-slate-400 hover:text-primary p-2 hover:bg-slate-50 rounded-full transition-colors"
-                    title="View Booking"
+                    title="View Details"
                   >
                     <span className="material-symbols-outlined">
                       visibility
@@ -830,7 +942,10 @@ export default function CustomerDetailsPage() {
               ))
             )}
 
-            <button className="col-span-full border-2 border-dashed border-slate-200 rounded-xl p-4 flex items-center justify-center gap-2 text-slate-500 hover:border-primary hover:text-primary transition-colors hover:bg-slate-50">
+            <button
+              onClick={() => setShowLinkTravellerModal(true)}
+              className="col-span-full border-2 border-dashed border-slate-200 rounded-xl p-4 flex items-center justify-center gap-2 text-slate-500 hover:border-primary hover:text-primary transition-colors hover:bg-slate-50"
+            >
               <span className="material-symbols-outlined">add_circle</span>
               <span className="font-bold text-sm">
                 Link New Traveller (Create Booking)
@@ -889,13 +1004,37 @@ export default function CustomerDetailsPage() {
             <button
               aria-label="Edit"
               onClick={() => {
+                setEditFirstName(customer?.firstName || "");
+                setEditLastName(customer?.lastName || "");
+                setEditEmail(customer?.email || "");
+                setEditPhone(customer?.phone || "");
+                setEditDob(customer?.dateOfBirth || "");
+                setEditGender(customer?.gender || "");
                 setEditCountry(customer?.country || "");
+                
                 const addr = safeJsonParse<Partial<Address>>(
                   customer?.address,
                   {},
                 );
+                setEditStreet(addr.street || "");
                 setEditState(addr.state || "");
                 setEditCity(addr.city || "");
+                setEditPostalCode(addr.postalCode || "");
+                
+                const pCode = customer?.phoneCountryCode || "";
+                setEditPhoneCountryCode(pCode);
+
+                // Find ISO based on code and country
+                let pIso = "US";
+                if (pCode) {
+                   const matches = countryPhoneOptions.filter((c) => c.callingCode === pCode);
+                   if (matches.length > 0) {
+                     const match = matches.find((c) => c.name === customer?.country);
+                     pIso = match ? match.iso : matches[0].iso;
+                   }
+                }
+                setEditPhoneIso(pIso);
+
                 setShowEditModal(true);
               }}
               className="flex items-center justify-center h-9 w-9 rounded-full hover:bg-slate-100 transition-colors text-slate-500"
@@ -1108,14 +1247,14 @@ export default function CustomerDetailsPage() {
                           <span className="material-symbols-outlined text-[16px]">
                             verified
                           </span>
-                          Verified
+                          Verified: {customer.email}
                         </span>
                       ) : (
                         <span className="bg-yellow-100 text-yellow-700 px-2 py-0.5 rounded text-sm font-medium flex items-center gap-1">
                           <span className="material-symbols-outlined text-[16px]">
                             warning
                           </span>
-                          Unverified
+                          Unverified: {customer.email}
                         </span>
                       )}
                     </div>
@@ -1201,7 +1340,10 @@ export default function CustomerDetailsPage() {
                         className="sr-only peer"
                         type="checkbox"
                         checked={customer.isDisabled === "true"}
-                        readOnly
+                        onChange={(e) => {
+                          setPendingDisable(e.target.checked);
+                          setShowDisableModal(true);
+                        }}
                       />
                       <div className="w-9 h-5 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-red-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-red-500"></div>
                       <span className="ml-2 text-xs font-medium text-slate-900">
@@ -1219,7 +1361,9 @@ export default function CustomerDetailsPage() {
                   Admin Note
                 </h4>
                 <p className="text-slate-600 text-sm leading-relaxed mb-3">
-                  System generated account. Details verified by automation.
+                  {creationSourceLabel +
+                    (customer.socialProvider ? ` via ${customer.socialProvider}` : "") +
+                    (customer.created_at ? ` on ${new Date(customer.created_at).toLocaleDateString()}` : "")}
                 </p>
                 <button className="text-primary text-xs font-bold hover:underline">
                   View Ticket History
@@ -1229,16 +1373,7 @@ export default function CustomerDetailsPage() {
           </div>
         </div>
       </div>
-      <div className="border-t border-slate-200 p-6 bg-white shrink-0">
-        <div className="flex flex-col-reverse sm:flex-row justify-between items-center gap-4">
-          <button
-            onClick={() => router.push("/dashboard/customers")}
-            className="w-full sm:w-auto px-5 py-2.5 rounded-lg border border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50 transition-colors"
-          >
-            Close
-          </button>
-        </div>
-      </div>
+      
 
       {/* Edit Customer Modal */}
       {showEditModal && (
@@ -1269,7 +1404,8 @@ export default function CustomerDetailsPage() {
                       </label>
                       <input
                         type="text"
-                        defaultValue={customer?.firstName}
+                        value={editFirstName}
+                        onChange={(e) => setEditFirstName(e.target.value)}
                         className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
                       />
                     </div>
@@ -1279,7 +1415,8 @@ export default function CustomerDetailsPage() {
                       </label>
                       <input
                         type="text"
-                        defaultValue={customer?.lastName}
+                        value={editLastName}
+                        onChange={(e) => setEditLastName(e.target.value)}
                         className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
                       />
                     </div>
@@ -1291,7 +1428,8 @@ export default function CustomerDetailsPage() {
                       </label>
                       <input
                         type="date"
-                        defaultValue={customer?.dateOfBirth || ""}
+                        value={editDob}
+                        onChange={(e) => setEditDob(e.target.value)}
                         className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
                       />
                     </div>
@@ -1300,7 +1438,8 @@ export default function CustomerDetailsPage() {
                         Gender
                       </label>
                       <select
-                        defaultValue={customer?.gender || ""}
+                        value={editGender}
+                        onChange={(e) => setEditGender(e.target.value)}
                         className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-white"
                       >
                         <option value="">Select Gender</option>
@@ -1317,7 +1456,8 @@ export default function CustomerDetailsPage() {
                   </label>
                   <input
                     type="email"
-                    defaultValue={customer?.email}
+                    value={editEmail}
+                    onChange={(e) => setEditEmail(e.target.value)}
                     className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
                   />
                 </div>
@@ -1326,15 +1466,30 @@ export default function CustomerDetailsPage() {
                     Phone
                   </label>
                   <div className="flex gap-2">
-                    <input
-                      type="text"
-                      defaultValue={customer?.phoneCountryCode}
-                      placeholder="+1"
-                      className="w-20 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
-                    />
+                    <select
+                      value={editPhoneIso}
+                      onChange={(e) => {
+                        const iso = e.target.value;
+                        setEditPhoneIso(iso);
+                        const option = countryPhoneOptions.find(
+                          (c) => c.iso === iso
+                        );
+                        if (option) {
+                          setEditPhoneCountryCode(option.callingCode);
+                        }
+                      }}
+                      className="w-32 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-white"
+                    >
+                      {countryPhoneOptions.map((option) => (
+                        <option key={option.iso} value={option.iso}>
+                          {option.display}
+                        </option>
+                      ))}
+                    </select>
                     <input
                       type="tel"
-                      defaultValue={customer?.phone || ""}
+                      value={editPhone}
+                      onChange={(e) => setEditPhone(e.target.value)}
                       className="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
                     />
                   </div>
@@ -1353,7 +1508,8 @@ export default function CustomerDetailsPage() {
                       </label>
                       <input
                         type="text"
-                        defaultValue={address.street}
+                        value={editStreet}
+                        onChange={(e) => setEditStreet(e.target.value)}
                         className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
                       />
                     </div>
@@ -1364,9 +1520,25 @@ export default function CustomerDetailsPage() {
                       <select
                         value={editCountry}
                         onChange={(e) => {
-                          setEditCountry(e.target.value);
+                          const val = e.target.value;
+                          setEditCountry(val);
                           setEditState("");
                           setEditCity("");
+                          
+                          const selected = countriesData.find(
+                            (c) => c.name === val,
+                          );
+                          if (selected?.code) {
+                            try {
+                              const cc = getCountryCallingCode(
+                                selected.code as CountryCode,
+                              );
+                              setEditPhoneCountryCode("+" + cc);
+                              setEditPhoneIso(selected.code);
+                            } catch (err) {
+                              console.error(err);
+                            }
+                          }
                         }}
                         className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-white"
                       >
@@ -1428,7 +1600,8 @@ export default function CustomerDetailsPage() {
                       </label>
                       <input
                         type="text"
-                        defaultValue={address.postalCode}
+                        value={editPostalCode}
+                        onChange={(e) => setEditPostalCode(e.target.value)}
                         className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
                       />
                     </div>
@@ -1443,7 +1616,10 @@ export default function CustomerDetailsPage() {
               >
                 Cancel
               </button>
-              <button className="px-4 py-2 text-sm font-bold text-white bg-primary hover:bg-blue-600 rounded-lg shadow-sm transition-colors">
+              <button
+                onClick={handleUpdateCustomer}
+                className="px-4 py-2 text-sm font-bold text-white bg-primary hover:bg-blue-600 rounded-lg shadow-sm transition-colors"
+              >
                 Save Changes
               </button>
             </div>
@@ -1555,6 +1731,263 @@ export default function CustomerDetailsPage() {
                   Send Reminder
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Link/Create Traveller Modal */}
+      {showLinkTravellerModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-xl w-full max-w-2xl overflow-hidden max-h-[90vh] flex flex-col animate-in zoom-in-95 duration-200">
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <h3 className="font-bold text-lg text-slate-900 flex items-center gap-2">
+                <span className="material-symbols-outlined text-primary">
+                  person_add
+                </span>
+                Link Traveller
+              </h3>
+              <button
+                onClick={() => setShowLinkTravellerModal(false)}
+                className="text-slate-400 hover:text-slate-600 transition-colors rounded-full hover:bg-slate-200 p-1"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex border-b border-slate-100">
+              <button
+                className={`flex-1 py-3 text-sm font-bold transition-colors border-b-2 ${
+                  linkModalTab === "existing"
+                    ? "text-primary border-primary bg-blue-50/50"
+                    : "text-slate-500 border-transparent hover:bg-slate-50"
+                }`}
+                onClick={() => setLinkModalTab("existing")}
+              >
+                Select Existing
+              </button>
+              <button
+                className={`flex-1 py-3 text-sm font-bold transition-colors border-b-2 ${
+                  linkModalTab === "new"
+                    ? "text-primary border-primary bg-blue-50/50"
+                    : "text-slate-500 border-transparent hover:bg-slate-50"
+                }`}
+                onClick={() => setLinkModalTab("new")}
+              >
+                Create New
+              </button>
+            </div>
+
+            {/* Content */}
+            <div className="p-6 overflow-y-auto flex-1">
+              {linkModalTab === "existing" ? (
+                <div className="space-y-6">
+                  <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 flex items-start gap-3">
+                    <span className="material-symbols-outlined text-blue-600 mt-0.5">
+                      info
+                    </span>
+                    <div className="text-sm text-blue-900">
+                      <p className="font-bold">Search Existing Travellers</p>
+                      <p className="mt-1">
+                        Search for a traveller profile that already exists in the
+                        system to link them to this customer account.
+                      </p>
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-slate-500 uppercase mb-2">
+                      Search Traveller
+                    </label>
+                    <TravellerSearch
+                      onSelect={handleLinkExistingTraveller}
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+              ) : (
+                <form onSubmit={handleCreateNewTraveller} className="space-y-4">
+                  {createTravellerError && (
+                    <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
+                      {createTravellerError}
+                    </div>
+                  )}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 uppercase mb-1">
+                        First Name <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={newTravellerData.firstName}
+                        onChange={(e) =>
+                          setNewTravellerData({
+                            ...newTravellerData,
+                            firstName: e.target.value,
+                          })
+                        }
+                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                        placeholder="e.g. John"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 uppercase mb-1">
+                        Last Name <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={newTravellerData.lastName}
+                        onChange={(e) =>
+                          setNewTravellerData({
+                            ...newTravellerData,
+                            lastName: e.target.value,
+                          })
+                        }
+                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                        placeholder="e.g. Doe"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 uppercase mb-1">
+                        Passport Number
+                      </label>
+                      <input
+                        type="text"
+                        value={newTravellerData.passportNumber || ""}
+                        onChange={(e) =>
+                          setNewTravellerData({
+                            ...newTravellerData,
+                            passportNumber: e.target.value,
+                          })
+                        }
+                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                        placeholder="e.g. A12345678"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 uppercase mb-1">
+                        Passport Expiry
+                      </label>
+                      <input
+                        type="date"
+                        value={newTravellerData.passportExpiry || ""}
+                        onChange={(e) =>
+                          setNewTravellerData({
+                            ...newTravellerData,
+                            passportExpiry: e.target.value,
+                          })
+                        }
+                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 uppercase mb-1">
+                        Date of Birth
+                      </label>
+                      <input
+                        type="date"
+                        value={newTravellerData.dob || ""}
+                        onChange={(e) =>
+                          setNewTravellerData({
+                            ...newTravellerData,
+                            dob: e.target.value,
+                          })
+                        }
+                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-bold text-slate-500 uppercase mb-1">
+                        Nationality
+                      </label>
+                      <select
+                        value={newTravellerData.nationality || ""}
+                        onChange={(e) =>
+                          setNewTravellerData({
+                            ...newTravellerData,
+                            nationality: e.target.value,
+                          })
+                        }
+                        className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-primary/20 focus:border-primary outline-none bg-white"
+                      >
+                        <option value="">Select Nationality</option>
+                        {countriesData.map((country) => (
+                          <option key={country.code} value={country.name}>
+                            {country.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-slate-100 flex justify-end gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setShowLinkTravellerModal(false)}
+                      className="px-4 py-2 text-sm font-bold text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={createTravellerLoading}
+                      className="px-4 py-2 text-sm font-bold text-white bg-primary rounded-lg hover:bg-primary/90 shadow-sm flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {createTravellerLoading ? (
+                        <>
+                          <span className="size-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+                          Creating...
+                        </>
+                      ) : (
+                        <>
+                          <span className="material-symbols-outlined text-[18px]">
+                            check
+                          </span>
+                          Create & Link
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+      {showDisableModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+              <h3 className="text-base font-bold text-slate-900">Confirm Account Status</h3>
+              <button
+                onClick={() => setShowDisableModal(false)}
+                className="text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+            <div className="p-6">
+              <p className="text-sm text-slate-600">
+                {pendingDisable ? "Disable this customer account?" : "Enable this customer account?"}
+              </p>
+            </div>
+            <div className="px-6 py-4 border-t border-slate-100 bg-slate-50 flex justify-end gap-3">
+              <button
+                onClick={() => setShowDisableModal(false)}
+                className="px-4 py-2 text-sm font-bold text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDisable}
+                className="px-6 py-2 text-sm font-bold text-white bg-primary rounded-lg hover:bg-blue-600 shadow-md shadow-blue-500/20 transition-all"
+              >
+                Confirm
+              </button>
             </div>
           </div>
         </div>
