@@ -30,17 +30,33 @@ CREATE TABLE IF NOT EXISTS flight_inquiries (
 ALTER TABLE flight_inquiries ENABLE ROW LEVEL SECURITY;
 
 -- Policies
-CREATE POLICY "Enable read access for all authenticated users" ON flight_inquiries
-    FOR SELECT USING (auth.role() = 'authenticated');
+DO $$ BEGIN
+    CREATE POLICY "Enable read access for all authenticated users" ON flight_inquiries
+        FOR SELECT USING (auth.role() = 'authenticated');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE POLICY "Enable insert for authenticated users" ON flight_inquiries
-    FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+DO $$ BEGIN
+    CREATE POLICY "Enable insert for authenticated users" ON flight_inquiries
+        FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE POLICY "Enable update for authenticated users" ON flight_inquiries
-    FOR UPDATE USING (auth.role() = 'authenticated');
+DO $$ BEGIN
+    CREATE POLICY "Enable update for authenticated users" ON flight_inquiries
+        FOR UPDATE USING (auth.role() = 'authenticated');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
-CREATE POLICY "Enable delete for authenticated users" ON flight_inquiries
-    FOR DELETE USING (auth.role() = 'authenticated');
+DO $$ BEGIN
+    CREATE POLICY "Enable delete for authenticated users" ON flight_inquiries
+        FOR DELETE USING (auth.role() = 'authenticated');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- Audit Log Table for Inquiries
 CREATE TABLE IF NOT EXISTS flight_inquiry_audit_logs (
@@ -55,8 +71,12 @@ CREATE TABLE IF NOT EXISTS flight_inquiry_audit_logs (
 
 ALTER TABLE flight_inquiry_audit_logs ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Enable read for authenticated users" ON flight_inquiry_audit_logs
-    FOR SELECT USING (auth.role() = 'authenticated');
+DO $$ BEGIN
+    CREATE POLICY "Enable read for authenticated users" ON flight_inquiry_audit_logs
+        FOR SELECT USING (auth.role() = 'authenticated');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
 
 -- Trigger for updated_at and audit logging
 CREATE OR REPLACE FUNCTION handle_flight_inquiry_change()
@@ -80,7 +100,7 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER flight_inquiry_change_trigger
+CREATE OR REPLACE TRIGGER flight_inquiry_change_trigger
 AFTER INSERT OR UPDATE OR DELETE ON flight_inquiries
 FOR EACH ROW EXECUTE FUNCTION handle_flight_inquiry_change();
 
@@ -92,3 +112,46 @@ VALUES
 ('#IF-9033', 'Corporate Jet', 'DXB', 'SYD', '2023-12-01', '2023-12-08', 'HIGH', 'PROCESSING'),
 ('#IF-9022', 'Sarah Jenkins', 'DXB', 'SIN', '2023-11-05', '2023-11-12', 'LOW', 'QUOTE_SENT')
 ON CONFLICT (inquiry_number) DO NOTHING;
+
+-- Add PNR related fields to flight_inquiries
+ALTER TABLE flight_inquiries 
+ADD COLUMN IF NOT EXISTS pnr_text TEXT,
+ADD COLUMN IF NOT EXISTS pnr_parsed_data JSONB,
+ADD COLUMN IF NOT EXISTS preview_url TEXT;
+
+-- Create index for faster PNR lookups
+CREATE INDEX IF NOT EXISTS idx_flight_inquiries_pnr_number 
+ON flight_inquiries ((pnr_parsed_data->>'pnr_number'));
+
+-- Create storage bucket for PNR previews if it doesn't exist
+INSERT INTO storage.buckets (id, name, public) 
+VALUES ('pnr-previews', 'pnr-previews', true)
+ON CONFLICT (id) DO NOTHING;
+
+-- Policy to allow public read access to pnr-previews
+DO $$ BEGIN
+    CREATE POLICY "Public Access" ON storage.objects
+    FOR SELECT USING (bucket_id = 'pnr-previews');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+-- Policy to allow authenticated upload
+DO $$ BEGIN
+    CREATE POLICY "Authenticated Upload" ON storage.objects
+    FOR INSERT WITH CHECK (
+      bucket_id = 'pnr-previews' 
+      AND auth.role() = 'authenticated'
+    );
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;
+
+-- Fix RLS policy for flight_inquiry_audit_logs
+-- Allow authenticated users to insert audit logs (needed for the trigger to work)
+DO $$ BEGIN
+    CREATE POLICY "Enable insert for authenticated users" ON flight_inquiry_audit_logs
+        FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+EXCEPTION
+    WHEN duplicate_object THEN null;
+END $$;

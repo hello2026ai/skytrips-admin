@@ -1,21 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
+import { updateSession } from "@/lib/supabase-middleware";
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const hostname = req.headers.get("host") || "";
-  const { pathname } = req.nextUrl;
   
-  // Define Allowed Domains
+  // 1. Refresh Supabase Session
+  // This must be done first to ensure auth tokens are valid for subsequent checks or API calls
+  const response = await updateSession(req);
+
+  // 2. Define Allowed Domains
   const ADMIN_DOMAIN = "admin.skytripsword.com";
   const ALLOWED_DOMAINS = [ADMIN_DOMAIN, "localhost", "127.0.0.1"];
 
   // Check if current host is allowed (includes Vercel preview URLs)
   const isAllowed = ALLOWED_DOMAINS.some(d => hostname.includes(d)) || hostname.endsWith(".vercel.app");
 
-  // Create Response
-  const response = NextResponse.next();
-
   // ---------------------------------------------------------
-  // 1. Security Headers (Enhanced Security Measures)
+  // 3. Security Headers (Enhanced Security Measures)
   // ---------------------------------------------------------
   response.headers.set("X-Frame-Options", "DENY");
   response.headers.set("X-Content-Type-Options", "nosniff");
@@ -24,24 +25,13 @@ export function middleware(req: NextRequest) {
   response.headers.set("Strict-Transport-Security", "max-age=63072000; includeSubDomains; preload");
 
   // ---------------------------------------------------------
-  // 2. Subdomain Isolation Logic
+  // 4. Subdomain Isolation Logic
   // ---------------------------------------------------------
-  // If the request reaches this app via an incorrect domain (e.g., skytrips.com.np pointing here),
-  // we want to prevent it from serving admin content to the public domain.
   
   if (!isAllowed) {
     // Optional: Log the potential misconfiguration
     console.warn(`[Middleware] Blocked request from unauthorized host: ${hostname}`);
-    
-    // Return 404 or Redirect to correct admin domain
-    // For strict isolation, we block it or redirect to the primary admin domain
-    // const url = req.nextUrl.clone();
-    // url.host = ADMIN_DOMAIN;
-    // url.port = ""; // Ensure standard port
-    // return NextResponse.redirect(url);
-    
-    // For now, we just warn and proceed, or we could strict block:
-    // return new NextResponse("Unauthorized Host", { status: 403 });
+    // For now, we just warn and proceed
   }
 
   return response;

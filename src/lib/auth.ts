@@ -79,3 +79,18 @@ export function getTokenFromCookieHeader(cookieHeader?: string) {
   }
   return undefined;
 }
+
+export function getTokenFromRequest(request: Request) {
+  // 1. Try Cookie
+  const cookieHeader = request.headers.get("cookie") || undefined;
+  const cookieToken = getTokenFromCookieHeader(cookieHeader);
+  if (cookieToken) return cookieToken;
+
+  // 2. Try Authorization Header
+  const authHeader = request.headers.get("authorization");
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    return authHeader.slice(7);
+  }
+
+  return undefined;
+}

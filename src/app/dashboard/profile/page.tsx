@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
+import ChangePasswordModal from "@/components/dashboard/profile/ChangePasswordModal";
 
 interface UserProfile {
   firstName: string;
@@ -16,6 +17,7 @@ interface UserProfile {
 
 export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
+  const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [memberSince, setMemberSince] = useState<string>("");
   const [totalBookings, setTotalBookings] = useState<number>(0);
   const [profile, setProfile] = useState<UserProfile>({
@@ -158,14 +160,22 @@ export default function ProfilePage() {
         </div>
 
         <div className="flex gap-3">
-          <button className="px-4 py-2 text-sm font-bold text-primary border border-primary/20 rounded-lg hover:bg-primary/10 transition-colors">
-            Edit
+          <button 
+            onClick={() => setIsPasswordModalOpen(true)}
+            className="px-4 py-2 text-sm font-bold text-primary border border-primary/20 rounded-lg hover:bg-primary/10 transition-colors"
+          >
+            Change Password
           </button>
           <button className="px-4 py-2 text-sm font-bold text-primary-foreground bg-primary rounded-lg hover:bg-primary/90 transition-colors shadow-sm shadow-blue-500/20">
             Change Avatar
           </button>
         </div>
       </div>
+
+      <ChangePasswordModal 
+        isOpen={isPasswordModalOpen} 
+        onClose={() => setIsPasswordModalOpen(false)} 
+      />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Column - Forms */}

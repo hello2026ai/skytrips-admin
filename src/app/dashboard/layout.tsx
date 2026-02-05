@@ -5,6 +5,9 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { UserWelcome } from "@/components/dashboard/UserWelcome";
+import { CompanyLogo } from "@/components/dashboard/CompanyLogo";
+import { ToastProvider } from "@/components/ui/ToastContext";
 
 export default function DashboardLayout({
   children,
@@ -141,13 +144,9 @@ export default function DashboardLayout({
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
               />
             </div>
-            <h1
-              className={`text-primary text-xl font-black leading-normal tracking-tight ${
-                sidebarCollapsed ? "sr-only" : ""
-              }`}
-            >
-              admin panel
-            </h1>
+            <div className={sidebarCollapsed ? "sr-only" : ""}>
+               <CompanyLogo />
+            </div>
             <button
               type="button"
               onClick={toggleSidebar}
@@ -598,6 +597,34 @@ export default function DashboardLayout({
             </p>
           </Link>
 
+          {/* Roles & Permissions */}
+          <Link
+            href="/dashboard/roles"
+            prefetch={false}
+            className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-3"} px-3 py-3 rounded-lg transition-all ${
+              pathname.startsWith("/dashboard/roles")
+                ? "bg-primary text-primary-foreground shadow-md shadow-blue-200 dark:shadow-none"
+                : "text-sidebar-foreground hover:bg-muted hover:text-foreground group"
+            }`}
+            aria-label="Roles & Permissions"
+            title="Roles & Permissions"
+          >
+            <span
+              className={`material-symbols-outlined ${
+                pathname.startsWith("/dashboard/roles")
+                  ? "active-icon"
+                  : "group-hover:text-primary transition-colors"
+              }`}
+            >
+              admin_panel_settings
+            </span>
+            <p
+              className={`text-sm font-medium leading-normal ${sidebarCollapsed ? "sr-only" : ""}`}
+            >
+              Roles & Permissions
+            </p>
+          </Link>
+
           {/* Services */}
           <Link
             href="/dashboard/services"
@@ -717,9 +744,10 @@ export default function DashboardLayout({
               <h2 className="text-foreground text-lg font-bold leading-tight">
                 Dashboard Overview
               </h2>
-              <p className="text-xs text-muted-foreground font-medium">
-                Welcome back, Admin
-              </p>
+              <UserWelcome 
+                email={userEmail} 
+                className="text-xs text-muted-foreground font-medium" 
+              />
             </div>
           </div>
 
@@ -745,7 +773,7 @@ export default function DashboardLayout({
 
         {/* Scrollable Content */}
         <main className="flex-1 overflow-y-auto p-4 md:p-8 scroll-smooth bg-background transition-colors duration-300">
-          {children}
+          <ToastProvider>{children}</ToastProvider>
         </main>
       </div>
     </div>

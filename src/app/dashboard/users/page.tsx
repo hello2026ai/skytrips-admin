@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import { InviteUserModal } from "@/components/InviteUserModal";
+import { RolesButton } from "@/components/dashboard/users/RolesButton";
 import { supabase } from "@/lib/supabase";
 import { EmailEventType } from "@/types/email-event";
 
@@ -245,15 +246,18 @@ export default function UsersPage() {
             Manage internal access levels and staff credentials.
           </p>
         </div>
-        <button
-          onClick={() => setIsInviteModalOpen(true)}
-          className="inline-flex items-center gap-2 rounded-lg border border-teal-700 px-4 py-2.5 text-sm font-bold text-teal-700 bg-white hover:bg-teal-50 transition-colors shadow-sm"
-        >
-          <span className="material-symbols-outlined text-[20px]">
-            person_add
-          </span>
-          Invite New User
-        </button>
+        <div className="flex items-center gap-3">
+          <RolesButton />
+          <button
+            onClick={() => setIsInviteModalOpen(true)}
+            className="inline-flex items-center gap-2 rounded-lg border border-teal-700 px-4 py-2.5 text-sm font-bold text-teal-700 bg-white hover:bg-teal-50 transition-colors shadow-sm"
+          >
+            <span className="material-symbols-outlined text-[20px]">
+              person_add
+            </span>
+            Invite New User
+          </button>
+        </div>
       </div>
 
       {/* Table Card */}
