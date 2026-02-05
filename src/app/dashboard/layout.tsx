@@ -401,6 +401,33 @@ export default function DashboardLayout({
             </p>
           </Link>
 
+          {/* Routes */}
+          <Link
+            href="/dashboard/routes"
+            className={`flex items-center ${sidebarCollapsed ? "justify-center" : "gap-3"} px-3 py-3 rounded-lg transition-all ${
+              pathname.startsWith("/dashboard/routes")
+                ? "bg-primary text-primary-foreground shadow-md shadow-blue-200 dark:shadow-none"
+                : "text-sidebar-foreground hover:bg-muted hover:text-foreground group"
+            }`}
+            aria-label="Routes"
+            title="Routes"
+          >
+            <span
+              className={`material-symbols-outlined ${
+                pathname.startsWith("/dashboard/routes")
+                  ? "active-icon"
+                  : "group-hover:text-primary transition-colors"
+              }`}
+            >
+              alt_route
+            </span>
+            <p
+              className={`text-sm font-medium leading-normal ${sidebarCollapsed ? "sr-only" : ""}`}
+            >
+              Routes
+            </p>
+          </Link>
+
           {/* Airlines Management */}
           <Link
             href="/dashboard/airlines"
