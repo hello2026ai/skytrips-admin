@@ -41,4 +41,11 @@ export const DEFAULT_EMAIL_TEMPLATES: EmailTemplate[] = [
     content:
       "Dear {NAME},\n\nYour refund request for booking #{PNR} is now in progress.\n\nWe are working with the airline to process your refund. This typically takes 7-14 business days depending on the airline's policies.\n\nWe will update you as soon as the refund has been approved.\n\nBest regards,\nSkyTrips Team",
   },
+  {
+    id: "refund_approved",
+    name: "Refund Approved",
+    subject: "Refund Approved - Booking #{PNR}",
+    content:
+      "Dear {NAME},\n\nGood news! Your refund for booking #{PNR} has been approved.\n\nTotal Refund Amount: {REFUND_AMOUNT}\n\nThe amount has been initiated to your original payment method and should appear in your account within 5-10 business days, depending on your bank's processing time.\n\nIf you have any questions, please don't hesitate to contact our support team.\n\nBest regards,\nSkyTrips Team",
+  },
 ];

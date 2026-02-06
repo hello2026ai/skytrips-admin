@@ -60,6 +60,24 @@ export async function GET(
       longitude: row.longitude_deg || null,
       timezone: row.timezone || null,
       active: row.published_status ?? false,
+      featured_image_url: row.featured_image_url,
+      description: row.description,
+      fast_facts: row.fast_facts,
+      top_airlines: row.top_airlines,
+      gallery_urls: row.gallery_urls,
+      faqs: row.faqs,
+      map_embed_code: row.map_embed_code,
+      seo_title: row.seo_title || undefined,
+      meta_description: row.meta_description || undefined,
+      seo_image_url: row.seo_image_url || undefined,
+      slug: row.slug || undefined,
+      canonical_url: row.canonical_url || undefined,
+      schema_markup: row.schema_markup || undefined,
+      no_index: row.no_index ?? undefined,
+      no_follow: row.no_follow ?? undefined,
+      no_archive: row.no_archive ?? undefined,
+      no_image_index: row.no_image_index ?? undefined,
+      no_snippet: row.no_snippet ?? undefined,
     };
 
     return NextResponse.json({ data: airport });
@@ -119,7 +137,12 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { iata_code, name, city, country, latitude, longitude, timezone, active } = body as UpdateAirportDTO & { active?: boolean };
+    const { 
+      iata_code, name, city, country, latitude, longitude, timezone, active,
+      featured_image_url, description, fast_facts, top_airlines, gallery_urls, faqs, map_embed_code,
+      seo_title, meta_description, seo_image_url, slug, canonical_url, schema_markup,
+      no_index, no_follow, no_archive, no_image_index, no_snippet
+    } = body as UpdateAirportDTO & { active?: boolean };
 
     // Build update object
     const updateData: Partial<AirportDBRow> = {};
@@ -131,6 +154,24 @@ export async function PUT(
     if (longitude !== undefined) updateData.longitude_deg = longitude;
     if (timezone) updateData.timezone = timezone;
     if (active !== undefined) updateData.published_status = active;
+    if (featured_image_url !== undefined) updateData.featured_image_url = featured_image_url;
+    if (description !== undefined) updateData.description = description;
+    if (fast_facts !== undefined) updateData.fast_facts = fast_facts;
+    if (top_airlines !== undefined) updateData.top_airlines = top_airlines;
+    if (gallery_urls !== undefined) updateData.gallery_urls = gallery_urls;
+    if (faqs !== undefined) updateData.faqs = faqs;
+    if (map_embed_code !== undefined) updateData.map_embed_code = map_embed_code;
+    if (seo_title !== undefined) updateData.seo_title = seo_title;
+    if (meta_description !== undefined) updateData.meta_description = meta_description;
+    if (seo_image_url !== undefined) updateData.seo_image_url = seo_image_url;
+    if (slug !== undefined) updateData.slug = slug;
+    if (canonical_url !== undefined) updateData.canonical_url = canonical_url;
+    if (schema_markup !== undefined) updateData.schema_markup = schema_markup;
+    if (no_index !== undefined) updateData.no_index = no_index;
+    if (no_follow !== undefined) updateData.no_follow = no_follow;
+    if (no_archive !== undefined) updateData.no_archive = no_archive;
+    if (no_image_index !== undefined) updateData.no_image_index = no_image_index;
+    if (no_snippet !== undefined) updateData.no_snippet = no_snippet;
 
     if (Object.keys(updateData).length === 0) {
       return NextResponse.json(
@@ -170,6 +211,24 @@ export async function PUT(
       longitude: data.longitude_deg || null,
       timezone: data.timezone || null,
       active: data.published_status ?? false,
+      featured_image_url: data.featured_image_url,
+      description: data.description,
+      fast_facts: data.fast_facts,
+      top_airlines: data.top_airlines,
+      gallery_urls: data.gallery_urls,
+      faqs: data.faqs,
+      map_embed_code: data.map_embed_code,
+      seo_title: data.seo_title || undefined,
+      meta_description: data.meta_description || undefined,
+      seo_image_url: data.seo_image_url || undefined,
+      slug: data.slug || undefined,
+      canonical_url: data.canonical_url || undefined,
+      schema_markup: data.schema_markup || undefined,
+      no_index: data.no_index ?? undefined,
+      no_follow: data.no_follow ?? undefined,
+      no_archive: data.no_archive ?? undefined,
+      no_image_index: data.no_image_index ?? undefined,
+      no_snippet: data.no_snippet ?? undefined,
     };
 
     return NextResponse.json({ data: updatedAirport });

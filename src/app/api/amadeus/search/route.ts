@@ -1,22 +1,31 @@
 import { NextResponse } from "next/server";
+import { getAmadeus } from "@/lib/amadeusClient";
 
 export const runtime = "nodejs";
 
-function getEnv(key: string, fallback = "") {
-  return process.env[key] || fallback;
-}
-
 function parseIata(input?: string): string {
   if (!input) return "";
-  const match = input.match(/\(([^)]+)\)\s*$/);
-  if (match) return match[1].trim();
-  // Fallback: if user typed code directly
-  if (/^[A-Z]{3}$/.test(input.trim())) return input.trim();
-  // Last token may be code
-  const tokens = input.trim().split(/\s+/);
-  const last = tokens[tokens.length - 1];
-  if (/^[A-Z]{3}$/.test(last)) return last;
-  return input.trim();
+  
+  // Decode and trim just in case
+  let clean = input;
+  try {
+    clean = decodeURIComponent(input).trim();
+  } catch {
+    clean = input.trim();
+  }
+
+  // 1. Look for 3 uppercase letters inside parentheses, e.g. "Name (KTM)"
+  const match = clean.match(/\(([A-Z]{3})\)/);
+  if (match) return match[1];
+
+  // 2. Check if the string itself is a 3-letter code (e.g. "KTM")
+  if (/^[A-Z]{3}$/.test(clean)) return clean;
+
+  // 3. Last resort: simple regex for ends with (XXX)
+  const endMatch = clean.match(/\(([^)]+)\)\s*$/);
+  if (endMatch) return endMatch[1].trim();
+
+  return clean;
 }
 
 export async function GET(req: Request) {
@@ -29,7 +38,7 @@ export async function GET(req: Request) {
     const adults = Number(searchParams.get("adults") || "1");
     const children = Number(searchParams.get("children") || "0");
     const infants = Number(searchParams.get("infants") || "0");
-    const travelClass = (searchParams.get("class") || "Economy").toUpperCase().replace(" ", "_");
+    const travelClass = (searchParams.get("class") || "Economy").toUpperCase().replace(/\s+/g, "_");
     const tripType = searchParams.get("type") || "Round Trip";
     const nonStop = searchParams.get("nonStop") === "true" ? "true" : undefined;
 
@@ -41,70 +50,43 @@ export async function GET(req: Request) {
 
     const departureDateOnly = departDate.split("T")[0];
     const returnDateOnly = returnDate ? returnDate.split("T")[0] : "";
-    const tripTypeApi = tripType === "One Way" ? "ONE_WAY" : "ROUND_TRIP";
 
-    const originDestinations: Array<{
-      id: string;
+    const amadeus = getAmadeus();
+    
+    // Construct parameters for GET request (amadeus.shopping.flightOffersSearch.get)
+    const params: {
       originLocationCode: string;
       destinationLocationCode: string;
-      departureDateTimeRange: { date: string };
-    }> = [
-      {
-        id: "1",
-        originLocationCode: origin,
-        destinationLocationCode: destination,
-        departureDateTimeRange: { date: departureDateOnly },
-      },
-    ];
-
-    if (tripType !== "One Way" && returnDateOnly) {
-      originDestinations.push({
-        id: "2",
-        originLocationCode: destination,
-        destinationLocationCode: origin,
-        departureDateTimeRange: { date: returnDateOnly },
-      });
-    }
-
-    const baseUrl = getEnv("NEXT_PUBLIC_API_BASE_URL", "https://dev-api.skytrips.com.au/");
-    const path = "flight-search/family-tree/price-group";
-    const url = new URL(path, baseUrl).toString();
-    const clientRef = getEnv("NEXT_PUBLIC_SKYTRIPS_CLIENT_REF", "1223");
-
-    const reqBody = {
-      originDestinations,
-      adults,
-      children,
-      infants,
-      travelClass,
-      currencyCode: "AUD",
-      tripType: tripTypeApi,
-      manualSort: "PRICE_LOW_TO_HIGH",
-      groupByPrice: true,
-      origin,
-      destination,
+      departureDate: string;
+      adults: number;
+      children?: number;
+      infants?: number;
+      travelClass?: string;
+      currencyCode: string;
+      nonStop?: boolean;
+      max: number;
+      returnDate?: string;
+    } = {
+      originLocationCode: origin,
+      destinationLocationCode: destination,
       departureDate: departureDateOnly,
-      ...(returnDateOnly ? { returnDate: returnDateOnly } : {}),
+      adults,
+      children: children > 0 ? children : undefined,
+      infants: infants > 0 ? infants : undefined,
+      travelClass: travelClass === "ANY" ? undefined : travelClass,
+      currencyCode: "AUD",
       nonStop: nonStop === "true",
+      max: 50 // Limit results for performance
     };
 
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "ama-client-ref": clientRef,
-      },
-      body: JSON.stringify(reqBody),
-    });
-
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      return NextResponse.json({ ok: false, error: "skytrips_error", details: text }, { status: res.status });
+    if (returnDateOnly && tripType !== "One Way") {
+      params.returnDate = returnDateOnly;
     }
 
-    const json = await res.json();
-    return NextResponse.json({ ok: true, raw: json });
+    const response = await amadeus.shopping.flightOffersSearch.get(params);
+    return NextResponse.json({ ok: true, raw: response.result });
   } catch (err: unknown) {
+    console.error("Amadeus Search Error:", err);
     const message = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json({ ok: false, error: "server_error", message }, { status: 500 });
   }
@@ -154,11 +136,6 @@ export async function POST(req: Request) {
     const departureDate = (firstSegment.date || "").split("T")[0];
     const returnDate = (lastSegment.date || "").split("T")[0];
 
-    const baseUrl = getEnv("NEXT_PUBLIC_SKYTRIPS_API_BASE", "https://dev-api.skytrips.com.au/");
-    const path = "flight-search/family-tree/price-group";
-    const url = new URL(path, baseUrl).toString();
-    const clientRef = getEnv("NEXT_PUBLIC_SKYTRIPS_CLIENT_REF", "1223");
-
     const reqBody = {
       originDestinations,
       adults,
@@ -175,22 +152,11 @@ export async function POST(req: Request) {
       returnDate,
     };
 
-    const res = await fetch(url, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "ama-client-ref": clientRef,
-      },
-      body: JSON.stringify(reqBody),
+    const amadeus = getAmadeus();
+    const response = await amadeus.client.post("/v2/shopping/flight-offers", {
+      data: reqBody,
     });
-
-    if (!res.ok) {
-      const text = await res.text().catch(() => "");
-      return NextResponse.json({ ok: false, error: "skytrips_error", details: text }, { status: res.status });
-    }
-
-    const json = await res.json();
-    return NextResponse.json({ ok: true, raw: json });
+    return NextResponse.json({ ok: true, raw: response.result });
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Unknown error";
     return NextResponse.json({ ok: false, error: "server_error", message }, { status: 500 });

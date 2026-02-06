@@ -1,6 +1,7 @@
 export interface Booking {
   id?: number;
-  PNR: string;
+  PNR?: string;
+  pnr?: string; // Supabase column name
   airlines: string;
   origin: string;
   transit: string;
@@ -41,12 +42,26 @@ export interface Booking {
   issuedthroughagency?: string;
   travellers?: Traveller[];
   customer?: Customer | number | string;
+  customerId?: string | number;
+  customerid?: string | number;
   customerType?: string;
   contactType?: string;
   addons?: Addons;
+  last_invoice_sent_at?: string;
+  last_eticket_sent_at?: string;
   created_at?: string;
+  createdAt?: string; // Potential camelCase alias
+  inserted_at?: string; // Potential alias
   updated_at?: string;
   itineraries?: FlightItinerary[];
+  notes?: string;
+  contact_details?: {
+    name?: {
+      firstName?: string;
+      lastName?: string;
+    };
+    [key: string]: any;
+  };
 }
 
 export interface Addons {
@@ -81,7 +96,7 @@ export interface FlightItinerary {
   segments: FlightSegment[];
 }
 
-export type BookingStatus = "PENDING" | "SEND" | "REFUNDED";
+export type BookingStatus = "PENDING" | "SEND" | "REFUNDED" | "DRAFT";
 
 export interface ManageBooking {
   uid: string;
@@ -99,12 +114,15 @@ export interface ManageBooking {
     manual_adjustment: number;
     total_refund_amount: number;
     adjustment_reason?: string;
+    agency_refunded_cp?: number;
   };
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   [key: string]: any;
 }
 
 export interface Traveller {
   id?: string; // unique temp id for frontend list management
+  title?: string;
   firstName: string;
   lastName: string;
   passportNumber?: string;
@@ -165,6 +183,9 @@ export interface Customer {
   profileImage?: string | null;
   readableTemporaryPassword?: string | null;
   auth_user_id?: string | null;
+  public_profile_enabled?: boolean;
+  company_name?: string | null;
+  public_bio?: string | null;
 }
 
 export interface Reason {

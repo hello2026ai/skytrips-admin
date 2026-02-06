@@ -20,13 +20,16 @@ export async function GET() {
     return NextResponse.json({ error: totalError.message }, { status: 500 });
   }
 
-  // Count unlinked bookings: No customerid AND No customer JSON data
-  // This is faster than querying for linked bookings with JSONB filters
-  const { count: withoutCustomerCount, error: withoutCustomerError } = await supabase
-    .from("bookings")
-    .select("id", { count: "exact", head: true })
-    .or("customerid.is.null,customerid.eq.00000000-0000-0000-0000-000000000000")
-    .is("customer", null);
+  // Get count of bookings WITHOUT customer link
+  // Unlinked if: (customerid is null OR empty) AND (customer is null OR empty object {})
+  const { count: withoutCustomerCount, error: withoutCustomerError } =
+    await supabase
+      .from("bookings")
+      .select("id", { count: "exact", head: true })
+      .or(
+        "customerid.is.null,customerid.eq.00000000-0000-0000-0000-000000000000",
+      )
+      .or("customer.is.null,customer.eq.{}");
 
   if (withoutCustomerError) {
     return NextResponse.json(
@@ -34,6 +37,41 @@ export async function GET() {
       { status: 500 },
     );
   }
+
+  // Get status counts in parallel
+  const [
+    { count: confirmedCount },
+    { count: onHoldCount },
+    { count: issuedCount },
+    { count: pendingCount },
+    { count: draftCount },
+    { count: cancelledCount },
+  ] = await Promise.all([
+    supabase
+      .from("bookings")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "Confirmed"),
+    supabase
+      .from("bookings")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "ON_HOLD"),
+    supabase
+      .from("bookings")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "Issued"),
+    supabase
+      .from("bookings")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "Pending"),
+    supabase
+      .from("bookings")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "Draft"),
+    supabase
+      .from("bookings")
+      .select("id", { count: "exact", head: true })
+      .eq("status", "Cancelled"),
+  ]);
 
   const withCustomerCount = Math.max(
     0,
@@ -43,5 +81,10 @@ export async function GET() {
   return NextResponse.json({
     withCustomerCount: withCustomerCount || 0,
     withoutCustomerCount: withoutCustomerCount || 0,
+    confirmedCount: (confirmedCount || 0) + (onHoldCount || 0),
+    issuedCount: issuedCount || 0,
+    pendingCount: pendingCount || 0,
+    draftCount: draftCount || 0,
+    cancelledCount: cancelledCount || 0,
   });
 }

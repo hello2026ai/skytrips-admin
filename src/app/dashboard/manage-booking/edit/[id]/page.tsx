@@ -2,52 +2,101 @@
 
 import { useState, useEffect } from "react";
 import { supabase } from "@/lib/supabase";
-import { Booking, ManageBooking, Reason } from "@/types";
-import {
-  getCustomerName,
-  getCustomerEmail,
-  getCustomerPhone,
-} from "@/lib/booking-helpers";
-import { useParams, useRouter } from "next/navigation";
+import { Booking, ManageBooking } from "@/types";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
-import SendEmailModal from "@/components/booking-management/SendEmailModal";
+import FlightDetailsCard from "@/components/booking-management/FlightDetailsCard";
+import ProcessingTab from "@/components/booking-management/tabs/ProcessingTab";
+import FlightDetailsTab from "@/components/booking-management/tabs/FlightDetailsTab";
+import FinancialSummaryTab from "@/components/booking-management/tabs/FinancialSummaryTab";
+import RefundedTab from "@/components/booking-management/tabs/RefundedTab";
 
-export default function ManageBookingEditPage() {
+type TabType = "request" | "processing" | "financial-summary" | "refunded";
+
+export default function EditBookingPage() {
   const params = useParams();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const id = params?.id as string;
+  const initialTab = searchParams.get("tab") as TabType;
 
   const [loading, setLoading] = useState(true);
   const [record, setRecord] = useState<ManageBooking | null>(null);
   const [booking, setBooking] = useState<Booking | null>(null);
+  const [processing, setProcessing] = useState(false);
+  const [activeTab, setActiveTab] = useState<TabType>(
+    initialTab && ["request", "processing", "financial-summary", "refunded"].includes(initialTab)
+      ? initialTab
+      : "processing"
+  );
+
+  // Shared State (Lifted)
+  const [selectedTravellers, setSelectedTravellers] = useState<string[]>([]);
+  const [refundStatus, setRefundStatus] = useState<string>("Processing");
   const [requester, setRequester] = useState<{
     name: string;
     email: string;
     agency?: string;
   } | null>(null);
-  const [reasons, setReasons] = useState<Reason[]>([]);
-  const [notifyEmail, setNotifyEmail] = useState(true);
-  const [isEmailModalOpen, setIsEmailModalOpen] = useState(false);
+
+  const [processingForm, setProcessingForm] = useState({
+    reason: "",
+    notes: "",
+    notifyEmail: true,
+    notifySMS: false,
+    notificationTemplate: "",
+    messageContent: "",
+  });
+
+  // Financial State
+  const [financials, setFinancials] = useState({
+    penalty: "0.00",
+    agencyFee: "0.00",
+    skytripsFee: "0.00",
+    agencyRefundedCP: "0.00",
+    adjustment: "0.00",
+    adjustmentReason: "",
+  });
+
+  useEffect(() => {
+    if (booking) {
+      const parseHelper = (val: string | number | undefined | null) => {
+        if (!val) return 0;
+        const str = val.toString().replace(/,/g, "");
+        return parseFloat(str) || 0;
+      };
+      
+      const sellingPrice = parseHelper(booking.sellingPrice);
+      const costPrice = parseHelper(booking.buyingPrice);
+      const profit = sellingPrice - costPrice;
+      
+
+    }
+  }, [booking]);
 
   useEffect(() => {
     if (id) {
       fetchRecord(id);
     }
-    fetchReasons();
   }, [id]);
 
-  const fetchReasons = async () => {
-    try {
-      const { data, error } = await supabase
-        .from("reasons")
-        .select("*")
-        .order("title", { ascending: true });
-      if (error) throw error;
-      setReasons(data || []);
-    } catch (err) {
-      console.error("Error fetching reasons:", err);
+  useEffect(() => {
+    if (record?.financial_breakdown) {
+      setFinancials({
+        penalty:
+          record.financial_breakdown.airline_penalty?.toString() || "0.00",
+        agencyFee: record.financial_breakdown.agency_fees?.toString() || "0.00",
+        skytripsFee:
+          record.financial_breakdown.skytrips_fee?.toString() || "0.00",
+        agencyRefundedCP:
+          record.financial_breakdown.agency_refunded_cp?.toString() || "0.00",
+        adjustment: Math.abs(
+          record.financial_breakdown.manual_adjustment || 0,
+        ).toString(),
+        adjustmentReason: record.financial_breakdown.adjustment_reason || "",
+      });
     }
-  };
+  }, [record]);
 
   const fetchRecord = async (uid: string) => {
     try {
@@ -60,13 +109,40 @@ export default function ManageBookingEditPage() {
 
       if (error) throw error;
       setRecord(data as ManageBooking);
+      if (data.selected_travellers) {
+        setSelectedTravellers(data.selected_travellers);
+      }
+      if (data.refund_status) {
+        setRefundStatus(data.refund_status);
+      }
+      if (data.reason || data.reason_detail) {
+        setProcessingForm((prev) => ({
+          ...prev,
+          reason: data.reason || "",
+          notes: data.reason_detail || "",
+        }));
+      }
 
       if (data.booking_details) {
         setBooking(data.booking_details as Booking);
       }
 
+      // Fetch dynamic agency name from bookings table
+      let agencyName = (data.booking_details as Booking)?.agency || "Travel World Inc.";
+      if (data.booking_id) {
+        const { data: realBookingData } = await supabase
+          .from("bookings")
+          .select("issuedthroughagency")
+          .eq("id", data.booking_id)
+          .single();
+        
+        if (realBookingData?.issuedthroughagency) {
+          agencyName = realBookingData.issuedthroughagency;
+        }
+      }
+
       if (data.user_id) {
-        const { data: userData, error: userError } = await supabase
+        const { data: userData } = await supabase
           .from("users")
           .select("first_name, last_name, email")
           .eq("id", data.user_id)
@@ -79,95 +155,95 @@ export default function ManageBookingEditPage() {
           setRequester({
             name: fullName || "Unknown",
             email: userData.email || "",
-            agency: "Travel World Inc.", // Placeholder as per design or fetch if available
+            agency: agencyName,
           });
         }
       }
-    } catch (err) {
+    } catch (err: any) {
+      // Ignore record not found error as it is handled by the UI state
+      if (err?.code === 'PGRST116') return;
       console.error("Error fetching record:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSendEmail = async (data: {
-    subject: string;
-    message: string;
-    template: string;
-  }) => {
-    if (!booking?.email) return;
-
+  const handleUpdate = async () => {
     try {
-      const res = await fetch("/api/send-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          to: booking.email,
-          subject: data.subject,
-          message: data.message,
-        }),
-      });
+      setProcessing(true);
 
-      if (!res.ok) {
-        throw new Error("Failed to send email");
-      }
+      const { error } = await supabase
+        .from("manage_booking")
+        .update({
+          selected_travellers: selectedTravellers,
+          refund_status: refundStatus,
+          reason: processingForm.reason,
+          reason_detail: processingForm.notes,
+          updated_at: new Date().toISOString(),
+        })
+        .eq("uid", id);
+
+      if (error) throw error;
+
+      // Navigate to next tab
+      setActiveTab("request");
     } catch (err) {
-      console.error("Error sending email:", err);
-      throw err;
+      console.error("Error updating record:", err);
+      alert("Failed to update booking. Please try again.");
+    } finally {
+      setProcessing(false);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setLoading(true);
-    const formData = new FormData(e.currentTarget);
-    const reason = formData.get("reason") as string;
-    const notes = formData.get("notes") as string;
+  const handleFinancialUpdate = (
+    key: keyof typeof financials,
+    value: string,
+  ) => {
+    setFinancials((prev) => ({ ...prev, [key]: value }));
+  };
 
+  const handleFinalSave = async () => {
     try {
-      if (!id) {
-        console.error("No ID found for navigation");
-        alert("Error: Booking ID is missing");
-        setLoading(false);
-        return;
-      }
+      setProcessing(true);
+      const {
+        penaltyVal,
+        agencyFeeVal,
+        skytripsFeeVal,
+        agencyRefundedCPVal,
+        adjustmentVal,
+        netRefund,
+      } = calculations;
 
-      // Save reason and notes to Supabase via API (to bypass RLS)
-      const response = await fetch(`/api/manage-booking/${id}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          reason: reason,
-          reason_detail: notes,
-          refund_status:
-            record?.refund_status === "Pending"
-              ? "Initiated"
-              : record?.refund_status || "Initiated",
-        }),
-      });
+      const financial_breakdown = {
+        airline_penalty: penaltyVal,
+        agency_fees: agencyFeeVal,
+        skytrips_fee: skytripsFeeVal,
+        agency_refunded_cp: agencyRefundedCPVal,
+        manual_adjustment: -adjustmentVal,
+        total_refund_amount: netRefund,
+        adjustment_reason: financials.adjustmentReason,
+      };
 
-      const result = await response.json();
+      const { error } = await supabase
+        .from("manage_booking")
+        .update({
+          financial_breakdown,
+          updated_at: new Date().toISOString(),
+          status: "SEND", // Move to Requesting/Send state
+        })
+        .eq("uid", id);
 
-      if (!response.ok) {
-        const errorMsg = result.error || "Failed to update record";
-        console.error("Error updating record:", errorMsg);
-        throw new Error(errorMsg);
-      }
+      if (error) throw error;
 
-      console.log("Update successful, returned data:", result.data);
-
-      console.log(
-        "Navigating to:",
-        `/dashboard/manage-booking/edit/${id}/flight-details`,
-      );
-      // Navigate to the next step: Flight Booking Details
-      router.push(`/dashboard/manage-booking/edit/${id}/flight-details`);
+      // Refresh record or navigate
+      // router.push(`/dashboard/manage-booking/view/${id}`); // Or stay
+      alert("Financial details saved successfully!");
+      fetchRecord(id);
     } catch (err) {
-      console.error("Error processing request:", err);
+      console.error("Error saving financial breakdown:", err);
       alert("Failed to save details. Please try again.");
-      setLoading(false);
+    } finally {
+      setProcessing(false);
     }
   };
 
@@ -196,27 +272,82 @@ export default function ManageBookingEditPage() {
     );
   }
 
-  const selectedTravellerIds = (record as any).selected_travellers || [];
-  const travellers = booking.travellers || [];
-  const selectedTravellers = travellers.filter((t: any) =>
-    selectedTravellerIds.includes(t.id),
+  // Calculations
+  const parseCurrency = (val: string | number | undefined | null) => {
+    if (!val) return 0;
+    const str = val.toString().replace(/,/g, "");
+    return parseFloat(str) || 0;
+  };
+
+  const sellingPrice = parseCurrency(booking.sellingPrice);
+  const costPrice = parseCurrency(booking.buyingPrice);
+  const profit = sellingPrice - costPrice;
+  const profitMargin =
+    costPrice > 0 ? ((profit / costPrice) * 100).toFixed(1) : "0";
+
+  const penaltyVal = parseFloat(financials.penalty) || 0;
+  const agencyFeeVal = parseFloat(financials.agencyFee) || 0;
+  const skytripsFeeVal = parseFloat(financials.skytripsFee) || 0;
+  const agencyRefundedCPVal = parseFloat(financials.agencyRefundedCP) || 0;
+  const adjustmentVal = parseFloat(financials.adjustment) || 0;
+  const differenceVal = sellingPrice - agencyRefundedCPVal;
+
+  const netRefund = Math.max(
+    0,
+    sellingPrice -
+      differenceVal -
+      penaltyVal -
+      agencyFeeVal -
+      skytripsFeeVal -
+      adjustmentVal,
   );
 
-  // If no specific travellers are selected in the record, fall back to showing all travellers
-  // or handle as per business logic. For now, let's show selected ones if any, else all.
-  const displayTravellers =
-    selectedTravellers.length > 0 ? selectedTravellers : travellers;
+  const calculations = {
+    sellingPrice,
+    costPrice,
+    profit,
+    profitMargin, // String
+    profitPercent: profitMargin, // Alias
+    penaltyVal,
+    agencyFeeVal,
+    skytripsFeeVal,
+    agencyRefundedCPVal,
+    adjustmentVal,
+    differenceVal: sellingPrice - netRefund,
+    netRefund,
+  };
 
-  const itinerary = booking.itineraries?.[0];
-  const segments = itinerary?.segments || [];
-  const firstSegment = segments[0];
-  const lastSegment = segments[segments.length - 1];
+  // Route Visuals Data (Mock/Derived)
+  // Replicate logic from FlightDetailsCard/Tab if needed, or pass Booking directly
+  // FlightDetailsCard handles parsing if we pass undefined.
+  // But let's pass formatted strings if we can.
+  // The Card component logic is robust enough to handle raw booking data.
 
-  const sellingPrice = parseFloat(booking.sellingPrice || "0");
-  const costPrice = parseFloat(booking.buyingPrice || "0");
-  const profit = sellingPrice - costPrice;
-  const profitPercent =
-    costPrice > 0 ? ((profit / costPrice) * 100).toFixed(1) : "0";
+  const getPageTitle = () => {
+    switch (activeTab) {
+      case "financial-summary":
+        return "Flight Financial Summary";
+      case "request":
+        return "Flight Booking Details";
+      case "refunded":
+        return "Refund Completed";
+      default:
+        return "Process Request";
+    }
+  };
+
+  const getPageSubtitle = () => {
+    switch (activeTab) {
+      case "financial-summary":
+        return `Review detailed breakdown and finalize refund for booking #BK-${record.booking_id}.`;
+      case "request":
+        return `Detailed view of booking #BK-${record.booking_id} and its history.`;
+      case "refunded":
+        return `Booking #BK-${record.booking_id} has been fully refunded.`;
+      default:
+        return "Review details and select passengers for refund/changes.";
+    }
+  };
 
   return (
     <div className="max-w-5xl mx-auto w-full font-display">
@@ -239,377 +370,176 @@ export default function ManageBookingEditPage() {
               chevron_right
             </span>
             <span className="font-medium text-slate-900">
-              Management Details
+              {record.status === "REFUNDED"
+                ? "Refunded"
+                : record.status === "SEND"
+                  ? "Requesting"
+                  : record.refund_status === "Processing"
+                    ? "Processing"
+                    : "Request"}
             </span>
           </div>
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mt-1">
             <div>
               <h2 className="text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
-                Booking Management Details
+                {getPageTitle()}
               </h2>
-              <p className="mt-1 text-sm text-slate-500">
-                Manage refund, reissue, or cancellation for selected booking.
-              </p>
-            </div>
-            <span
-              className={`inline-flex items-center rounded-md px-3 py-1 text-sm font-medium ring-1 ring-inset ${
-                record.status === "REFUNDED"
-                  ? "bg-green-50 text-green-700 ring-green-600/20"
-                  : record.status === "SEND"
-                    ? "bg-blue-50 text-blue-700 ring-blue-600/20"
-                    : "bg-yellow-50 text-yellow-700 ring-yellow-600/20"
-              }`}
-            >
-              {record.status || "PENDING"}
-            </span>
-          </div>
-        </div>
-
-        <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
-          <div className="border-b border-slate-200 px-6 py-4 flex items-center justify-between">
-            <h3 className="text-base font-semibold text-slate-900 flex items-center gap-2">
-              <span className="material-symbols-outlined text-slate-400">
-                flight
-              </span>
-              Flight Details
-            </h3>
-          </div>
-          <div className="p-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-y-6 gap-x-8">
-              <div>
-                <label className="block text-xs font-medium uppercase text-slate-500">
-                  Booking ID
-                </label>
-                <p className="mt-1 text-base font-medium text-slate-900 font-mono">
-                  #{record.booking_id}
-                </p>
-              </div>
-              <div>
-                <label className="block text-xs font-medium uppercase text-slate-500">
-                  PNR
-                </label>
-                <p className="mt-1 text-base font-medium text-slate-900 font-mono">
-                  {booking.PNR || "N/A"}
-                </p>
-              </div>
-              <div>
-                <label className="block text-xs font-medium uppercase text-slate-500">
-                  Issued Date
-                </label>
-                <p className="mt-1 text-base font-medium text-slate-900">
-                  {booking.IssueDay} {booking.issueMonth}, {booking.issueYear}
-                </p>
-              </div>
-              <div className="col-span-1 md:col-span-2 lg:col-span-3">
-                <label className="block text-xs font-medium uppercase text-slate-500 mb-2">
-                  Passengers
-                </label>
-                <div className="space-y-2">
-                  {displayTravellers.map((traveller: any, index: number) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-100"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="h-8 w-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">
-                          {traveller.firstName?.[0]}
-                        </div>
-                        <div>
-                          <p className="text-sm font-semibold text-slate-900">
-                            {traveller.firstName} {traveller.lastName}
-                          </p>
-                          <p className="text-xs text-slate-500">
-                            {traveller.nationality || "N/A"}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xs text-slate-500 uppercase">
-                          Ticket No.
-                        </p>
-                        <p className="text-sm font-mono font-medium text-slate-900">
-                          {traveller.eticketNumber || "N/A"}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
-                  {displayTravellers.length === 0 && (
-                    <p className="text-sm text-slate-500 italic">
-                      No passenger details available.
-                    </p>
-                  )}
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-xs font-medium uppercase text-slate-500">
-                  Route
-                </label>
-                <div className="mt-1 flex items-center gap-2 text-base font-medium text-slate-900">
-                  <span>
-                    {firstSegment?.departure?.iataCode || booking.origin}
-                  </span>
-                  <span className="material-symbols-outlined text-slate-400 text-[16px]">
-                    arrow_forward
-                  </span>
-                  <span>
-                    {lastSegment?.arrival?.iataCode || booking.destination}
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="bg-slate-50 border-t border-slate-200 px-6 py-4">
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div className="flex flex-col">
-                <span className="text-xs text-slate-500">Selling Price</span>
-                <span className="text-lg font-bold text-slate-900">
-                  ${sellingPrice.toFixed(2)}
-                </span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs text-slate-500">Cost Price</span>
-                <span className="text-lg font-bold text-slate-700">
-                  ${costPrice.toFixed(2)}
-                </span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-xs text-slate-500">Profit Margin</span>
-                <span
-                  className={`text-lg font-bold flex items-center gap-1 ${profit >= 0 ? "text-emerald-600" : "text-red-600"}`}
-                >
-                  {profit >= 0 ? "+" : ""}${profit.toFixed(2)}
-                  <span className="text-xs font-normal text-slate-500">
-                    ({profitPercent}%)
-                  </span>
-                </span>
-              </div>
+              <p className="mt-1 text-sm text-slate-500">{getPageSubtitle()}</p>
             </div>
           </div>
         </div>
 
-        <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
-          <div className="border-b border-slate-200 px-6 py-4">
-            <h3 className="text-base font-semibold text-slate-900 flex items-center gap-2">
-              <span className="material-symbols-outlined text-slate-400">
-                edit_document
-              </span>
-              Management Action
-            </h3>
-          </div>
-          <form className="flex flex-col" onSubmit={handleSubmit}>
-            <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="col-span-1">
-                <label
-                  className="block text-sm font-medium leading-6 text-slate-900"
-                  htmlFor="requested-by"
-                >
-                  Requested by
-                </label>
-                <div className="mt-2">
-                  <input
-                    className="block w-full rounded-md border-0 py-2 px-3 text-slate-500 shadow-sm ring-1 ring-inset ring-slate-300 bg-slate-100 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6 cursor-not-allowed"
-                    disabled
-                    id="requested-by"
-                    name="requested-by"
-                    readOnly
-                    type="text"
-                    value={requester?.name || "Loading..."}
-                  />
-                </div>
-              </div>
-              <div className="col-span-1">
-                <label
-                  className="block text-sm font-medium leading-6 text-slate-900"
-                  htmlFor="agency"
-                >
-                  Requested Agency
-                </label>
-                <div className="mt-2">
-                  <input
-                    className="block w-full rounded-md border-0 py-2 px-3 text-slate-500 shadow-sm ring-1 ring-inset ring-slate-300 bg-slate-100 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6 cursor-not-allowed"
-                    disabled
-                    id="agency"
-                    name="agency"
-                    readOnly
-                    type="text"
-                    value={requester?.agency || "Travel World Inc."}
-                  />
-                </div>
-              </div>
-              <div className="col-span-1 md:col-span-2">
-                <label
-                  className="block text-sm font-medium leading-6 text-slate-900"
-                  htmlFor="reason"
-                >
-                  Reason for Action
-                </label>
-                <div className="mt-2">
-                  <select
-                    className="block w-full rounded-md border-0 py-2.5 px-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6"
-                    id="reason"
-                    name="reason"
-                    defaultValue={
-                      record.reason === "Requested via Admin Dashboard"
-                        ? ""
-                        : record.reason || ""
-                    }
-                  >
-                    <option value="">Select a reason...</option>
-                    {reasons.length > 0 ? (
-                      reasons.map((reason) => (
-                        <option key={reason.id} value={reason.title}>
-                          {reason.title}
-                        </option>
-                      ))
-                    ) : (
-                      <>
-                        <option>Customer Refund Request</option>
-                        <option>Flight Cancellation</option>
-                        <option>Schedule Change</option>
-                        <option>Duplicate Booking</option>
-                        <option>Ticket Reissue</option>
-                        <option>Other</option>
-                      </>
-                    )}
-                  </select>
-                </div>
-              </div>
-              <div className="col-span-1 md:col-span-2">
-                <label
-                  className="block text-sm font-medium leading-6 text-slate-900"
-                  htmlFor="notes"
-                >
-                  Notes / Remarks
-                </label>
-                <div className="mt-2">
-                  <textarea
-                    className="block w-full rounded-md border-0 py-1.5 px-3 text-slate-900 shadow-sm ring-1 ring-inset ring-slate-300 placeholder:text-slate-400 focus:ring-2 focus:ring-inset focus:ring-primary sm:text-sm sm:leading-6"
-                    id="notes"
-                    name="notes"
-                    defaultValue={record.reason_detail || ""}
-                    placeholder="Add any additional details about this request..."
-                    rows={3}
-                  ></textarea>
-                </div>
-              </div>
-              <div className="col-span-1 md:col-span-2 pt-4 border-t border-slate-200 mt-2">
-                <h4 className="text-sm font-semibold text-slate-900 mb-4 flex items-center gap-2">
-                  <span className="material-symbols-outlined text-slate-400 text-[20px]">
-                    forward_to_inbox
-                  </span>
-                  Notify Customer
-                </h4>
-                <div className="space-y-5">
-                  <div className="flex flex-col sm:flex-row gap-6">
-                    <div className="relative flex items-start">
-                      <div className="flex h-6 items-center">
-                        <input
-                          aria-describedby="notify-email-description"
-                          checked={notifyEmail}
-                          onChange={(e) => setNotifyEmail(e.target.checked)}
-                          className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
-                          id="notify-email"
-                          name="notify-email"
-                          type="checkbox"
-                        />
-                      </div>
-                      <div className="ml-3 text-sm leading-6">
-                        <label
-                          className="font-medium text-slate-900"
-                          htmlFor="notify-email"
-                        >
-                          Send Email Update
-                        </label>
-                        <p
-                          className="text-slate-500 text-xs"
-                          id="notify-email-description"
-                        >
-                          Notify {booking.email || "customer"}
-                        </p>
-                      </div>
-                    </div>
-                    <div className="relative flex items-start">
-                      <div className="flex h-6 items-center">
-                        <input
-                          aria-describedby="notify-sms-description"
-                          className="h-4 w-4 rounded border-slate-300 text-primary focus:ring-primary"
-                          id="notify-sms"
-                          name="notify-sms"
-                          type="checkbox"
-                        />
-                      </div>
-                      <div className="ml-3 text-sm leading-6">
-                        <label
-                          className="font-medium text-slate-900"
-                          htmlFor="notify-sms"
-                        >
-                          Send SMS Notification
-                        </label>
-                        <p
-                          className="text-slate-500 text-xs"
-                          id="notify-sms-description"
-                        >
-                          Alert to {booking.phone || "phone"}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {notifyEmail && (
-                    <div className="animate-in fade-in slide-in-from-top-2 duration-200">
-                      <button
-                        type="button"
-                        onClick={() => setIsEmailModalOpen(true)}
-                        className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 rounded-lg text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors shadow-sm"
-                      >
-                        <span className="material-symbols-outlined text-[18px] text-primary">
-                          edit_square
-                        </span>
-                        Compose Email
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-            <div className="flex items-center justify-end gap-3 px-6 py-4 bg-slate-50 border-t border-slate-200 rounded-b-xl">
-              <button
-                className="rounded-lg px-4 py-2.5 text-sm font-semibold text-slate-700 hover:bg-white hover:shadow-sm border border-transparent hover:border-slate-200 transition-all"
-                type="button"
-                onClick={() => router.back()}
-              >
-                Cancel
-              </button>
-              <button
-                className="flex items-center justify-center gap-2 rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-primary-hover focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary transition-all"
-                type="submit"
-              >
-                <span className="material-symbols-outlined text-[18px]">
-                  check_circle
-                </span>
-                Confirm Action
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      {booking && (
-        <SendEmailModal
-          isOpen={isEmailModalOpen}
-          onClose={() => setIsEmailModalOpen(false)}
-          recipient={{
-            name: getCustomerName(booking),
-            email: booking.email || "",
-            phone: booking.phone,
-            organization: (booking as any).companyName || "Individual",
-            pnr: booking.PNR,
+        {/* Unified FlightDetailsCard */}
+        <FlightDetailsCard
+          booking={booking}
+          record={record}
+          title="Flight Details"
+          showRouteVisuals={true}
+          showFinancials={activeTab !== "financial-summary"}
+          financials={{
+            sellingPrice,
+            costPrice,
+            profit,
+            profitPercent: profitMargin,
           }}
-          initialTemplateId="refund_request_received"
-          onSend={handleSendEmail}
         />
-      )}
+
+        {/* Progress Steps (Tabs) */}
+        <div className="w-full px-4 sm:px-0">
+          <div className="relative">
+            <div
+              className="absolute left-0 top-4 -mt-px w-full h-0.5 bg-slate-200"
+              aria-hidden="true"
+            ></div>
+            <ul className="relative flex w-full justify-between">
+              {[
+                {
+                  id: "01",
+                  name: "Processing",
+                  status:
+                    activeTab === "processing"
+                      ? "current"
+                      : ["request", "financial-summary", "refunded"].includes(activeTab)
+                        ? "complete"
+                        : "upcoming",
+                  onClick: () => setActiveTab("processing"),
+                },
+                {
+                  id: "02",
+                  name: "Request",
+                  status:
+                    activeTab === "request"
+                      ? "current"
+                      : ["financial-summary", "refunded"].includes(activeTab)
+                        ? "complete"
+                        : "upcoming",
+                  onClick: () => setActiveTab("request"),
+                },
+                {
+                  id: "03",
+                  name: "Requesting",
+                  status:
+                    activeTab === "financial-summary"
+                      ? "current"
+                      : ["refunded"].includes(activeTab)
+                        ? "complete"
+                        : "upcoming",
+                  onClick: () => setActiveTab("financial-summary"),
+                },
+                {
+                  id: "04",
+                  name: "Refunded",
+                  status:
+                    activeTab === "refunded" ? "current" : "upcoming",
+                  onClick: () => setActiveTab("refunded"),
+                },
+              ].map((step) => (
+                <li
+                  key={step.name}
+                  className="flex flex-col items-center relative bg-transparent z-10"
+                >
+                  <button
+                    onClick={step.onClick}
+                    className="flex flex-col items-center group"
+                  >
+                    <div
+                      className={`relative z-10 flex h-8 w-8 items-center justify-center rounded-full border-2 transition-all ${
+                        step.status === "current"
+                          ? "border-primary bg-primary text-white group-hover:bg-primary-hover"
+                          : "border-slate-300 bg-white text-slate-500 group-hover:border-slate-400 group-hover:text-slate-600"
+                      }`}
+                    >
+                      {step.status === "complete" ? (
+                        <span className="material-symbols-outlined text-[16px]">
+                          check
+                        </span>
+                      ) : (
+                        <span className="text-xs font-bold">{step.id}</span>
+                      )}
+                    </div>
+                    <span
+                      className={`mt-2 text-xs font-medium transition-colors ${
+                        step.status === "current"
+                          ? "text-primary group-hover:text-primary-hover"
+                          : "text-slate-500 group-hover:text-slate-600"
+                      }`}
+                    >
+                      {step.name}
+                    </span>
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+          {/* Tab Content */}
+          {activeTab === "processing" && (
+            <ProcessingTab
+              booking={booking}
+              record={record}
+              requester={requester}
+              processingForm={processingForm}
+              setProcessingForm={setProcessingForm}
+              onConfirm={handleUpdate}
+              onCancel={() => router.back()}
+              isProcessing={processing}
+            />
+          )}
+
+          {activeTab === "request" && (
+            <FlightDetailsTab
+              booking={booking}
+              record={record}
+              requester={requester}
+              calculations={{
+                sellingPrice,
+                costPrice,
+                profit,
+                profitPercent: profitMargin,
+              }}
+              onNext={() => setActiveTab("financial-summary")}
+              onPrevious={() => setActiveTab("processing")}
+            />
+          )}
+
+          {activeTab === "financial-summary" && (
+            <FinancialSummaryTab
+              booking={booking}
+              record={record}
+              financials={financials}
+              setFinancials={handleFinancialUpdate}
+              calculations={calculations}
+              onPrevious={() => setActiveTab("request")}
+              onConfirm={handleFinalSave}
+              isProcessing={processing}
+            />
+          )}
+
+          {activeTab === "refunded" && (
+            <RefundedTab booking={booking} record={record} />
+          )}
+      </div>
     </div>
   );
 }
