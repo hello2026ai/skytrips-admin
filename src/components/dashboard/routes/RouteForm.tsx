@@ -8,9 +8,7 @@ import { RouteMultiSelect } from "@/components/RouteMultiSelect";
 import { AirportSelect } from "@/components/airports/AirportSelect";
 import { MediaSelectorModal } from "@/components/media/MediaSelectorModal";
 import { MediaFile } from "@/lib/media-service";
-import { transformRouteInfoData } from "@/utils/transformRouteInfoData";
 import { transformHeroData } from "@/utils/transformHeroData";
-import { routeInfoSchema } from "@/lib/schemas/route";
 import HeroPreview from "./HeroPreview";
 
 import RichTextDescription from "./RichTextDescription";
