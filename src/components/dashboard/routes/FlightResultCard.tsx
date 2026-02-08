@@ -184,9 +184,7 @@ export default function FlightResultCard({ offer, getRawOffer }: FlightResultCar
     setFaresLoading(true);
     setFaresError(null);
     try {
-      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://dev-api.skytrips.com.au/";
-      const clientRef = process.env.NEXT_PUBLIC_SKYTRIPS_CLIENT_REF || "1223";
-      const url = new URL("flight-branded-fares-upsell", baseUrl);
+      const url = new URL("/api/flight-branded-fares-upsell", window.location.origin);
       url.searchParams.set("page", "1");
       url.searchParams.set("limit", "10");
 
@@ -194,7 +192,6 @@ export default function FlightResultCard({ offer, getRawOffer }: FlightResultCar
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "ama-client-ref": clientRef,
           accept: "application/json",
         },
         body: JSON.stringify(raw),
@@ -277,9 +274,7 @@ export default function FlightResultCard({ offer, getRawOffer }: FlightResultCar
       const raw = getRawOffer(offer.id);
       if (!raw) return;
 
-      const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || "https://dev-api.skytrips.com.au/";
-      const clientRef = process.env.NEXT_PUBLIC_SKYTRIPS_CLIENT_REF || "1223";
-      const url = new URL("flight-price", baseUrl);
+      const url = new URL("/api/amadeus/price", window.location.origin);
       url.searchParams.set("page", "1");
       url.searchParams.set("limit", "10");
 
@@ -289,7 +284,6 @@ export default function FlightResultCard({ offer, getRawOffer }: FlightResultCar
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "ama-client-ref": clientRef,
           accept: "*/*",
         },
         body: JSON.stringify(payload),
